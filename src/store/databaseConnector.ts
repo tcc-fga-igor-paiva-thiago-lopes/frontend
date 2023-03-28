@@ -30,7 +30,7 @@ export const runDatabaseOperation = async (
 
     await callback(dbInfo);
 
-    if (platform === 'web') {
+    if (platform === 'web' && process.env.JEST_WORKER_ID === undefined) {
         await sqlite.saveToStore(connection.options.database as string);
     }
 };
