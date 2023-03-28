@@ -1,0 +1,7 @@
+{
+    "name": "accounts-management-app",
+    "integrations": {
+        "capacitor": {}
+    },
+    "type": "vue"
+}

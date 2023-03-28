@@ -1,0 +1,21 @@
+name: Run Unit Tests
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    check-eslint:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+            - run: npm install
+            - run: npm run test:unit
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

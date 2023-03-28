@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "ionic.ionic",
+        "esbenp.prettier-vscode",
+        "2gua.rainbow-brackets",
+        "oderwat.indent-rainbow",
+        "dbaeumer.vscode-eslint",
+        "Vue.volar",
+        "Vue.vscode-typescript-vue-plugin"
+    ]
+}
