@@ -1,32 +1,37 @@
 name: Run Unit Tests
 
 on:
-    push:
-        branches:
-            - main
-    pull_request:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
     check-eslint:
-        runs-on: ubuntu-latest
+      runs-on: ubuntu-latest
 
-        steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
-            - run: npm install
-            - run: npm run test:unit
-            - name: Upload coverage reports to Codecov with GitHub Action
-                if: always()
-                uses: codecov/codecov-action@v3
-                with:
-                    token: ${{ secrets.CODECOV_TOKEN }}
-                    directory: ./
-                    fail_ci_if_error: true
-                    files: ./coverage/coverage-final.json
-                    flags: unittests
-                    name: frontend
-                    verbose: true
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      steps:
+        - uses: actions/checkout@v3
+        - uses: actions/setup-node@v3
+
+        - name: Install packages
+          run: npm install
+
+        - name: Run unit tests
+          run: npm run test:unit
+
+        - name: Upload coverage reports to Codecov with GitHub Action
+          if: always()
+          uses: codecov/codecov-action@v3
+          with:
+            token: ${{ secrets.CODECOV_TOKEN }}
+            directory: ./
+            fail_ci_if_error: true
+            files: ./coverage/coverage-final.json
+            flags: unittests
+            name: frontend
+            verbose: true
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
