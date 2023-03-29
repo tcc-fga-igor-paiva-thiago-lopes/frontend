@@ -6,6 +6,9 @@ module.exports = {
     verbose: true,
     collectCoverage: true,
     coverageDirectory: 'coverage/',
-    collectCoverageFrom: ['**/*.{ts,js,vue}'],
-    coverageReporters: ['json'],
+    collectCoverageFrom: [
+        'src/**/*.{ts,js,vue}',
+        '!src/database/migrations/**',
+    ],
+    coverageReporters: ['json', 'html'],
 };
