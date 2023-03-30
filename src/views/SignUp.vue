@@ -12,7 +12,7 @@
             </div>
 
             <form class="form ion-padding" @submit="submit">
-                <ion-list style="padding: 0">
+                <ion-list class="ion-no-padding">
                     <ion-item class="form-item">
                         <ion-label position="stacked">Nome *</ion-label>
                         <ion-input
@@ -132,13 +132,6 @@ const passwordConfirmation = ref('');
 const submit = async () => {
     const apiBaseUrl = process.env.VUE_APP_API_URL;
 
-    console.log({
-        name,
-        email,
-        password,
-        passwordConfirmation,
-    });
-
     if (
         !name.value ||
         !email.value ||
@@ -149,9 +142,6 @@ const submit = async () => {
         return;
     }
 
-    console.log('password: ', password);
-    console.log('passwordConfirmation: ', passwordConfirmation);
-
     if (password.value !== passwordConfirmation.value) {
         errorMessage.value = 'A senha e confirmação de senha devem ser iguais';
         return;
@@ -160,22 +150,12 @@ const submit = async () => {
     loading.value = true;
 
     try {
-        const response = await axios.post(
-            `${apiBaseUrl}/truck-drivers`,
-            {
-                name: name.value,
-                email: email.value,
-                password: password.value,
-                passwordConfirmation: passwordConfirmation.value,
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json; charset=utf-8',
-                },
-            }
-        );
-
-        console.log(response);
+        await axios.post(`${apiBaseUrl}/truck-drivers`, {
+            name: name.value,
+            email: email.value,
+            password: password.value,
+            password_confirmation: passwordConfirmation.value,
+        });
 
         errorMessage.value = '';
         presentToast('Conta criada com sucesso!', 'success');
