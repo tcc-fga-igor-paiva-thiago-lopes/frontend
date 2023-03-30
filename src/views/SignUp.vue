@@ -98,128 +98,6 @@
 }
 </style>
 
-<!-- <script lang="ts">
-import axios from 'axios';
-
-import {
-    IonContent,
-    IonHeader,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-    IonText,
-    IonLoading,
-    IonInput,
-    IonButton,
-    IonList,
-    IonNote,
-    IonItem,
-    IonLabel,
-} from '@ionic/vue';
-import { useState } from '@/composables/state';
-import { presentToast } from '@/utils/toast';
-
-export default {
-    setup() {
-        const [loading, setLoading] = useState(false);
-        const [errorMessage, setErrorMessage] = useState('');
-        const [name, setName] = useState('');
-        const [email, setEmail] = useState('');
-        const [password, setPassword] = useState('');
-        const [passwordConfirmation, setPasswordConfirmation] = useState('');
-
-        return {
-            loading,
-            setLoading,
-            errorMessage,
-            setErrorMessage,
-            name,
-            setName,
-            email,
-            setEmail,
-            password,
-            setPassword,
-            passwordConfirmation,
-            setPasswordConfirmation,
-        };
-    },
-    methods: {
-        async submit() {
-            const apiBaseUrl = process.env.VUE_APP_API_URL;
-
-            const { name, email, password, passwordConfirmation } = this;
-
-            console.log({
-                name,
-                email,
-                password,
-                passwordConfirmation,
-            });
-
-            if (!name || !email || !password || !passwordConfirmation) {
-                this.setErrorMessage('Todos os campos com * são obrigatórios');
-                return;
-            }
-
-            console.log('password: ', password);
-            console.log('passwordConfirmation: ', passwordConfirmation);
-
-            if (password !== passwordConfirmation) {
-                this.setErrorMessage(
-                    'A senha e confirmação de senha devem ser iguais'
-                );
-                return;
-            }
-
-            this.setLoading(true);
-
-            try {
-                const response = await axios.post(
-                    `${apiBaseUrl}/truck_driver`,
-                    {
-                        name,
-                        email,
-                        password,
-                        passwordConfirmation,
-                    }
-                );
-
-                console.log(response);
-
-                this.setErrorMessage('');
-                presentToast('Conta criada com sucesso!', 'success');
-
-                this.$router.push({ name: 'Home' });
-            } catch (error) {
-                console.error(error);
-
-                if (axios.isAxiosError(error)) {
-                    this.setErrorMessage(error.response?.data.error);
-                    presentToast(this.errorMessage, 'danger');
-                }
-            } finally {
-                this.setLoading(false);
-            }
-        },
-    },
-    components: {
-        IonContent,
-        IonHeader,
-        IonPage,
-        IonTitle,
-        IonToolbar,
-        IonText,
-        IonLoading,
-        IonInput,
-        IonButton,
-        IonList,
-        IonNote,
-        IonItem,
-        IonLabel,
-    },
-};
-</script> -->
-
 <script setup lang="ts">
 import axios from 'axios';
 import { useRouter } from 'vue-router';
@@ -239,7 +117,6 @@ import {
     IonItem,
     IonLabel,
 } from '@ionic/vue';
-import { useState } from '@/composables/state';
 import { presentToast } from '@/utils/toast';
 import { ref } from 'vue';
 
@@ -251,13 +128,6 @@ const name = ref('');
 const email = ref('');
 const password = ref('');
 const passwordConfirmation = ref('');
-
-// const [loading, setLoading] = useState(false);
-// const [errorMessage, setErrorMessage] = useState('');
-// const [name, setName] = useState('');
-// const [email, setEmail] = useState('');
-// const [password, setPassword] = useState('');
-// const [passwordConfirmation, setPasswordConfirmation] = useState('');
 
 const submit = async () => {
     const apiBaseUrl = process.env.VUE_APP_API_URL;
@@ -293,10 +163,10 @@ const submit = async () => {
         const response = await axios.post(
             `${apiBaseUrl}/truck-drivers`,
             {
-                name,
-                email,
-                password,
-                passwordConfirmation,
+                name: name.value,
+                email: email.value,
+                password: password.value,
+                passwordConfirmation: passwordConfirmation.value,
             },
             {
                 headers: {

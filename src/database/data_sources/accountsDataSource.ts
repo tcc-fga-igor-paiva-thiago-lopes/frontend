@@ -13,6 +13,8 @@ export default new DataSource({
     database: 'ionic-vue-user',
     entities: [Account],
     migrations: [AddAccountsTable1679179393713],
+    // entities: ['src/models/**/*.ts', '!src/models/appBaseEntity.ts'],
+    // migrations: ['src/database/migrations/**/*.ts'],
     logging: ['error', 'query', 'schema'],
     synchronize: false,
     migrationsRun: false,

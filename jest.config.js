@@ -4,6 +4,8 @@ module.exports = {
         '/node_modules/(?!@ionic/vue|@ionic/vue-router|@ionic/core|@stencil/core|ionicons)',
     ],
     verbose: true,
+    // globalSetup: '<rootDir>/tests/globalSetup.ts',
+    // globalTeardown: '<rootDir>/tests/globalTeardown.ts',
     collectCoverage: true,
     coverageDirectory: 'coverage/',
     collectCoverageFrom: [
