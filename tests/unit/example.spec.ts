@@ -22,7 +22,8 @@ describe('HomePage.vue', () => {
 
     it('renders home vue', () => {
         const wrapper = mount(HomePage);
-        expect(wrapper.text()).toMatch('Blank');
+
+        expect(wrapper.text()).toMatch('Bem-vindo!');
     });
 
     it('should create account', async () => {
