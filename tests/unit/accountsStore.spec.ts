@@ -5,7 +5,11 @@ import { TestHelper } from '../testHelper';
 import { Account } from '@/models/account';
 import { useAccountsStore } from '@/store/accounts';
 
-beforeAll(() => TestHelper.instance.setupTestDB());
+beforeAll(async () => {
+    await TestHelper.instance.setupTestDB();
+
+    setActivePinia(createPinia());
+});
 
 afterAll(() => TestHelper.instance.teardownTestDB());
 
