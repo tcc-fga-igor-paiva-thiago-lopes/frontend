@@ -9,7 +9,7 @@ beforeAll(() => TestHelper.instance.setupTestDB());
 
 afterAll(() => TestHelper.instance.teardownTestDB());
 
-describe('HomePage.vue', () => {
+describe('accountsStore', () => {
     beforeEach(() => {
         setActivePinia(createPinia());
     });
