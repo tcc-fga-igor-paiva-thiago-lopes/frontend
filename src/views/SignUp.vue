@@ -100,6 +100,7 @@
 
 <script setup lang="ts">
 import axios from 'axios';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
@@ -118,7 +119,7 @@ import {
     IonLabel,
 } from '@ionic/vue';
 import { presentToast } from '@/utils/toast';
-import { ref } from 'vue';
+import APIAdapter from '@/services/api';
 
 const router = useRouter();
 
@@ -130,8 +131,6 @@ const password = ref('');
 const passwordConfirmation = ref('');
 
 const submit = async () => {
-    const apiBaseUrl = process.env.VUE_APP_API_URL;
-
     if (
         !name.value ||
         !email.value ||
@@ -149,13 +148,20 @@ const submit = async () => {
 
     loading.value = true;
 
+    const apiAdapter = new APIAdapter();
+
     try {
-        await axios.post(`${apiBaseUrl}/truck-drivers`, {
-            name: name.value,
-            email: email.value,
-            password: password.value,
-            password_confirmation: passwordConfirmation.value,
-        });
+        await apiAdapter.post(
+            '/truck-drivers',
+            {
+                name: name.value,
+                email: email.value,
+                password: password.value,
+                password_confirmation: passwordConfirmation.value,
+            },
+            undefined,
+            false
+        );
 
         errorMessage.value = '';
         presentToast('Conta criada com sucesso!', 'success');
