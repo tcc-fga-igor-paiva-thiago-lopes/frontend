@@ -157,17 +157,12 @@ const submit = async () => {
     const apiAdapter = new APIAdapter();
 
     try {
-        await apiAdapter.post(
-            '/truck-drivers',
-            {
-                name: name.value,
-                email: email.value,
-                password: password.value,
-                password_confirmation: passwordConfirmation.value,
-            },
-            undefined,
-            false
-        );
+        await apiAdapter.postWithoutAuth('/truck-drivers', {
+            name: name.value,
+            email: email.value,
+            password: password.value,
+            password_confirmation: passwordConfirmation.value,
+        });
 
         errorMessage.value = '';
         presentToast('Conta criada com sucesso!', 'success');

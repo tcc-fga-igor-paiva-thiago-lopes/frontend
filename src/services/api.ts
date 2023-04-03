@@ -20,8 +20,8 @@ const addTokenToRequest = (config: AxiosRequestConfig = CONFIG) => ({
 
 const getRequestConfig = (
     config: AxiosRequestConfig = CONFIG,
-    protectedEndpoint = true
-) => (protectedEndpoint ? addTokenToRequest(config) : config);
+    requiresAuth = true
+) => (requiresAuth ? addTokenToRequest(config) : config);
 
 const responseErrorHandler = (error: any) => {
     const { response } = error;
@@ -49,51 +49,39 @@ export default class APIAdapter {
         );
     }
 
-    async get(
+    async getWithoutAuth(path: string, config?: AxiosRequestConfig) {
+        return this.instance.get(path, getRequestConfig(config, false));
+    }
+
+    async postWithoutAuth(
         path: string,
-        config?: AxiosRequestConfig,
-        protectedEndpoint = true
+        data?: Record<string, any>,
+        config?: AxiosRequestConfig
     ) {
-        return this.instance.get(
-            path,
-            getRequestConfig(config, protectedEndpoint)
-        );
+        return this.instance.post(path, data, getRequestConfig(config, false));
+    }
+
+    async get(path: string, config?: AxiosRequestConfig) {
+        return this.instance.get(path, getRequestConfig(config, true));
     }
 
     async post(
         path: string,
         data?: Record<string, any>,
-        config?: AxiosRequestConfig,
-        protectedEndpoint = true
+        config?: AxiosRequestConfig
     ) {
-        return this.instance.post(
-            path,
-            data,
-            getRequestConfig(config, protectedEndpoint)
-        );
+        return this.instance.post(path, data, getRequestConfig(config, true));
     }
 
     async patch(
         path: string,
         data?: Record<string, any>,
-        config?: AxiosRequestConfig,
-        protectedEndpoint = true
+        config?: AxiosRequestConfig
     ) {
-        return this.instance.patch(
-            path,
-            data,
-            getRequestConfig(config, protectedEndpoint)
-        );
+        return this.instance.patch(path, data, getRequestConfig(config, true));
     }
 
-    async delete(
-        path: string,
-        config?: AxiosRequestConfig,
-        protectedEndpoint = true
-    ) {
-        return this.instance.delete(
-            path,
-            getRequestConfig(config, protectedEndpoint)
-        );
+    async delete(path: string, config?: AxiosRequestConfig) {
+        return this.instance.delete(path, getRequestConfig(config, true));
     }
 }
