@@ -18,8 +18,8 @@
                         <ion-input
                             required
                             :name="name"
-                            v-model="name"
                             placeholder="Digite seu nome"
+                            @ion-change="(event) => setName(event.target.value as string)"
                         >
                         </ion-input>
                     </ion-item>
@@ -31,8 +31,8 @@
                             type="email"
                             inputmode="email"
                             :name="email"
-                            v-model="email"
                             placeholder="Digite seu e-mail"
+                            @ion-change="(event) => setEmail(event.target.value as string)"
                         >
                         </ion-input>
                         <ion-note slot="helper"
@@ -47,8 +47,8 @@
                             required
                             type="password"
                             :name="password"
-                            v-model="password"
                             placeholder="Digite sua senha"
+                            @ion-change="(event) => setPassword(event.target.value as string)"
                         >
                         </ion-input>
                     </ion-item>
@@ -60,20 +60,23 @@
                         <ion-input
                             required
                             type="password"
-                            placeholder="Confirme sua senha"
                             :name="passwordConfirmation"
-                            v-model="passwordConfirmation"
+                            placeholder="Confirme sua senha"
+                            @ion-change="(event) => setPasswordConfirmation(event.target.value as string)"
                         >
                         </ion-input>
                         <ion-note slot="helper"
                             >Deve ser igual a senha</ion-note
                         >
                     </ion-item>
-
-                    <ion-text color="danger" v-if="!loading && !!errorMessage">
-                        <h6>{{ errorMessage }}</h6>
-                    </ion-text>
                 </ion-list>
+
+                <ion-text
+                    color="danger on-align-self-center"
+                    v-if="!loading && !!errorMessage"
+                >
+                    <h6>{{ errorMessage }}</h6>
+                </ion-text>
 
                 <ion-button
                     shape="round"
@@ -100,7 +103,6 @@
 
 <script setup lang="ts">
 import axios from 'axios';
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
@@ -120,15 +122,16 @@ import {
 } from '@ionic/vue';
 import { presentToast } from '@/utils/toast';
 import APIAdapter from '@/services/api';
+import { useState } from '@/composables/state';
 
 const router = useRouter();
 
-const loading = ref(false);
-const errorMessage = ref('');
-const name = ref('');
-const email = ref('');
-const password = ref('');
-const passwordConfirmation = ref('');
+const [loading, setLoading] = useState(false);
+const [errorMessage, setErrorMessage] = useState('');
+const [name, setName] = useState('');
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+const [passwordConfirmation, setPasswordConfirmation] = useState('');
 
 const validateForm = () => {
     if (
@@ -137,12 +140,12 @@ const validateForm = () => {
         !password.value ||
         !passwordConfirmation.value
     ) {
-        errorMessage.value = 'Todos os campos com * são obrigatórios';
+        setErrorMessage('Todos os campos com * são obrigatórios');
         return false;
     }
 
     if (password.value !== passwordConfirmation.value) {
-        errorMessage.value = 'A senha e confirmação de senha devem ser iguais';
+        setErrorMessage('A senha e confirmação de senha devem ser iguais');
         return false;
     }
 
@@ -152,7 +155,7 @@ const validateForm = () => {
 const submit = async () => {
     if (!validateForm()) return;
 
-    loading.value = true;
+    setLoading(true);
 
     const apiAdapter = new APIAdapter();
 
@@ -164,7 +167,7 @@ const submit = async () => {
             password_confirmation: passwordConfirmation.value,
         });
 
-        errorMessage.value = '';
+        setErrorMessage('');
         presentToast('Conta criada com sucesso!', 'success');
 
         router.push({ name: 'Home' });
@@ -172,11 +175,14 @@ const submit = async () => {
         console.error(error);
 
         if (axios.isAxiosError(error)) {
-            errorMessage.value = error.response?.data.error;
+            setErrorMessage(error.response?.data.error);
+            presentToast(errorMessage.value, 'danger');
+        } else {
+            setErrorMessage('Erro de conexão com o servidor. Tente novamente.');
             presentToast(errorMessage.value, 'danger');
         }
     } finally {
-        loading.value = false;
+        setLoading(false);
     }
 };
 </script>
