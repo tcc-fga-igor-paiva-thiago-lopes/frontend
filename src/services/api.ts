@@ -44,7 +44,7 @@ export default class APIAdapter {
         this.instance = axios.create(CONFIG);
 
         this.instance.interceptors.response.use(
-            undefined,
+            (response) => response.data,
             responseErrorHandler
         );
     }
