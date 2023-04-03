@@ -130,7 +130,7 @@ const email = ref('');
 const password = ref('');
 const passwordConfirmation = ref('');
 
-const submit = async () => {
+const validateForm = () => {
     if (
         !name.value ||
         !email.value ||
@@ -138,13 +138,19 @@ const submit = async () => {
         !passwordConfirmation.value
     ) {
         errorMessage.value = 'Todos os campos com * são obrigatórios';
-        return;
+        return false;
     }
 
     if (password.value !== passwordConfirmation.value) {
         errorMessage.value = 'A senha e confirmação de senha devem ser iguais';
-        return;
+        return false;
     }
+
+    return true;
+};
+
+const submit = async () => {
+    if (!validateForm()) return;
 
     loading.value = true;
 
