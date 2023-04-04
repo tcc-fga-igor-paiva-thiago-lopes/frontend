@@ -1,11 +1,11 @@
-import { readonly, ref, UnwrapRef } from 'vue';
+import { readonly, Ref, ref, UnwrapRef } from 'vue';
 
-export function useState<T>(initialState: T): [T, (newState: T) => void] {
+export function useState<T>(initialState: T): [Ref<T>, (newState: T) => void] {
     const state = ref<T>(initialState);
 
     const setState = (newState: T) => {
         state.value = newState as UnwrapRef<T>;
     };
 
-    return [readonly(state) as T, setState];
+    return [readonly(state) as Ref<T>, setState];
 }

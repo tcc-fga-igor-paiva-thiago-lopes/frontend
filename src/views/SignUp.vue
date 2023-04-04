@@ -60,20 +60,23 @@
                         <ion-input
                             required
                             type="password"
-                            placeholder="Confirme sua senha"
                             :name="passwordConfirmation"
                             v-model="passwordConfirmation"
+                            placeholder="Confirme sua senha"
                         >
                         </ion-input>
                         <ion-note slot="helper"
                             >Deve ser igual a senha</ion-note
                         >
                     </ion-item>
-
-                    <ion-text color="danger" v-if="!loading && !!errorMessage">
-                        <h6>{{ errorMessage }}</h6>
-                    </ion-text>
                 </ion-list>
+
+                <ion-text
+                    color="danger on-align-self-center"
+                    v-if="!loading && !!errorMessage"
+                >
+                    <h6>{{ errorMessage }}</h6>
+                </ion-text>
 
                 <ion-button
                     shape="round"
@@ -100,6 +103,7 @@
 
 <script setup lang="ts">
 import axios from 'axios';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
@@ -118,7 +122,7 @@ import {
     IonLabel,
 } from '@ionic/vue';
 import { presentToast } from '@/utils/toast';
-import { ref } from 'vue';
+import APIAdapter from '@/services/api';
 
 const router = useRouter();
 
@@ -129,9 +133,7 @@ const email = ref('');
 const password = ref('');
 const passwordConfirmation = ref('');
 
-const submit = async () => {
-    const apiBaseUrl = process.env.VUE_APP_API_URL;
-
+const validateForm = () => {
     if (
         !name.value ||
         !email.value ||
@@ -139,18 +141,26 @@ const submit = async () => {
         !passwordConfirmation.value
     ) {
         errorMessage.value = 'Todos os campos com * são obrigatórios';
-        return;
+        return false;
     }
 
     if (password.value !== passwordConfirmation.value) {
         errorMessage.value = 'A senha e confirmação de senha devem ser iguais';
-        return;
+        return false;
     }
+
+    return true;
+};
+
+const submit = async () => {
+    if (!validateForm()) return;
 
     loading.value = true;
 
+    const apiAdapter = new APIAdapter();
+
     try {
-        await axios.post(`${apiBaseUrl}/truck-drivers`, {
+        await apiAdapter.postWithoutAuth('/truck-drivers', {
             name: name.value,
             email: email.value,
             password: password.value,
@@ -166,6 +176,10 @@ const submit = async () => {
 
         if (axios.isAxiosError(error)) {
             errorMessage.value = error.response?.data.error;
+            presentToast(errorMessage.value, 'danger');
+        } else {
+            errorMessage.value =
+                'Erro de conexão com o servidor. Tente novamente.';
             presentToast(errorMessage.value, 'danger');
         }
     } finally {

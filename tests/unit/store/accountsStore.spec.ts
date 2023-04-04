@@ -1,6 +1,6 @@
 import { setActivePinia, createPinia } from 'pinia';
 
-import { TestHelper } from '../testHelper';
+import { TestHelper } from '../../testHelper';
 
 import { Account } from '@/models/account';
 import { useAccountsStore } from '@/store/accounts';
