@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import vueRouter from '@/router';
 
-const CONFIG: AxiosRequestConfig = {
+export const CONFIG: AxiosRequestConfig = {
     timeout: parseInt(process.env.VUE_APP_API_TIMEOUT || '5000', 10),
     baseURL: `${process.env.VUE_APP_API_URL}/`,
     headers: {
