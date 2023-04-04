@@ -27,7 +27,7 @@ jobs:
           uses: codecov/codecov-action@v3
           with:
             token: ${{ secrets.CODECOV_TOKEN }}
-            directory: ./
+            directory: ./coverage
             fail_ci_if_error: true
             files: ./coverage/coverage-final.json
             flags: unittests
