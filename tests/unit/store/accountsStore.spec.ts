@@ -87,29 +87,6 @@ describe('accountsStore', () => {
         );
     });
 
-    // it('should throw error when account is not found in update', async () => {
-    //     const accountsStore = useAccountsStore();
-    //     const { updateAccount } = accountsStore;
-
-    //     const account = await Account.createWithAttrs({
-    //         name: 'To update',
-    //     });
-
-    //     const accountId = account.id;
-
-    //     await account.remove();
-
-    //     // const func = () => {
-    //     //     return updateAccount(accountId, { name: 'Updated' });
-    //     //     // throw new Error('Not found');
-    //     // };
-
-    //     // expect(func).toThrow(Error);
-    //     expect(async () =>
-    //         updateAccount(accountId, { name: 'Updated' })
-    //     ).toThrow('Not found');
-    // });
-
     it('should remove all accounts', async () => {
         const accountsStore = useAccountsStore();
         const { removeAllAccounts } = accountsStore;
