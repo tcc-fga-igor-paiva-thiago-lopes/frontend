@@ -40,8 +40,8 @@ const responseErrorHandler = (error: any) => {
 export default class APIAdapter {
     private instance: AxiosInstance;
 
-    constructor() {
-        this.instance = axios.create(CONFIG);
+    constructor(instance?: AxiosInstance) {
+        this.instance = instance || axios.create(CONFIG);
 
         this.instance.interceptors.response.use(
             (response) => response.data,
