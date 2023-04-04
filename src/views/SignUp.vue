@@ -18,8 +18,8 @@
                         <ion-input
                             required
                             :name="name"
+                            v-model="name"
                             placeholder="Digite seu nome"
-                            @ion-change="(event) => setName(event.target.value as string)"
                         >
                         </ion-input>
                     </ion-item>
@@ -31,8 +31,8 @@
                             type="email"
                             inputmode="email"
                             :name="email"
+                            v-model="email"
                             placeholder="Digite seu e-mail"
-                            @ion-change="(event) => setEmail(event.target.value as string)"
                         >
                         </ion-input>
                         <ion-note slot="helper"
@@ -47,8 +47,8 @@
                             required
                             type="password"
                             :name="password"
+                            v-model="password"
                             placeholder="Digite sua senha"
-                            @ion-change="(event) => setPassword(event.target.value as string)"
                         >
                         </ion-input>
                     </ion-item>
@@ -61,8 +61,8 @@
                             required
                             type="password"
                             :name="passwordConfirmation"
+                            v-model="passwordConfirmation"
                             placeholder="Confirme sua senha"
-                            @ion-change="(event) => setPasswordConfirmation(event.target.value as string)"
                         >
                         </ion-input>
                         <ion-note slot="helper"
@@ -103,6 +103,7 @@
 
 <script setup lang="ts">
 import axios from 'axios';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
@@ -122,16 +123,15 @@ import {
 } from '@ionic/vue';
 import { presentToast } from '@/utils/toast';
 import APIAdapter from '@/services/api';
-import { useState } from '@/composables/state';
 
 const router = useRouter();
 
-const [loading, setLoading] = useState(false);
-const [errorMessage, setErrorMessage] = useState('');
-const [name, setName] = useState('');
-const [email, setEmail] = useState('');
-const [password, setPassword] = useState('');
-const [passwordConfirmation, setPasswordConfirmation] = useState('');
+const loading = ref(false);
+const errorMessage = ref('');
+const name = ref('');
+const email = ref('');
+const password = ref('');
+const passwordConfirmation = ref('');
 
 const validateForm = () => {
     if (
@@ -140,12 +140,12 @@ const validateForm = () => {
         !password.value ||
         !passwordConfirmation.value
     ) {
-        setErrorMessage('Todos os campos com * são obrigatórios');
+        errorMessage.value = 'Todos os campos com * são obrigatórios';
         return false;
     }
 
     if (password.value !== passwordConfirmation.value) {
-        setErrorMessage('A senha e confirmação de senha devem ser iguais');
+        errorMessage.value = 'A senha e confirmação de senha devem ser iguais';
         return false;
     }
 
@@ -155,7 +155,7 @@ const validateForm = () => {
 const submit = async () => {
     if (!validateForm()) return;
 
-    setLoading(true);
+    loading.value = true;
 
     const apiAdapter = new APIAdapter();
 
@@ -167,7 +167,7 @@ const submit = async () => {
             password_confirmation: passwordConfirmation.value,
         });
 
-        setErrorMessage('');
+        errorMessage.value = '';
         presentToast('Conta criada com sucesso!', 'success');
 
         router.push({ name: 'Home' });
@@ -175,14 +175,15 @@ const submit = async () => {
         console.error(error);
 
         if (axios.isAxiosError(error)) {
-            setErrorMessage(error.response?.data.error);
+            errorMessage.value = error.response?.data.error;
             presentToast(errorMessage.value, 'danger');
         } else {
-            setErrorMessage('Erro de conexão com o servidor. Tente novamente.');
+            errorMessage.value =
+                'Erro de conexão com o servidor. Tente novamente.';
             presentToast(errorMessage.value, 'danger');
         }
     } finally {
-        setLoading(false);
+        loading.value = false;
     }
 };
 </script>
