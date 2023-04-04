@@ -49,10 +49,6 @@ export default class APIAdapter {
         );
     }
 
-    async getWithoutAuth(path: string, config?: AxiosRequestConfig) {
-        return this.instance.get(path, getRequestConfig(config, false));
-    }
-
     async postWithoutAuth(
         path: string,
         data?: Record<string, any>,
