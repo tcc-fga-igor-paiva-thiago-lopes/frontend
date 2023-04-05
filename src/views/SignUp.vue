@@ -29,9 +29,9 @@
                         <ion-input
                             required
                             type="email"
-                            inputmode="email"
                             :name="email"
                             v-model="email"
+                            inputmode="email"
                             placeholder="Digite seu e-mail"
                         >
                         </ion-input>
