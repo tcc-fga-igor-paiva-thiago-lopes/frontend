@@ -19,6 +19,7 @@
                             required
                             :name="name"
                             v-model="name"
+                            id="truck-driver-name"
                             placeholder="Digite seu nome"
                         >
                         </ion-input>
@@ -29,9 +30,10 @@
                         <ion-input
                             required
                             type="email"
-                            inputmode="email"
                             :name="email"
                             v-model="email"
+                            inputmode="email"
+                            id="truck-driver-email"
                             placeholder="Digite seu e-mail"
                         >
                         </ion-input>
@@ -48,6 +50,7 @@
                             type="password"
                             :name="password"
                             v-model="password"
+                            id="truck-driver-password"
                             placeholder="Digite sua senha"
                         >
                         </ion-input>
@@ -63,6 +66,7 @@
                             :name="passwordConfirmation"
                             v-model="passwordConfirmation"
                             placeholder="Confirme sua senha"
+                            id="truck-driver-password-confirmation"
                         >
                         </ion-input>
                         <ion-note slot="helper"
