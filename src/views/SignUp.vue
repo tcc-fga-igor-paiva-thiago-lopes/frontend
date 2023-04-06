@@ -1,7 +1,13 @@
 <template>
-    <ion-page>
+    <ion-page id="main-content">
         <ion-header :translucent="true">
             <ion-toolbar>
+                <ion-buttons slot="start">
+                    <ion-button @click="() => $router.back()">
+                        <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
+                    </ion-button>
+                </ion-buttons>
+
                 <ion-title>Cadastro</ion-title>
             </ion-toolbar>
         </ion-header>
@@ -120,7 +126,11 @@ import {
     IonNote,
     IonItem,
     IonLabel,
+    IonButtons,
+    IonIcon,
 } from '@ionic/vue';
+import { arrowBack } from 'ionicons/icons';
+
 import { presentToast } from '@/utils/toast';
 import APIAdapter from '@/services/api';
 
