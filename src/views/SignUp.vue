@@ -13,9 +13,7 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
-            <div v-if="loading">
-                <ion-loading />
-            </div>
+            <ion-loading v-if="loading" />
 
             <form class="form ion-padding" @submit="submit">
                 <ion-list class="ion-no-padding">

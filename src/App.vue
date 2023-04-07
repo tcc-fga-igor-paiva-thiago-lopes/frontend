@@ -14,10 +14,16 @@
             <ion-content>
                 <ion-list>
                     <ion-menu-toggle>
-                        <!-- router-link="Home" routerDirection="forward" -->
-                        <ion-item @click="() => $router.push({ name: 'Home' })">
-                            <ion-icon :icon="home" slot="start"></ion-icon>
-                            <ion-label>Home</ion-label>
+                        <ion-item
+                            v-for="option in menuOptions"
+                            :key="option.route"
+                            @click="() => $router.push({ name: option.route })"
+                        >
+                            <ion-icon
+                                :icon="option.icon"
+                                slot="start"
+                            ></ion-icon>
+                            <ion-label>{{ option.name }}</ion-label>
                         </ion-item>
                     </ion-menu-toggle>
                 </ion-list>
@@ -50,4 +56,12 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 
 const isMenuDisabled = () => route.name === 'Home' || route.name === 'SignUp';
+
+const menuOptions = [
+    {
+        route: 'Home',
+        icon: home,
+        name: 'Home',
+    },
+];
 </script>
