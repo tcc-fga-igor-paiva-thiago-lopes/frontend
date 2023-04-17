@@ -1,5 +1,5 @@
 <template>
-    <ion-note slot="error">
+    <ion-note slot="error" class="white-space-pre-line">
         {{
             displayValidationErrors(
                 props.validationErrors,
@@ -9,6 +9,12 @@
         }}
     </ion-note>
 </template>
+
+<style>
+.white-space-pre-line {
+    white-space: pre-line;
+}
+</style>
 
 <script setup lang="ts">
 import { IonNote } from '@ionic/vue';

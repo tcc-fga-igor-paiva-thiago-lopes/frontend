@@ -7,6 +7,12 @@ export interface ErrorResponseData {
     errors?: ValidationErrors;
 }
 
+export type FieldData = {
+    value: any;
+    field: string;
+    fieldRef: Ref<any>;
+};
+
 const isObjectEmpty = (errors?: ValidationErrors) =>
     Object.keys(errors || {}).length === 0;
 
@@ -28,6 +34,16 @@ export const getValidationErrors = (errorResponse: ErrorResponseData) => {
     if (isObjectEmpty(errorResponse.errors)) return {};
 
     return objectKeysToCamelCase(errorResponse.errors || {});
+};
+
+export const assignValidationErrorsFromResponse = (
+    validationErrors: ValidationErrors,
+    errorResponse: ErrorResponseData,
+    fieldRefs: Record<string, Ref<any>>
+) => {
+    Object.assign(validationErrors, getValidationErrors(errorResponse));
+
+    addErrorClassToFields(validationErrors, fieldRefs);
 };
 
 export const displayValidationErrors = (
@@ -52,16 +68,19 @@ export const addErrorClassToFields = (
     });
 };
 
-export const addErrorClassToField = (fieldRef: Ref<any>) => {
+export const removeValidationClasses = (fieldRef: Ref<any>) => {
     fieldRef.value.$el.classList.remove('ion-valid');
     fieldRef.value.$el.classList.remove('ion-invalid');
+};
+
+export const addErrorClassToField = (fieldRef: Ref<any>) => {
+    removeValidationClasses(fieldRef);
 
     fieldRef.value.$el.classList.add('ion-invalid');
 };
 
 export const addValidClassToField = (fieldRef: Ref<any>) => {
-    fieldRef.value.$el.classList.remove('ion-valid');
-    fieldRef.value.$el.classList.remove('ion-invalid');
+    removeValidationClasses(fieldRef);
 
     fieldRef.value.$el.classList.add('ion-valid');
 };
@@ -71,8 +90,7 @@ export const clearFieldErrors = (
     field?: string,
     validationErrors?: ValidationErrors
 ) => {
-    fieldRef.value.$el.classList.remove('ion-valid');
-    fieldRef.value.$el.classList.remove('ion-invalid');
+    addValidClassToField(fieldRef);
 
     if (validationErrors && field) validationErrors[field] = [];
 };
@@ -82,8 +100,7 @@ export const clearFieldsErrors = (
     validationErrors?: ValidationErrors
 ) => {
     Object.values(fieldRefs).forEach((fieldRef) => {
-        fieldRef.value.$el.classList.remove('ion-valid');
-        fieldRef.value.$el.classList.remove('ion-invalid');
+        addValidClassToField(fieldRef);
     });
 
     if (validationErrors) validationErrors = {};
@@ -92,27 +109,30 @@ export const clearFieldsErrors = (
 export const createOrPushError = (
     validationErrors: ValidationErrors,
     field: string,
-    errorMsg: string
+    errorMsg: string[]
 ) => {
     if (validationErrors[field]) {
-        validationErrors[field].push(errorMsg);
+        validationErrors[field] = [...validationErrors[field], ...errorMsg];
     } else {
-        validationErrors[field] = [errorMsg];
+        validationErrors[field] = [...errorMsg];
     }
 };
 
 export const validateRequiredFields = (
     validationErrors: ValidationErrors,
     fields: Record<string, any>,
-    fieldRefs?: Record<string, Ref<any>>
+    fieldRefs: Record<string, Ref<any>>
 ) => {
     let hasError = false;
 
     Object.entries(fields).forEach(([field, value]) => {
         if (!value) {
-            createOrPushError(validationErrors, field, 'Campo obrigatório');
-
-            if (fieldRefs) addErrorClassToField(fieldRefs[field]);
+            addErrorToField(
+                validationErrors,
+                field,
+                ['Campo obrigatório'],
+                fieldRefs[field]
+            );
 
             hasError = true;
         }
@@ -123,32 +143,42 @@ export const validateRequiredFields = (
 
 export const addErrorToFields = (
     validationErrors: ValidationErrors,
-    fields: string[],
-    errorMessages: string | Record<string, string>,
+    errorMessages: Record<string, string[]>,
     fieldRefs: Record<string, Ref<any>>
 ) => {
-    fields.forEach((field) => {
-        const errorMessage =
-            typeof errorMessages === 'string'
-                ? errorMessages
-                : errorMessages[field];
-
-        addErrorToField(
-            validationErrors,
-            field,
-            errorMessage,
-            fieldRefs[field]
-        );
+    Object.entries(errorMessages).forEach(([field, messages]) => {
+        addErrorToField(validationErrors, field, messages, fieldRefs[field]);
     });
 };
 
 export const addErrorToField = (
     validationErrors: ValidationErrors,
     field: string,
-    errorMsg: string,
+    errorMessages: string[],
     fieldRef: Ref<any>
 ) => {
-    createOrPushError(validationErrors, field, errorMsg);
+    createOrPushError(validationErrors, field, errorMessages);
 
     addErrorClassToField(fieldRef);
+};
+
+export const validateField = (
+    fieldData: FieldData,
+    validationFunc: (value: any) => string[],
+    validationErrors?: ValidationErrors
+) => {
+    const { value, field, fieldRef } = fieldData;
+
+    if (validationErrors) validationErrors[field] = [];
+
+    const errorMessages = validationFunc(value);
+
+    errorMessages.length
+        ? addErrorToField(
+              validationErrors || {},
+              field,
+              errorMessages,
+              fieldRef
+          )
+        : clearFieldErrors(fieldRef, field, validationErrors);
 };

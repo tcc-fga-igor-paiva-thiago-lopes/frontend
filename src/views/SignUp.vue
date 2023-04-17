@@ -42,14 +42,13 @@
                             :name="email"
                             v-model="email"
                             inputmode="email"
-                            @ionInput="validateEmail"
+                            @ionInput="handleEmailChange"
                             placeholder="Digite seu e-mail"
                         >
                         </ion-input>
                         <ion-note slot="helper"
                             >Insira um e-mail válido</ion-note
                         >
-                        <ion-note slot="error">E-mail inválido</ion-note>
 
                         <InputErrorNote
                             field="email"
@@ -132,7 +131,7 @@
 
 <script setup lang="ts">
 import axios from 'axios';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
@@ -160,15 +159,12 @@ import { presentToast } from '@/utils/toast';
 import InputErrorNote from '@/components/InputErrorNote.vue';
 
 import {
+    validateField,
     ValidationErrors,
-    clearFieldErrors,
     addErrorToFields,
     clearFieldsErrors,
-    getValidationErrors,
-    addValidClassToField,
-    addErrorClassToField,
-    addErrorClassToFields,
     validateRequiredFields,
+    assignValidationErrorsFromResponse,
 } from '@/utils/errors';
 
 const router = useRouter();
@@ -199,16 +195,18 @@ const validateEmailFormat = (email: string) => {
     );
 };
 
-const validateEmail = (ev: IonInputCustomEvent<InputEvent>) => {
+const validateEmail = (value: string, errors: ValidationErrors) => {
+    validateField(
+        { value, field: 'email', fieldRef: emailRef },
+        (v: string) => (validateEmailFormat(v) ? [] : ['E-mail inválido']),
+        errors
+    );
+};
+
+const handleEmailChange = (ev: IonInputCustomEvent<InputEvent>) => {
     const value = ev.target.value;
 
-    clearFieldErrors(emailRef, 'email', validationErrors.value);
-
-    if (!value) return;
-
-    validateEmailFormat(value as string)
-        ? addValidClassToField(emailRef)
-        : addErrorClassToField(emailRef);
+    validateEmail(value as string, validationErrors.value);
 };
 
 const validateForm = () => {
@@ -216,8 +214,6 @@ const validateForm = () => {
     const newValidationErrors = {} as ValidationErrors;
 
     clearFieldsErrors(fieldsRefs);
-
-    console.log(validationErrors.value);
 
     const failedRequiredFields = validateRequiredFields(
         newValidationErrors,
@@ -234,11 +230,16 @@ const validateForm = () => {
         errorMessage.value = 'Todos os campos com * são obrigatórios';
     }
 
+    validateEmail(email.value, newValidationErrors);
+
     if (password.value !== passwordConfirmation.value) {
+        const errorMessages = [
+            'A senha e confirmação de senha devem ser iguais',
+        ];
+
         addErrorToFields(
             newValidationErrors,
-            ['password', 'passwordConfirmation'],
-            'A senha e confirmação de senha devem ser iguais',
+            { password: errorMessages, passwordConfirmation: errorMessages },
             formFieldsRefs()
         );
     }
@@ -271,11 +272,11 @@ const submit = async () => {
         console.error(error);
 
         if (axios.isAxiosError(error)) {
-            console.log(error.response?.data);
-
-            validationErrors.value = getValidationErrors(error.response?.data);
-
-            addErrorClassToFields(validationErrors.value, formFieldsRefs());
+            assignValidationErrorsFromResponse(
+                validationErrors.value,
+                error.response?.data,
+                formFieldsRefs()
+            );
 
             errorMessage.value = error.response?.data.message;
 
