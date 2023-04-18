@@ -209,13 +209,39 @@ const handleEmailChange = (ev: IonInputCustomEvent<InputEvent>) => {
     validateEmail(value as string, validationErrors.value);
 };
 
+const validatePassword = (value: string, errors: ValidationErrors) => {
+    validateField(
+        { value, field: 'password', fieldRef: passwordRef },
+        (v: string) =>
+            v.length >= 8 ? [] : ['Menor que o tamanho mínimo de 8 caracteres'],
+        errors
+    );
+};
+
+const validatePasswordAndConfirmation = (errors: ValidationErrors) => {
+    if (password.value === passwordConfirmation.value) return;
+
+    const errorMessages = ['A senha e confirmação de senha devem ser iguais'];
+
+    addErrorToFields({
+        validationErrors: errors,
+        errorMessages: {
+            password: errorMessages,
+            passwordConfirmation: errorMessages,
+        },
+        fieldRefs: formFieldsRefs(),
+        overwriteErrors: true,
+    });
+};
+
 const validateForm = () => {
     const fieldsRefs = formFieldsRefs();
     const newValidationErrors = {} as ValidationErrors;
 
+    errorMessage.value = '';
     clearFieldsErrors(fieldsRefs);
 
-    const failedRequiredFields = validateRequiredFields(
+    const validFields = validateRequiredFields(
         newValidationErrors,
         {
             name: name.value,
@@ -226,23 +252,14 @@ const validateForm = () => {
         fieldsRefs
     );
 
-    if (!failedRequiredFields) {
+    if (!validFields)
         errorMessage.value = 'Todos os campos com * são obrigatórios';
-    }
 
     validateEmail(email.value, newValidationErrors);
 
-    if (password.value !== passwordConfirmation.value) {
-        const errorMessages = [
-            'A senha e confirmação de senha devem ser iguais',
-        ];
+    validatePassword(password.value, newValidationErrors);
 
-        addErrorToFields(
-            newValidationErrors,
-            { password: errorMessages, passwordConfirmation: errorMessages },
-            formFieldsRefs()
-        );
-    }
+    validatePasswordAndConfirmation(newValidationErrors);
 
     validationErrors.value = newValidationErrors;
 

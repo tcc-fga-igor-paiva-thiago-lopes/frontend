@@ -13,6 +13,21 @@ export type FieldData = {
     fieldRef: Ref<any>;
 };
 
+type AddErrorArgument = {
+    validationErrors: ValidationErrors;
+    field: string;
+    errorMessages: string[];
+    fieldRef: Ref<any>;
+    overwriteErrors?: boolean;
+};
+
+type AddErrorsArgument = {
+    validationErrors: ValidationErrors;
+    errorMessages: Record<string, string[]>;
+    fieldRefs: Record<string, Ref<any>>;
+    overwriteErrors?: boolean;
+};
+
 const isObjectEmpty = (errors?: ValidationErrors) =>
     Object.keys(errors || {}).length === 0;
 
@@ -127,12 +142,12 @@ export const validateRequiredFields = (
 
     Object.entries(fields).forEach(([field, value]) => {
         if (!value) {
-            addErrorToField(
+            addErrorToField({
                 validationErrors,
                 field,
-                ['Campo obrigatório'],
-                fieldRefs[field]
-            );
+                errorMessages: ['Campo obrigatório'],
+                fieldRef: fieldRefs[field],
+            });
 
             hasError = true;
         }
@@ -141,23 +156,32 @@ export const validateRequiredFields = (
     return !hasError;
 };
 
-export const addErrorToFields = (
-    validationErrors: ValidationErrors,
-    errorMessages: Record<string, string[]>,
-    fieldRefs: Record<string, Ref<any>>
-) => {
+export const addErrorToFields = ({
+    validationErrors,
+    errorMessages,
+    fieldRefs,
+    overwriteErrors = false,
+}: AddErrorsArgument) => {
     Object.entries(errorMessages).forEach(([field, messages]) => {
-        addErrorToField(validationErrors, field, messages, fieldRefs[field]);
+        addErrorToField({
+            validationErrors,
+            field,
+            errorMessages: messages,
+            fieldRef: fieldRefs[field],
+            overwriteErrors,
+        });
     });
 };
 
-export const addErrorToField = (
-    validationErrors: ValidationErrors,
-    field: string,
-    errorMessages: string[],
-    fieldRef: Ref<any>
-) => {
-    createOrPushError(validationErrors, field, errorMessages);
+export const addErrorToField = ({
+    validationErrors,
+    field,
+    errorMessages,
+    fieldRef,
+    overwriteErrors = false,
+}: AddErrorArgument) => {
+    if (overwriteErrors) validationErrors[field] = errorMessages;
+    else createOrPushError(validationErrors, field, errorMessages);
 
     addErrorClassToField(fieldRef);
 };
@@ -174,11 +198,11 @@ export const validateField = (
     const errorMessages = validationFunc(value);
 
     errorMessages.length
-        ? addErrorToField(
-              validationErrors || {},
+        ? addErrorToField({
+              validationErrors: validationErrors || {},
               field,
               errorMessages,
-              fieldRef
-          )
+              fieldRef,
+          })
         : clearFieldErrors(fieldRef, field, validationErrors);
 };
