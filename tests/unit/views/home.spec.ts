@@ -1,15 +1,15 @@
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 
-import HomePage from '@/views/HomePage.vue';
+import WelcomePage from '@/views/WelcomePage.vue';
 
 beforeAll(() => {
     setActivePinia(createPinia());
 });
 
-describe('HomePage.vue', () => {
+describe('WelcomePage.vue', () => {
     it('renders home vue', async () => {
-        const wrapper = mount(HomePage);
+        const wrapper = mount(WelcomePage);
 
         const button = wrapper.find('ion-button');
 
@@ -20,7 +20,7 @@ describe('HomePage.vue', () => {
     it('redirects to signup page when button is clicked', async () => {
         const mockRouter = { push: jest.fn() };
 
-        const wrapper = mount(HomePage, {
+        const wrapper = mount(WelcomePage, {
             global: {
                 mocks: {
                     $router: mockRouter,
