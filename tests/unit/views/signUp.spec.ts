@@ -1,5 +1,5 @@
 import { createPinia, setActivePinia } from 'pinia';
-import { mount, flushPromises } from '@vue/test-utils';
+import { mount, flushPromises, VueWrapper } from '@vue/test-utils';
 import { Router, createRouter, createWebHistory } from 'vue-router';
 
 import { routes } from '@/router';
@@ -7,6 +7,7 @@ import APIAdapter from '@/services/api';
 import { presentToast } from '@/utils/toast';
 
 import SignUp from '@/views/SignUp.vue';
+import { getCSSProperty } from '../../testHelper';
 
 jest.mock('@/services/api');
 jest.mock('@/utils/toast');
@@ -28,6 +29,21 @@ beforeEach(async () => {
 });
 
 describe('SignUp.vue', () => {
+    const fieldsOrderMap: Record<string, number> = {
+        name: 1,
+        email: 2,
+        password: 3,
+        passwordConfirmation: 4,
+    };
+
+    const findInputNote = (wrapper: VueWrapper, field: string) =>
+        wrapper.find(
+            `ion-item:nth-child(${fieldsOrderMap[field]})>ion-note[slot="error"]`
+        );
+
+    const inputQueryString = (field: string) =>
+        `ion-item:nth-child(${fieldsOrderMap[field]})>ion-input`;
+
     it('renders signup vue', () => {
         const wrapper = mount(SignUp);
 
@@ -48,39 +64,24 @@ describe('SignUp.vue', () => {
             'Todos os campos com * são obrigatórios'
         );
 
-        const nameNote = wrapper.find('ion-item:nth-child(1)>ion-note');
-        const emailNote = wrapper.find(
-            'ion-item:nth-child(2)>ion-note[slot="error"]'
-        );
-        const passwordNote = wrapper.find('ion-item:nth-child(3)>ion-note');
-        const passwordConfirmationNote = wrapper.find(
-            'ion-item:nth-child(4)>ion-note[slot="error"]'
+        const nameNote = findInputNote(wrapper, 'name');
+        const emailNote = findInputNote(wrapper, 'email');
+        const passwordNote = findInputNote(wrapper, 'password');
+        const passwordConfirmationNote = findInputNote(
+            wrapper,
+            'passwordConfirmation'
         );
 
-        expect(
-            getComputedStyle(nameNote.element).getPropertyValue('display')
-        ).toBeFalsy();
-
+        expect(getCSSProperty(nameNote, 'display')).toBeFalsy();
         expect(nameNote.text()).toBe('Campo obrigatório');
 
-        expect(
-            getComputedStyle(emailNote.element).getPropertyValue('display')
-        ).toBeFalsy();
-
+        expect(getCSSProperty(emailNote, 'display')).toBeFalsy();
         expect(emailNote.text()).toBe('Campo obrigatório');
 
-        expect(
-            getComputedStyle(passwordNote.element).getPropertyValue('display')
-        ).toBeFalsy();
-
+        expect(getCSSProperty(passwordNote, 'display')).toBeFalsy();
         expect(passwordNote.text()).toBe('Campo obrigatório');
 
-        expect(
-            getComputedStyle(passwordConfirmationNote.element).getPropertyValue(
-                'display'
-            )
-        ).toBeFalsy();
-
+        expect(getCSSProperty(passwordConfirmationNote, 'display')).toBeFalsy();
         expect(passwordConfirmationNote.text()).toBe('Campo obrigatório');
 
         expect(APIAdapter).toHaveBeenCalledTimes(0);
@@ -89,32 +90,25 @@ describe('SignUp.vue', () => {
     it('shows error message when password length is smaller than 8', async () => {
         const wrapper = mount(SignUp);
 
-        wrapper
-            .findComponent('ion-item:nth-child(1)>ion-input')
-            .setValue('John');
+        wrapper.findComponent(inputQueryString('name')).setValue('John');
 
         wrapper
-            .findComponent('ion-item:nth-child(2)>ion-input')
+            .findComponent(inputQueryString('email'))
             .setValue('john@mail.com');
 
-        wrapper
-            .findComponent('ion-item:nth-child(3)>ion-input')
-            .setValue('123');
+        wrapper.findComponent(inputQueryString('password')).setValue('123');
 
         wrapper
-            .findComponent('ion-item:nth-child(4)>ion-input')
+            .findComponent(inputQueryString('passwordConfirmation'))
             .setValue('123');
 
         await wrapper.get('form>ion-button').trigger('click');
 
         await flushPromises();
 
-        const passwordNote = wrapper.find('ion-item:nth-child(3)>ion-note');
+        const passwordNote = findInputNote(wrapper, 'password');
 
-        expect(
-            getComputedStyle(passwordNote.element).getPropertyValue('display')
-        ).toBeFalsy();
-
+        expect(getCSSProperty(passwordNote, 'display')).toBeFalsy();
         expect(passwordNote.text()).toBe(
             'Menor que o tamanho mínimo de 8 caracteres'
         );
@@ -125,45 +119,36 @@ describe('SignUp.vue', () => {
     it('shows error message when password and confirmation are different', async () => {
         const wrapper = mount(SignUp);
 
-        wrapper
-            .findComponent('ion-item:nth-child(1)>ion-input')
-            .setValue('John');
+        wrapper.findComponent(inputQueryString('name')).setValue('John');
 
         wrapper
-            .findComponent('ion-item:nth-child(2)>ion-input')
+            .findComponent(inputQueryString('email'))
             .setValue('john@mail.com');
 
         wrapper
-            .findComponent('ion-item:nth-child(3)>ion-input')
+            .findComponent(inputQueryString('password'))
             .setValue('12345678');
 
         wrapper
-            .findComponent('ion-item:nth-child(4)>ion-input')
+            .findComponent(inputQueryString('passwordConfirmation'))
             .setValue('87654321');
 
         await wrapper.get('ion-button').trigger('click');
 
         await flushPromises();
 
-        const passwordNote = wrapper.find('ion-item:nth-child(3)>ion-note');
-        const passwordConfirmationNote = wrapper.find(
-            'ion-item:nth-child(4)>ion-note[slot="error"]'
+        const passwordNote = findInputNote(wrapper, 'password');
+        const passwordConfirmationNote = findInputNote(
+            wrapper,
+            'passwordConfirmation'
         );
 
-        expect(
-            getComputedStyle(passwordNote.element).getPropertyValue('display')
-        ).toBeFalsy();
-
+        expect(getCSSProperty(passwordNote, 'display')).toBeFalsy();
         expect(passwordNote.text()).toBe(
             'A senha e confirmação de senha devem ser iguais'
         );
 
-        expect(
-            getComputedStyle(passwordConfirmationNote.element).getPropertyValue(
-                'display'
-            )
-        ).toBeFalsy();
-
+        expect(getCSSProperty(passwordConfirmationNote, 'display')).toBeFalsy();
         expect(passwordConfirmationNote.text()).toBe(
             'A senha e confirmação de senha devem ser iguais'
         );
@@ -174,20 +159,13 @@ describe('SignUp.vue', () => {
     it('shows error message when email is invalid', async () => {
         const wrapper = mount(SignUp);
 
-        wrapper
-            .findComponent('ion-item:nth-child(2)>ion-input')
-            .setValue('john@mail.');
+        wrapper.findComponent(inputQueryString('email')).setValue('john@mail.');
 
         await flushPromises();
 
-        const emailNote = wrapper.find(
-            'ion-item:nth-child(2)>ion-note[slot="error"]'
-        );
+        const emailNote = findInputNote(wrapper, 'email');
 
-        expect(
-            getComputedStyle(emailNote.element).getPropertyValue('display')
-        ).toBeFalsy();
-
+        expect(getCSSProperty(emailNote, 'display')).toBeFalsy();
         expect(emailNote.text()).toBe('E-mail inválido');
 
         expect(APIAdapter).toHaveBeenCalledTimes(0);
@@ -200,25 +178,31 @@ describe('SignUp.vue', () => {
             },
         });
 
-        wrapper
-            .findComponent('ion-item:nth-child(1)>ion-input')
-            .setValue('John');
+        wrapper.findComponent(inputQueryString('name')).setValue('John');
 
         wrapper
-            .findComponent('ion-item:nth-child(2)>ion-input')
+            .findComponent(inputQueryString('email'))
             .setValue('john@mail.com');
 
         wrapper
-            .findComponent('ion-item:nth-child(3)>ion-input')
+            .findComponent(inputQueryString('password'))
             .setValue('12345678');
 
         wrapper
-            .findComponent('ion-item:nth-child(4)>ion-input')
+            .findComponent(inputQueryString('passwordConfirmation'))
             .setValue('12345678');
 
         await wrapper.get('form>ion-button').trigger('click');
 
         await flushPromises();
+
+        const nameNote = findInputNote(wrapper, 'name');
+        const emailNote = findInputNote(wrapper, 'email');
+        const passwordNote = findInputNote(wrapper, 'password');
+        const passwordConfirmationNote = findInputNote(
+            wrapper,
+            'passwordConfirmation'
+        );
 
         expect(APIAdapter).toHaveBeenCalledTimes(1);
 
@@ -227,5 +211,10 @@ describe('SignUp.vue', () => {
             'Conta criada com sucesso!',
             'success'
         );
+
+        expect(getCSSProperty(nameNote, 'display')).toBeFalsy();
+        expect(getCSSProperty(emailNote, 'display')).toBeFalsy();
+        expect(getCSSProperty(passwordNote, 'display')).toBeFalsy();
+        expect(getCSSProperty(passwordConfirmationNote, 'display')).toBeFalsy();
     });
 });

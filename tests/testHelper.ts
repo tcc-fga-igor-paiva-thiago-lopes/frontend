@@ -1,5 +1,9 @@
 import { DataSource } from 'typeorm';
+import { DOMWrapper } from '@vue/test-utils';
 import Database, { Database as DatabaseType } from 'better-sqlite3';
+
+export const getCSSProperty = (elWrapper: DOMWrapper<Element>, prop: string) =>
+    getComputedStyle(elWrapper.element).getPropertyValue(prop);
 
 export class TestHelper {
     private static _instance: TestHelper;
