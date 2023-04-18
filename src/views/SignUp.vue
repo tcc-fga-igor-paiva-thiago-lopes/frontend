@@ -196,7 +196,7 @@ const validateEmailFormat = (email: string) => {
 };
 
 const validateEmail = (value: string, errors: ValidationErrors) => {
-    validateField(
+    return validateField(
         { value, field: 'email', fieldRef: emailRef },
         (v: string) => (validateEmailFormat(v) ? [] : ['E-mail inválido']),
         errors
@@ -210,7 +210,7 @@ const handleEmailChange = (ev: IonInputCustomEvent<InputEvent>) => {
 };
 
 const validatePassword = (value: string, errors: ValidationErrors) => {
-    validateField(
+    return validateField(
         { value, field: 'password', fieldRef: passwordRef },
         (v: string) =>
             v.length >= 8 ? [] : ['Menor que o tamanho mínimo de 8 caracteres'],
@@ -219,7 +219,7 @@ const validatePassword = (value: string, errors: ValidationErrors) => {
 };
 
 const validatePasswordAndConfirmation = (errors: ValidationErrors) => {
-    if (password.value === passwordConfirmation.value) return;
+    if (password.value === passwordConfirmation.value) return true;
 
     const errorMessages = ['A senha e confirmação de senha devem ser iguais'];
 
@@ -232,16 +232,19 @@ const validatePasswordAndConfirmation = (errors: ValidationErrors) => {
         fieldRefs: formFieldsRefs(),
         overwriteErrors: true,
     });
+
+    return false;
 };
 
 const validateForm = () => {
+    let validFields = true;
     const fieldsRefs = formFieldsRefs();
     const newValidationErrors = {} as ValidationErrors;
 
     errorMessage.value = '';
     clearFieldsErrors(fieldsRefs);
 
-    const validFields = validateRequiredFields(
+    validFields = validateRequiredFields(
         newValidationErrors,
         {
             name: name.value,
@@ -255,15 +258,18 @@ const validateForm = () => {
     if (!validFields)
         errorMessage.value = 'Todos os campos com * são obrigatórios';
 
-    validateEmail(email.value, newValidationErrors);
+    validFields =
+        validFields && validateEmail(email.value, newValidationErrors);
 
-    validatePassword(password.value, newValidationErrors);
+    validFields =
+        validFields && validatePassword(password.value, newValidationErrors);
 
-    validatePasswordAndConfirmation(newValidationErrors);
+    validFields =
+        validFields && validatePasswordAndConfirmation(newValidationErrors);
 
     validationErrors.value = newValidationErrors;
 
-    return !Object.keys(newValidationErrors).length;
+    return validFields;
 };
 
 const submit = async () => {

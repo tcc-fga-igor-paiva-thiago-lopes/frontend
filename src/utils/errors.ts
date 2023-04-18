@@ -205,4 +205,6 @@ export const validateField = (
               fieldRef,
           })
         : clearFieldErrors(fieldRef, field, validationErrors);
+
+    return !errorMessages.length;
 };
