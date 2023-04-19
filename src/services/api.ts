@@ -1,5 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import vueRouter from '@/router';
+import { presentToast } from '@/utils/toast';
+import AuthService from './auth';
 
 export const CONFIG: AxiosRequestConfig = {
     timeout: parseInt(process.env.VUE_APP_API_TIMEOUT || '5000', 10),
@@ -9,12 +11,12 @@ export const CONFIG: AxiosRequestConfig = {
     },
 };
 
-const addTokenToRequest = (config: AxiosRequestConfig = CONFIG) => ({
+const addTokenToRequest = async (config: AxiosRequestConfig = CONFIG) => ({
     ...config,
     headers: {
         ...config.headers,
         // TODO: add token to requests
-        // Authorization: `Bearer ${getToken()}`,
+        Authorization: `Bearer ${await AuthService.getInstance().getToken()}`,
     },
 });
 
@@ -27,9 +29,11 @@ const responseErrorHandler = (error: any) => {
     const { response } = error;
 
     if (response.status === 401) {
-        // TODO: handle unauthorized request
-
-        if (window.location.pathname !== '/login') {
+        if (vueRouter.currentRoute.value.name !== 'SignIn') {
+            presentToast(
+                'Sua sessão expirou, será necessário conectar-se novamente.',
+                'danger'
+            );
             vueRouter.push({ name: 'Login' });
         }
     }
@@ -44,7 +48,7 @@ export default class APIAdapter {
         this.instance = instance || axios.create(CONFIG);
 
         this.instance.interceptors.response.use(
-            (response) => response.data,
+            undefined,
             responseErrorHandler
         );
     }
@@ -54,11 +58,15 @@ export default class APIAdapter {
         data?: Record<string, any>,
         config?: AxiosRequestConfig
     ) {
-        return this.instance.post(path, data, getRequestConfig(config, false));
+        return this.instance.post(
+            path,
+            data,
+            await getRequestConfig(config, false)
+        );
     }
 
     async get(path: string, config?: AxiosRequestConfig) {
-        return this.instance.get(path, getRequestConfig(config, true));
+        return this.instance.get(path, await getRequestConfig(config, true));
     }
 
     async post(
@@ -66,7 +74,11 @@ export default class APIAdapter {
         data?: Record<string, any>,
         config?: AxiosRequestConfig
     ) {
-        return this.instance.post(path, data, getRequestConfig(config, true));
+        return this.instance.post(
+            path,
+            data,
+            await getRequestConfig(config, true)
+        );
     }
 
     async patch(
@@ -74,10 +86,14 @@ export default class APIAdapter {
         data?: Record<string, any>,
         config?: AxiosRequestConfig
     ) {
-        return this.instance.patch(path, data, getRequestConfig(config, true));
+        return this.instance.patch(
+            path,
+            data,
+            await getRequestConfig(config, true)
+        );
     }
 
     async delete(path: string, config?: AxiosRequestConfig) {
-        return this.instance.delete(path, getRequestConfig(config, true));
+        return this.instance.delete(path, await getRequestConfig(config, true));
     }
 }
