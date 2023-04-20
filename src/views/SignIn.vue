@@ -62,7 +62,6 @@
 <script setup lang="ts">
 import axios from 'axios';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 import {
     IonContent,
@@ -80,10 +79,7 @@ import {
     IonLabel,
 } from '@ionic/vue';
 import { presentToast } from '@/utils/toast';
-import APIAdapter from '@/services/api';
 import AuthService from '@/services/auth';
-
-const router = useRouter();
 
 const loading = ref(false);
 const errorMessage = ref('');
@@ -105,7 +101,7 @@ const submit = async () => {
     loading.value = true;
 
     try {
-        AuthService.getInstance().logIn(email.value, password.value);
+        await AuthService.getInstance().logIn(email.value, password.value);
     } catch (error) {
         console.error(error);
 
