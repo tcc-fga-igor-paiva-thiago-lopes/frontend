@@ -1,12 +1,20 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
-import HomePage from '../views/HomePage.vue';
 import SignUp from '../views/SignUp.vue';
+import HomePage from '@/views/HomePage.vue';
+import NotFound from '../views/NotFound.vue';
+import WelcomePage from '../views/WelcomePage.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        redirect: '/home',
+        redirect: '/welcome',
+        // TODO: redirect to home page when user is logged in and to signup when not
+    },
+    {
+        path: '/welcome',
+        name: 'Welcome',
+        component: WelcomePage,
     },
     {
         path: '/home',
@@ -17,6 +25,12 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/signup',
         name: 'SignUp',
         component: SignUp,
+    },
+    {
+        // Always leave this as last one
+        path: '/:pathMatch(.*)',
+        name: 'NotFound',
+        component: NotFound,
     },
 ];
 

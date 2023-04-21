@@ -31,7 +31,7 @@ describe('SignUp.vue', () => {
     it('renders signup vue', () => {
         const wrapper = mount(SignUp);
 
-        const button = wrapper.find('ion-button');
+        const button = wrapper.find('form>ion-button');
 
         expect(button.exists()).toBe(true);
         expect(button.text()).toBe('Criar conta');
@@ -40,7 +40,7 @@ describe('SignUp.vue', () => {
     it('shows error message when fields are not filled', async () => {
         const wrapper = mount(SignUp);
 
-        wrapper.get('ion-button').trigger('click');
+        wrapper.get('form>ion-button').trigger('click');
 
         await flushPromises();
 
@@ -68,7 +68,7 @@ describe('SignUp.vue', () => {
             .findComponent('ion-item:nth-child(4)>ion-input')
             .setValue('321');
 
-        await wrapper.get('ion-button').trigger('click');
+        await wrapper.get('form>ion-button').trigger('click');
 
         await flushPromises();
 
@@ -100,7 +100,7 @@ describe('SignUp.vue', () => {
             .findComponent('ion-item:nth-child(4)>ion-input')
             .setValue('123');
 
-        await wrapper.get('ion-button').trigger('click');
+        await wrapper.get('form>ion-button').trigger('click');
 
         await flushPromises();
 
