@@ -19,7 +19,7 @@
                 <ion-button
                     shape="round"
                     class="signup-button"
-                    :onclick="() => $router.push({ name: 'SignUp' })"
+                    @click="() => $router.push({ name: 'SignUp' })"
                 >
                     Criar conta
                 </ion-button>

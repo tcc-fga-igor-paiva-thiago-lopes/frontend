@@ -24,7 +24,7 @@
 
                 <ion-button
                     shape="round"
-                    :onclick="() => $router.push({ name: 'Home' })"
+                    @click="() => $router.push({ name: 'Home' })"
                 >
                     Ir para página inicial
                 </ion-button>
