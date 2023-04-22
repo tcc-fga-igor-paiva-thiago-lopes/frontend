@@ -11,6 +11,8 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
+            <ion-loading v-if="loading"></ion-loading>
+
             <ManageAccounts
                 labelField="name"
                 itemName="Conta"
@@ -36,6 +38,7 @@ import {
     IonHeader,
     IonContent,
     IonToolbar,
+    IonLoading,
     IonButtons,
     IonMenuButton,
 } from '@ionic/vue';
@@ -44,6 +47,7 @@ import { Ref, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAccountsStore } from '@/store';
 
+import { presentToast } from '@/utils/toast';
 import PaginationService from '@/utils/pagination/paginationService';
 import ManageAccounts from '@/components/Management/MainComponent.vue';
 
@@ -52,6 +56,8 @@ const store = useAccountsStore();
 const { loadPaginated } = store;
 
 const { accounts } = storeToRefs(store);
+
+const loading = ref(true);
 
 const paginationService: Ref<PaginationService<unknown>> = ref(
     new PaginationService(loadPaginated, 13)
@@ -76,6 +82,12 @@ const removeItem = (item: any) => {
 const loadMoreItems = () => paginationService.value.getNextPage();
 
 onMounted(async () => {
-    await paginationService.value.getFirstPage();
+    try {
+        await paginationService.value.getFirstPage();
+    } catch {
+        presentToast('Falha ao carregar contas', 'danger');
+    } finally {
+        loading.value = false;
+    }
 });
 </script>
