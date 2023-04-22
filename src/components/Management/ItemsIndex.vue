@@ -35,13 +35,22 @@
         </ion-item>
     </ion-list>
 
-    <ion-infinite-scroll @ionInfinite="handleInfiniteScroll">
+    <ion-infinite-scroll
+        :disabled="!hasPagination()"
+        @ionInfinite="handleInfiniteScroll"
+    >
         <ion-infinite-scroll-content
             :loading-text="`Carregando ${itemsName.toLowerCase()}...`"
             loading-spinner="circular"
             class="ion-padding-vertical"
         ></ion-infinite-scroll-content>
     </ion-infinite-scroll>
+
+    <ion-text class="ion-text-center">
+        <h5 :class="!hasPagination() ? 'pagination-message' : ''">
+            {{ getPaginationMessage() }}
+        </h5>
+    </ion-text>
 </template>
 
 <style>
@@ -54,6 +63,10 @@ button.alert-button.alert-button-confirm {
     background-color: var(--ion-color-danger);
     color: var(--ion-color-danger-contrast);
 }
+
+.pagination-message {
+    margin: 16px auto !important;
+}
 </style>
 
 <script setup lang="ts">
@@ -62,6 +75,7 @@ import {
     IonList,
     IonItem,
     IonIcon,
+    IonText,
     IonLabel,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
@@ -85,10 +99,19 @@ interface IProps {
 
 const props = defineProps<IProps>();
 
-const { items, itemsName } = toRefs(props);
+const { items, itemsName, paginationService } = toRefs(props);
 
 // eslint-disable-next-line vue/no-setup-props-destructure
 const { editItem, removeItem, loadMoreItems } = props;
+
+const hasPagination = () =>
+    items.value.length < paginationService.value.totalResults;
+
+const getPaginationMessage = () => {
+    const lowerCaseName = itemsName.value.toLowerCase();
+
+    return `Exibindo ${items.value.length} ${lowerCaseName} de ${paginationService.value.totalResults} ${lowerCaseName}`;
+};
 
 const handleEdit = (ev: MouseEvent, item: any) => {
     editItem(item);

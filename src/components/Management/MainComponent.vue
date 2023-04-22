@@ -1,5 +1,5 @@
 <template>
-    <ion-card>
+    <ion-card class="ion-margin-bottom">
         <ion-card-header class="header">
             <div>
                 <ion-text>
