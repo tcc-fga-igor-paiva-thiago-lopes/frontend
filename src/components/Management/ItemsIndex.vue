@@ -61,8 +61,8 @@ import { toRefs } from 'vue';
 import {
     IonList,
     IonItem,
-    IonLabel,
     IonIcon,
+    IonLabel,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
 } from '@ionic/vue';
