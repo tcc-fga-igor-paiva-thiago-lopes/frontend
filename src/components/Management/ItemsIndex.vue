@@ -2,43 +2,46 @@
     <ion-list>
         <ion-item
             button
+            lines="full"
             v-for="item in items"
             :key="item.id"
             @click="() => showItem(item)"
         >
-            <ion-label>{{ item[labelField] }}</ion-label>
+            <!-- <ion-checkbox slot="start"></ion-checkbox> -->
 
-            <div slot="end">
-                <ion-button
-                    size="small"
-                    id="hover-trigger"
-                    title="Visualizar item"
-                    @click="() => showItem(item)"
-                >
-                    <ion-icon slot="icon-only" :icon="eye"></ion-icon>
-                </ion-button>
+            <ion-label text-wrap>{{ item[labelField] }}</ion-label>
 
-                <ion-button
-                    size="small"
+            <div
+                slot="end"
+                class="ion-justify-content-between ion-align-items-center"
+            >
+                <ion-icon
+                    :icon="pencil"
+                    size="large"
+                    color="primary"
                     title="Editar item"
-                    @click="() => editItem(item)"
-                >
-                    <ion-icon slot="icon-only" :icon="pencil"></ion-icon>
-                </ion-button>
+                    style="margin-right: 16px"
+                    @click="(ev) => handleEdit(ev, item)"
+                ></ion-icon>
 
-                <ion-button
-                    size="small"
+                <ion-icon
+                    :icon="trash"
+                    size="large"
+                    color="danger"
                     title="Remover item"
-                    @click="() => handleRemoval(item)"
-                >
-                    <ion-icon slot="icon-only" :icon="trash"></ion-icon>
-                </ion-button>
+                    @click="(ev) => handleRemoval(ev, item)"
+                ></ion-icon>
             </div>
         </ion-item>
     </ion-list>
 </template>
 
 <style>
+ion-icon:hover {
+    opacity: 0.9;
+    cursor: pointer;
+}
+
 button.alert-button.alert-button-confirm {
     background-color: var(--ion-color-danger);
     color: var(--ion-color-danger-contrast);
@@ -47,9 +50,8 @@ button.alert-button.alert-button-confirm {
 
 <script setup lang="ts">
 import { toRefs } from 'vue';
-import { IonButton, IonList, IonItem, IonLabel, IonIcon } from '@ionic/vue';
-import { eye, trash, pencil } from 'ionicons/icons';
-import { presentConfirmationAlert } from '@/utils/alert';
+import { IonList, IonItem, IonLabel, IonIcon } from '@ionic/vue';
+import { trash, pencil } from 'ionicons/icons';
 
 interface IProps {
     items: any[];
@@ -57,22 +59,24 @@ interface IProps {
     labelField: string;
     editItem: (item: any) => void;
     showItem: (item: any) => void;
-    removeItem: (item: any) => void;
+    removeItem: (item: any) => Promise<any>;
 }
 
 const props = defineProps<IProps>();
 
+const { items } = toRefs(props);
+
 // eslint-disable-next-line vue/no-setup-props-destructure
-const { removeItem } = props;
+const { editItem, removeItem } = props;
 
-const { items, itemName } = toRefs(props);
+const handleEdit = (ev: MouseEvent, item: any) => {
+    editItem(item);
+    ev.stopPropagation();
+};
 
-const handleRemoval = async (item: any) => {
-    await presentConfirmationAlert({
-        title: `Remover ${itemName.value}`,
-        message: 'Deseja remover este registro?',
-        confirmAction: () => removeItem(item),
-        confirmClass: 'alert-button-confirm',
-    });
+const handleRemoval = async (ev: MouseEvent, item: any) => {
+    await removeItem(item);
+
+    ev.stopPropagation();
 };
 </script>
