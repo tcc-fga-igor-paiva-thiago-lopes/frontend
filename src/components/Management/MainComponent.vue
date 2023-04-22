@@ -1,11 +1,25 @@
 <template>
     <ion-card>
         <ion-card-header class="header">
-            <ion-text>
-                <h4>{{ itemsName }}</h4>
-            </ion-text>
+            <div>
+                <ion-text>
+                    <h4>
+                        <strong>{{ itemsName }}</strong>
+                    </h4>
+                </ion-text>
 
-            <ion-button @click="addNewItem">
+                <ion-text>
+                    <h6 class="results-text">
+                        {{
+                            `${
+                                paginationService.totalResults
+                            } ${itemsName.toLowerCase()} encontrados(as)`
+                        }}
+                    </h6>
+                </ion-text>
+            </div>
+
+            <ion-button @click="addItem">
                 <ion-icon slot="start" :icon="add"></ion-icon>
                 Adicionar
             </ion-button>
@@ -16,9 +30,12 @@
                 :items="items"
                 :labelField="labelField"
                 :itemName="itemName"
+                :itemsName="itemsName"
                 :showItem="showItem"
                 :editItem="editItem"
                 :removeItem="handleRemoval"
+                :loadMoreItems="loadMoreItems"
+                :paginationService="paginationService"
             />
         </ion-card-content>
     </ion-card>
@@ -29,6 +46,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.results-text {
+    font-size: 14px;
 }
 
 .content {
@@ -50,23 +71,27 @@ import { add } from 'ionicons/icons';
 import { presentConfirmationAlert } from '@/utils/alert';
 
 import ItemsIndex from '@/components/Management/ItemsIndex.vue';
+import PaginationService from '@/utils/pagination/paginationService';
 
 interface IProps {
     items: any[];
     itemName: string;
     itemsName: string;
     labelField: string;
+    paginationService: PaginationService<unknown>;
+    addItem: () => void;
     editItem: (item: any) => void;
     showItem: (item: any) => void;
     removeItem: (item: any) => void;
+    loadMoreItems: () => Promise<unknown>;
 }
 
 const props = defineProps<IProps>();
 
 // eslint-disable-next-line vue/no-setup-props-destructure
-const { removeItem } = props;
+const { addItem, removeItem, loadMoreItems } = props;
 
-const { items, itemName } = toRefs(props);
+const { items, itemName, itemsName } = toRefs(props);
 
 const handleRemoval = async (item: any) => {
     await presentConfirmationAlert({
@@ -75,9 +100,5 @@ const handleRemoval = async (item: any) => {
         confirmAction: () => removeItem(item),
         confirmClass: 'alert-button-confirm',
     });
-};
-
-const addNewItem = async () => {
-    console.log('addNewItem');
 };
 </script>

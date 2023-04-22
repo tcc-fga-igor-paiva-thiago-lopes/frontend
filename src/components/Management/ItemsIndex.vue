@@ -34,6 +34,14 @@
             </div>
         </ion-item>
     </ion-list>
+
+    <ion-infinite-scroll @ionInfinite="handleInfiniteScroll">
+        <ion-infinite-scroll-content
+            :loading-text="`Carregando ${itemsName.toLowerCase()}...`"
+            loading-spinner="circular"
+            class="ion-padding-vertical"
+        ></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
 </template>
 
 <style>
@@ -50,27 +58,41 @@ button.alert-button.alert-button-confirm {
 
 <script setup lang="ts">
 import { toRefs } from 'vue';
-import { IonList, IonItem, IonLabel, IonIcon } from '@ionic/vue';
+import {
+    IonList,
+    IonItem,
+    IonLabel,
+    IonIcon,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
+} from '@ionic/vue';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core';
 import { trash, pencil } from 'ionicons/icons';
+
+import PaginationService from '@/utils/pagination/paginationService';
 
 interface IProps {
     items: any[];
     itemName: string;
+    itemsName: string;
     labelField: string;
+    paginationService: PaginationService<unknown>;
     editItem: (item: any) => void;
     showItem: (item: any) => void;
     removeItem: (item: any) => Promise<any>;
+    loadMoreItems: () => Promise<unknown>;
 }
 
 const props = defineProps<IProps>();
 
-const { items } = toRefs(props);
+const { items, itemsName } = toRefs(props);
 
 // eslint-disable-next-line vue/no-setup-props-destructure
-const { editItem, removeItem } = props;
+const { editItem, removeItem, loadMoreItems } = props;
 
 const handleEdit = (ev: MouseEvent, item: any) => {
     editItem(item);
+
     ev.stopPropagation();
 };
 
@@ -78,5 +100,11 @@ const handleRemoval = async (ev: MouseEvent, item: any) => {
     await removeItem(item);
 
     ev.stopPropagation();
+};
+
+const handleInfiniteScroll = async (ev: IonInfiniteScrollCustomEvent<void>) => {
+    await loadMoreItems();
+
+    ev.target.complete();
 };
 </script>

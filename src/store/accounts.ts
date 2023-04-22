@@ -20,8 +20,23 @@ export const useAccountsStore = defineStore('accounts', {
         accounts: (state: IAccountsStoreState) => state._accounts,
     },
     actions: {
+        mergeAccounts(accounts: Account[]) {
+            this._accounts = [...this._accounts, ...accounts];
+        },
         async loadAccountsFromDatabase() {
             this._accounts = await Account.find();
+        },
+        async loadPaginated(pageSize: number, pageNum: number) {
+            const paginationRet = await Account.findPaginated(
+                pageSize,
+                pageNum
+            );
+
+            const [results] = paginationRet;
+
+            this.mergeAccounts(results);
+
+            return paginationRet;
         },
         async findAccount(id: IAccount['id']) {
             return Account.findOneBy({ id });
