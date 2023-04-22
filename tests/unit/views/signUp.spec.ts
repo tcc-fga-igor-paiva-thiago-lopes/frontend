@@ -133,7 +133,7 @@ describe('SignUp.vue', () => {
             .findComponent(inputQueryString('passwordConfirmation'))
             .setValue('87654321');
 
-        await wrapper.get('ion-button').trigger('click');
+        await wrapper.get('form>ion-button').trigger('click');
 
         await flushPromises();
 
