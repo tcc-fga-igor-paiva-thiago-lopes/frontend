@@ -13,7 +13,19 @@ export default class AuthService {
     }
 
     getToken = async () => {
-        return Preferences.get({ key: 'token' });
+        return (await Preferences.get({ key: 'token' })).value;
+    };
+
+    setToken = async (token: string) => {
+        Preferences.set({ key: 'token', value: token });
+    };
+
+    deleteToken = async () => {
+        return Preferences.remove({ key: 'token' });
+    };
+
+    hasToken = async () => {
+        return !!this.getToken();
     };
 
     logIn = async (email: string, password: string) => {
@@ -33,17 +45,5 @@ export default class AuthService {
     logOut = async () => {
         await this.deleteToken();
         vueRouter.push({ name: 'Login' });
-    };
-
-    private hasToken = async () => {
-        return !!this.getToken();
-    };
-
-    private deleteToken = async () => {
-        return Preferences.remove({ key: 'token' });
-    };
-
-    private setToken = async (token: string) => {
-        Preferences.set({ key: 'token', value: token });
     };
 }
