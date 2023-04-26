@@ -15,8 +15,7 @@ const addTokenToRequest = async (config: AxiosRequestConfig = CONFIG) => ({
     ...config,
     headers: {
         ...config.headers,
-        // TODO: add token to requests
-        Authorization: `Bearer ${await AuthService.getInstance().getToken()}`,
+        Authorization: `Bearer ${await AuthService.getToken()}`,
     },
 });
 
@@ -29,11 +28,12 @@ const responseErrorHandler = (error: any) => {
     const { response } = error;
 
     if (response.status === 401) {
+        AuthService.deleteToken();
+        presentToast(
+            'Sua sessão expirou, será necessário conectar-se novamente.',
+            'danger'
+        );
         if (vueRouter.currentRoute.value.name !== 'SignIn') {
-            presentToast(
-                'Sua sessão expirou, será necessário conectar-se novamente.',
-                'danger'
-            );
             vueRouter.push({ name: 'Login' });
         }
     }

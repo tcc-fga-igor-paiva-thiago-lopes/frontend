@@ -1,38 +1,48 @@
 import AuthService from '@/services/auth';
+import { Preferences } from '@capacitor/preferences';
 
-let authService: AuthService;
+jest.mock('@capacitor/preferences', () => ({
+    Preferences: {
+        get: jest.fn(),
+        set: jest.fn(),
+        remove: jest.fn(),
+    },
+}));
 
-beforeAll(() => {
-    process.env.VUE_APP_API_TIMEOUT = '5000';
-    process.env.VUE_APP_API_URL = 'http://localhost:5000';
-
-    authService = new AuthService();
-});
-
-describe('authService', () => {
+describe('AuthService', () => {
     it('should create token in preferences', async () => {
-        await authService.setToken('test');
-        const token = await authService.getToken();
-        expect(token).toEqual('test');
+        await AuthService.setToken('test01');
+        expect(Preferences.set).toHaveBeenCalledWith({
+            key: 'token',
+            value: 'test01',
+        });
     });
 
     it('should return token from preferences', async () => {
-        const token = await authService.getToken();
-        expect(token).toEqual('test');
+        jest.spyOn(Preferences, 'get').mockImplementation(() =>
+            Promise.resolve({ value: 'test' })
+        );
+
+        const token = await AuthService.getToken();
+        expect(token).toBe('test');
     });
 
     it('should return true if token exists', async () => {
-        const hasToken = await authService.hasToken();
-        expect(hasToken).toEqual(true);
+        jest.spyOn(Preferences, 'get').mockImplementation(() =>
+            Promise.resolve({ value: 'test' })
+        );
+
+        const hasToken = await AuthService.hasToken();
+        expect(hasToken).toBe(true);
     });
 
     it('should delete token from preferences', async () => {
-        await authService.deleteToken();
-        const token = await authService.getToken();
-        expect(token).toEqual(null);
+        await AuthService.deleteToken();
+
+        expect(Preferences.remove).toHaveBeenCalledWith({ key: 'token' });
     });
 
-    // Failed to mock axios response
+    // TODO: fix these tests
     // it('should log in and set token', async () => {
     //     const expectedResponse: AxiosResponse = {
     //         data: { token: 'loggedin' },
@@ -46,13 +56,13 @@ describe('authService', () => {
     //         Promise.resolve(expectedResponse)
     //     );
 
-    //     await authService.logIn('test', 'test');
-    //     const token = await authService.getToken();
-    //     expect(token).toEqual('loggedin');
+    //     await AuthService.logIn('test', 'test');
+    //     const token = await AuthService.getToken();
+    //     expect(token).toBe('loggedin');
     // });
 
     // it('should log out and delete token', async () => {
-    //     await authService.logOut();
-    //     expect(await authService.hasToken).toBeFalsy();
+    //     await AuthService.logOut();
+    //     expect(await AuthService.hasToken).toBeFalsy();
     // });
 });

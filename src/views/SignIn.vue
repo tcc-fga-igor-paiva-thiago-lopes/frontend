@@ -7,9 +7,7 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
-            <div v-if="loading">
-                <ion-loading />
-            </div>
+            <ion-loading v-if="loading" />
 
             <form class="form ion-padding" @submit="submit">
                 <ion-list class="ion-no-padding">
@@ -79,12 +77,15 @@ import {
     IonLabel,
 } from '@ionic/vue';
 import { presentToast } from '@/utils/toast';
+import APIAdapter from '@/services/api';
 import AuthService from '@/services/auth';
+import { useRouter } from 'vue-router';
 
 const loading = ref(false);
 const errorMessage = ref('');
 const email = ref('');
 const password = ref('');
+const router = useRouter();
 
 const validateForm = () => {
     if (!email.value || !password.value) {
@@ -101,7 +102,16 @@ const submit = async () => {
     loading.value = true;
 
     try {
-        await AuthService.getInstance().logIn(email.value, password.value);
+        const api = new APIAdapter();
+
+        const response = await api.postWithoutAuth('/truck-drivers/login', {
+            email: email.value,
+            password: password.value,
+        });
+
+        await AuthService.setToken(response.data.token);
+        router.push({ name: 'Home' });
+        console.log('Logado. Token: ' + (await AuthService.getToken()));
     } catch (error) {
         console.error(error);
 
