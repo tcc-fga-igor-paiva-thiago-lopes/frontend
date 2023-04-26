@@ -108,7 +108,7 @@
 
                 <ion-button
                     shape="round"
-                    :onclick="submit"
+                    @click="submit"
                     class="ion-margin-top"
                 >
                     Criar conta
