@@ -13,4 +13,11 @@ export class Account extends AppBaseEntity implements IAccount {
 
     @Column()
     name!: string;
+
+    static async findPaginated(pageSize: number, pageNum = 1) {
+        return Account.findAndCount({
+            take: pageSize,
+            skip: (pageNum - 1) * pageSize,
+        });
+    }
 }

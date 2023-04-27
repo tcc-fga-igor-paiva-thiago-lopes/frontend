@@ -1,61 +1,93 @@
 <template>
-    <ion-page>
+    <ion-page id="main-content">
         <ion-header :translucent="true">
             <ion-toolbar>
+                <ion-buttons slot="start">
+                    <ion-menu-button></ion-menu-button>
+                </ion-buttons>
+
                 <ion-title>Página inicial</ion-title>
             </ion-toolbar>
         </ion-header>
 
         <ion-content :fullscreen="true">
-            <div class="options-container">
-                <ion-text>
-                    <h5>Bem-vindo!</h5>
-                </ion-text>
+            <ion-loading v-if="loading"></ion-loading>
 
-                <ion-button
-                    shape="round"
-                    class="signup-button"
-                    :onclick="() => $router.push({ name: 'SignUp' })"
-                >
-                    Criar conta
-                </ion-button>
-
-                <ion-button
-                    shape="round"
-                    class="signup-button"
-                    :onclick="() => $router.push({ name: 'SignIn' })"
-                >
-                    Fazer login
-                </ion-button>
-            </div>
+            <ManageAccounts
+                labelField="name"
+                itemName="Conta"
+                itemsName="Contas"
+                :items="accounts"
+                :addItem="addItem"
+                :showItem="showItem"
+                :editItem="editItem"
+                :removeItem="removeItem"
+                :loadMoreItems="loadMoreItems"
+                :paginationService="paginationService"
+            />
         </ion-content>
     </ion-page>
 </template>
 
-<style>
-.options-container {
-    width: 100%;
-    display: flex;
-    padding-top: 32px;
-    align-items: center;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.signup-button {
-    width: 250px;
-    margin-top: 32px;
-}
-</style>
+<style></style>
 
 <script setup lang="ts">
 import {
-    IonContent,
-    IonHeader,
     IonPage,
     IonTitle,
+    IonHeader,
+    IonContent,
     IonToolbar,
-    IonText,
-    IonButton,
+    IonLoading,
+    IonButtons,
+    IonMenuButton,
 } from '@ionic/vue';
+
+import { Ref, onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useAccountsStore } from '@/store';
+
+import { presentToast } from '@/utils/toast';
+import PaginationService from '@/utils/pagination/paginationService';
+import ManageAccounts from '@/components/Management/MainComponent.vue';
+
+const store = useAccountsStore();
+
+const { loadPaginated } = store;
+
+const { accounts } = storeToRefs(store);
+
+const loading = ref(true);
+
+const paginationService: Ref<PaginationService<unknown>> = ref(
+    new PaginationService(loadPaginated, 13)
+);
+
+const addItem = () => {
+    console.log('add new item');
+};
+
+const showItem = (item: any) => {
+    console.log('Show: ', item);
+};
+
+const editItem = (item: any) => {
+    console.log('Edit: ', item);
+};
+
+const removeItem = (item: any) => {
+    console.log('Remove: ', item);
+};
+
+const loadMoreItems = () => paginationService.value.getNextPage();
+
+onMounted(async () => {
+    try {
+        await paginationService.value.getFirstPage();
+    } catch {
+        presentToast('Falha ao carregar contas', 'danger');
+    } finally {
+        loading.value = false;
+    }
+});
 </script>
