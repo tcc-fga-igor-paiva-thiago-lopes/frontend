@@ -111,7 +111,6 @@ const submit = async () => {
 
         await AuthService.setToken(response.data.token);
         router.push({ name: 'Home' });
-        console.log('Logado. Token: ' + (await AuthService.getToken()));
     } catch (error) {
         console.error(error);
 
