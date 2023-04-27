@@ -14,6 +14,6 @@ export default class AuthService {
     }
 
     static async hasToken() {
-        return (await this.getToken()) != null ? true : false;
+        return (await this.getToken()) != null;
     }
 }
