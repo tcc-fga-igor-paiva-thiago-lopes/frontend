@@ -2,7 +2,7 @@
     <div class="container">
         <div class="header">
             <template v-for="(step, idx) in steps" :key="step.name">
-                <div class="step-content">
+                <div class="step">
                     <ion-icon
                         size="large"
                         :icon="step.icon || checkmarkCircle"
@@ -11,7 +11,7 @@
                         @click="$emit('changeStep', idx)"
                     ></ion-icon>
 
-                    <ion-text>
+                    <ion-text class="ion-text-center step-title">
                         <h6>{{ step.title }}</h6>
                     </ion-text>
                 </div>
@@ -68,12 +68,17 @@
     justify-content: space-between;
 }
 
-.step-content {
+.step {
     display: flex;
-    min-width: 64px;
     align-items: center;
     flex-direction: column;
     justify-content: center;
+}
+
+.step-title {
+    min-width: 64px;
+    max-width: 128px;
+    word-wrap: break-word;
 }
 
 .content {
