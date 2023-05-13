@@ -1,256 +1,44 @@
 <template>
-    <!-- TODO: add submit action -->
     <StepperComponent
         :activeStep="step"
         lastStepActionLabel="Criar frete"
         @changeStep="(newStep) => (step = newStep)"
-        @lastStepAction="() => true"
-        :steps="[
-            {
-                name: 'step_one',
-                title: 'Dados gerais',
-                subtitle: 'sub title 1',
-                icon: menu,
-            },
-            {
-                name: 'step_two',
-                title: 'Localização',
-                subtitle: 'sub title 2',
-                icon: navigate,
-            },
-        ]"
+        @lastStepAction="handleSubmit"
+        :steps="steps"
     >
         <template v-slot:content>
-            <form class="form" v-if="step === 0">
-                <ion-item lines="none">
-                    <ion-checkbox
-                        slot="start"
-                        v-model="finished"
-                    ></ion-checkbox>
-                    <ion-label>Finalizado?</ion-label>
-                </ion-item>
+            <GeneralData
+                v-if="step === 0"
+                :finished="formData.finished"
+                :name="formData.name"
+                :description="formData.description"
+                :cargoType="formData.cargoType"
+                :cargoWeight="formData.cargoWeight"
+                :contractor="formData.contractor"
+                :agreedPayment="formData.agreedPayment"
+                :startDatetime="formData.startDatetime"
+                :dueDatetime="formData.dueDatetime"
+                :finishedDatetime="formData.finishedDatetime"
+                @field-change="handleFieldChange"
+            />
 
-                <ion-item class="form-item" ref="nameRef">
-                    <ion-label position="stacked">Nome *</ion-label>
-                    <ion-input
-                        required
-                        name="name"
-                        type="text"
-                        v-model="name"
-                        autocomplete="name"
-                        placeholder="Digite um nome para este frete"
-                    >
-                    </ion-input>
-                </ion-item>
-
-                <ion-item class="form-item" ref="descriptionRef">
-                    <ion-label position="stacked">Descrição *</ion-label>
-                    <ion-input
-                        required
-                        type="text"
-                        name="description"
-                        v-model="description"
-                        placeholder="Digite uma descrição para este frete"
-                    >
-                    </ion-input>
-                </ion-item>
-
-                <ion-item class="form-item" ref="cargoTypeRef">
-                    <ion-label position="stacked">Tipo de carga</ion-label>
-                    <ion-input
-                        type="text"
-                        name="cargoType"
-                        v-model="cargoType"
-                        placeholder="Digite o tipo de carga deste frete"
-                    ></ion-input>
-                </ion-item>
-
-                <ion-item class="form-item" ref="cargoWeightRef">
-                    <ion-label position="stacked">Peso carga</ion-label>
-                    <ion-input
-                        type="number"
-                        name="cargoWeight"
-                        inputmode="decimal"
-                        v-model="cargoWeight"
-                        placeholder="Digite o peso da carga deste frete"
-                    >
-                    </ion-input>
-                </ion-item>
-
-                <ion-item class="form-item" ref="contractorRef">
-                    <ion-label position="stacked">Contratante</ion-label>
-                    <ion-input
-                        type="text"
-                        name="contractor"
-                        v-model="contractor"
-                        placeholder="Digite o contratante deste frete"
-                    >
-                    </ion-input>
-                </ion-item>
-
-                <ion-item class="form-item" ref="agreedPaymentRef">
-                    <ion-label position="stacked">Pagamento acordado</ion-label>
-                    <ion-input
-                        type="number"
-                        inputmode="decimal"
-                        name="agreedPayment"
-                        v-model="agreedPayment"
-                        placeholder="Digite o pagamento acordado"
-                    >
-                    </ion-input>
-                </ion-item>
-
-                <ion-item class="form-item" ref="dueDatetimeRef">
-                    <ion-label position="stacked" style="margin-bottom: 16px"
-                        >Data limite</ion-label
-                    >
-
-                    <DatetimeButton
-                        identifier="dueDatetime"
-                        :value="dueDatetime"
-                        @valueChange="(e) => (dueDatetime = e.target.value as string)"
-                    />
-                </ion-item>
-
-                <ion-item class="form-item" ref="startDatetimeRef">
-                    <ion-label position="stacked" style="margin-bottom: 16px"
-                        >Data de início</ion-label
-                    >
-
-                    <DatetimeButton
-                        identifier="startDatetime"
-                        :value="startDatetime"
-                        @valueChange="(e) => (startDatetime = e.target.value as string)"
-                    />
-                </ion-item>
-
-                <ion-item
-                    class="form-item"
-                    ref="finishedDatetimeRef"
-                    v-if="finished"
-                >
-                    <ion-label position="stacked" style="margin-bottom: 16px"
-                        >Data de conclusão</ion-label
-                    >
-
-                    <DatetimeButton
-                        identifier="finishedDatetime"
-                        :value="finishedDatetime"
-                        @valueChange="(e) => (finishedDatetime = e.target.value as string)"
-                    />
-                </ion-item>
-            </form>
-
-            <div v-if="step === 1">
-                <ion-item class="form-item" ref="distanceRef">
-                    <ion-label position="stacked">Distância</ion-label>
-                    <ion-input
-                        type="number"
-                        name="distance"
-                        inputmode="decimal"
-                        v-model="distance"
-                        placeholder="Digite a distância entre origem e destino"
-                    >
-                    </ion-input>
-                </ion-item>
-
-                <ion-accordion-group multiple>
-                    <ion-accordion value="first" class="form-item">
-                        <ion-item slot="header" color="light">
-                            <ion-label>Origem</ion-label>
-                        </ion-item>
-
-                        <div class="ion-padding" slot="content">
-                            <ion-item class="form-item" ref="originCityRef">
-                                <ion-label position="stacked">Cidade</ion-label>
-                                <ion-input
-                                    type="text"
-                                    name="originCity"
-                                    v-model="originCity"
-                                    placeholder="Digite a cidade de origem"
-                                >
-                                </ion-input>
-                            </ion-item>
-
-                            <ion-item class="form-item" ref="originStateRef">
-                                <ion-label position="stacked">Estado</ion-label>
-                                <ion-input
-                                    type="text"
-                                    name="originState"
-                                    v-model="originState"
-                                    placeholder="Digite o estado de origem"
-                                >
-                                </ion-input>
-                            </ion-item>
-
-                            <ion-item class="form-item" ref="originCountryRef">
-                                <ion-label position="stacked">Cidade</ion-label>
-                                <ion-input
-                                    type="text"
-                                    name="originCountry"
-                                    v-model="originCountry"
-                                    placeholder="Digite o país de origem"
-                                >
-                                </ion-input>
-                            </ion-item>
-                        </div>
-                    </ion-accordion>
-
-                    <ion-accordion value="second" class="form-item">
-                        <ion-item slot="header" color="light">
-                            <ion-label>Destino</ion-label>
-                        </ion-item>
-
-                        <div class="ion-padding" slot="content">
-                            <ion-item
-                                class="form-item"
-                                ref="destinationCityRef"
-                            >
-                                <ion-label position="stacked">Cidade</ion-label>
-                                <ion-input
-                                    type="text"
-                                    name="destinationCity"
-                                    v-model="destinationCity"
-                                    placeholder="Digite a cidade de destino"
-                                >
-                                </ion-input>
-                            </ion-item>
-
-                            <ion-item
-                                class="form-item"
-                                ref="destinationStateRef"
-                            >
-                                <ion-label position="stacked">Estado</ion-label>
-                                <ion-input
-                                    type="text"
-                                    name="destinationState"
-                                    v-model="destinationState"
-                                    placeholder="Digite o estado de destino"
-                                >
-                                </ion-input>
-                            </ion-item>
-
-                            <ion-item
-                                class="form-item"
-                                ref="destinationCountryRef"
-                            >
-                                <ion-label position="stacked">Cidade</ion-label>
-                                <ion-input
-                                    type="text"
-                                    name="destinationCountry"
-                                    v-model="destinationCountry"
-                                    placeholder="Digite o país de destino"
-                                >
-                                </ion-input>
-                            </ion-item>
-                        </div>
-                    </ion-accordion>
-                </ion-accordion-group>
-            </div>
+            <LocationInfo
+                v-if="step === 1"
+                :distance="formData.distance"
+                :originCountry="formData.originCountry"
+                :originCity="formData.originCity"
+                :originState="formData.originState"
+                :destinationCountry="formData.destinationCountry"
+                :destinationCity="formData.destinationCity"
+                :destinationState="formData.destinationState"
+                @field-change="handleFieldChange"
+            />
         </template>
 
         <template v-if="step === 0" v-slot:backBtn>
-            <ion-button color="danger">Criar frete</ion-button>
+            <ion-button color="danger" @click="handleSubmit"
+                >Criar frete</ion-button
+            >
         </template>
     </StepperComponent>
 </template>
@@ -267,38 +55,76 @@
 </style>
 
 <script setup lang="ts">
-import {
-    IonItem,
-    IonLabel,
-    IonInput,
-    IonButton,
-    IonCheckbox,
-    IonAccordion,
-    IonAccordionGroup,
-} from '@ionic/vue';
 import { ref } from 'vue';
-
+import { IonButton } from '@ionic/vue';
 import { menu, navigate } from 'ionicons/icons';
 
+import GeneralData from './GeneralData.vue';
+import LocationInfo from './LocationInfo.vue';
 import StepperComponent from '@/components/StepperComponent.vue';
-import DatetimeButton from '@/components/DatetimeButton.vue';
+
+interface IFormData extends Record<string, any> {
+    finished: boolean;
+    name: string;
+    description: string;
+    cargoType: string;
+    cargoWeight: string;
+    contractor: string;
+    agreedPayment: string;
+    startDatetime: string;
+    dueDatetime: string;
+    finishedDatetime: string;
+    distance: string;
+    originCountry: string;
+    originCity: string;
+    originState: string;
+    destinationCountry: string;
+    destinationCity: string;
+    destinationState: string;
+}
 
 const step = ref(0);
-const finished = ref(false);
-const name = ref('');
-const description = ref('');
-const cargoType = ref('');
-const cargoWeight = ref('');
-const contractor = ref('');
-const agreedPayment = ref('');
-const startDatetime = ref(new Date().toISOString());
-const dueDatetime = ref('');
-const finishedDatetime = ref('');
-const distance = ref('');
-const originCountry = ref('Brasil');
-const originCity = ref('');
-const originState = ref('');
-const destinationCountry = ref('Brasil');
-const destinationCity = ref('');
-const destinationState = ref('');
+
+const formData = ref<IFormData>({
+    finished: false,
+    name: '',
+    description: '',
+    cargoType: '',
+    cargoWeight: '',
+    contractor: '',
+    agreedPayment: '',
+    startDatetime: new Date().toISOString(),
+    dueDatetime: '',
+    finishedDatetime: '',
+    distance: '',
+    originCountry: 'Brasil',
+    originCity: '',
+    originState: '',
+    destinationCountry: 'Brasil',
+    destinationCity: '',
+    destinationState: '',
+});
+
+const steps = [
+    {
+        name: 'step_one',
+        title: 'Dados gerais',
+        subtitle: 'sub title 1',
+        icon: menu,
+    },
+    {
+        name: 'step_two',
+        title: 'Localização',
+        subtitle: 'sub title 2',
+        icon: navigate,
+    },
+];
+
+const handleFieldChange = (field: string, value: any) => {
+    formData.value[field] = value;
+};
+
+const handleSubmit = () => {
+    console.log(formData.value);
+};
 </script>
