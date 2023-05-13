@@ -1,10 +1,11 @@
 <template>
     <StepperComponent
+        :steps="steps"
         :activeStep="step"
         lastStepActionLabel="Criar frete"
-        @changeStep="(newStep) => (step = newStep)"
+        contentPadding="0 0 16px 0"
         @lastStepAction="handleSubmit"
-        :steps="steps"
+        @changeStep="(newStep) => (step = newStep)"
     >
         <template v-slot:content>
             <GeneralData

@@ -27,7 +27,7 @@
             </template>
         </div>
 
-        <div class="content-container">
+        <div class="content-container" :style="`padding: ${contentPadding};`">
             <slot name="content"></slot>
 
             <div
@@ -87,7 +87,6 @@
 .content-container {
     width: 100%;
     display: flex;
-    padding: 16px 0;
     flex-direction: column;
 }
 
@@ -116,13 +115,15 @@ interface IStep {
 interface IProps {
     steps: IStep[];
     activeStep: number;
+    contentPadding?: string;
     lastStepActionLabel: string;
 }
-const props = defineProps<IProps>();
+const props = withDefaults(defineProps<IProps>(), { contentPadding: '16px 0' });
 
 const slots = useSlots();
 
-const { activeStep, steps, lastStepActionLabel } = toRefs(props);
+const { activeStep, steps, lastStepActionLabel, contentPadding } =
+    toRefs(props);
 
 const emit = defineEmits(['changeStep', 'lastStepAction']);
 </script>
