@@ -5,7 +5,7 @@
                 <div class="step">
                     <ion-icon
                         size="large"
-                        :icon="step.icon || checkmarkCircle"
+                        :icon="step.icon"
                         style="width: 40px; height: 40px"
                         :color="idx <= activeStep ? 'primary' : 'medium'"
                         @click="$emit('changeStep', idx)"
@@ -33,7 +33,10 @@
             <div
                 class="ion-margin-top display-flex ion-justify-content-between"
             >
+                <slot name="backBtn" v-if="slots.backBtn"></slot>
+
                 <ion-button
+                    v-else
                     color="danger"
                     :disabled="activeStep <= 0"
                     @click="$emit('changeStep', activeStep - 1)"
@@ -99,16 +102,15 @@
 </style>
 
 <script setup lang="ts">
-import { toRefs } from 'vue';
-import { checkmarkCircle } from 'ionicons/icons';
+import { toRefs, useSlots } from 'vue';
 
 import { IonText, IonIcon, IonButton } from '@ionic/vue';
 
 interface IStep {
     name: string;
+    icon: string;
     title: string;
     subtitle: string;
-    icon?: string;
 }
 
 interface IProps {
@@ -117,6 +119,8 @@ interface IProps {
     lastStepActionLabel: string;
 }
 const props = defineProps<IProps>();
+
+const slots = useSlots();
 
 const { activeStep, steps, lastStepActionLabel } = toRefs(props);
 </script>
