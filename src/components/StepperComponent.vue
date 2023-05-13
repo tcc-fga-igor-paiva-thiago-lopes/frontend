@@ -8,7 +8,7 @@
                         :icon="step.icon"
                         style="width: 40px; height: 40px"
                         :color="idx <= activeStep ? 'primary' : 'medium'"
-                        @click="$emit('changeStep', idx)"
+                        @click="emit('changeStep', idx)"
                     ></ion-icon>
 
                     <ion-text class="ion-text-center step-title">
@@ -27,31 +27,31 @@
             </template>
         </div>
 
-        <div class="content">
+        <div class="content-container">
             <slot name="content"></slot>
 
             <div
                 class="ion-margin-top display-flex ion-justify-content-between"
             >
-                <slot name="backBtn" v-if="slots.backBtn"></slot>
+                <slot v-if="!!slots.backBtn" name="backBtn"></slot>
 
                 <ion-button
                     v-else
                     color="danger"
                     :disabled="activeStep <= 0"
-                    @click="$emit('changeStep', activeStep - 1)"
+                    @click="emit('changeStep', activeStep - 1)"
                 >
                     Voltar
                 </ion-button>
 
                 <ion-button
                     v-if="activeStep < steps.length - 1"
-                    @click="$emit('changeStep', activeStep + 1)"
+                    @click="emit('changeStep', activeStep + 1)"
                 >
                     Próximo
                 </ion-button>
 
-                <ion-button v-else @click="$emit('lastStepAction')">
+                <ion-button v-else @click="emit('lastStepAction')">
                     {{ lastStepActionLabel }}
                 </ion-button>
             </div>
@@ -84,7 +84,7 @@
     word-wrap: break-word;
 }
 
-.content {
+.content-container {
     width: 100%;
     display: flex;
     padding: 16px 0;
@@ -123,4 +123,6 @@ const props = defineProps<IProps>();
 const slots = useSlots();
 
 const { activeStep, steps, lastStepActionLabel } = toRefs(props);
+
+const emit = defineEmits(['changeStep', 'lastStepAction']);
 </script>
