@@ -62,26 +62,7 @@ import { menu, navigate } from 'ionicons/icons';
 import GeneralData from './GeneralData.vue';
 import LocationInfo from './LocationInfo.vue';
 import StepperComponent from '@/components/StepperComponent.vue';
-
-interface IFormData extends Record<string, any> {
-    finished: boolean;
-    name: string;
-    description: string;
-    cargoType: string;
-    cargoWeight: string;
-    contractor: string;
-    agreedPayment: string;
-    startDatetime: string;
-    dueDatetime: string;
-    finishedDatetime: string;
-    distance: string;
-    originCountry: string;
-    originCity: string;
-    originState: string;
-    destinationCountry: string;
-    destinationCity: string;
-    destinationState: string;
-}
+import { IFormData } from '.';
 
 const step = ref(0);
 
@@ -120,11 +101,13 @@ const steps = [
     },
 ];
 
-const handleFieldChange = (field: string, value: any) => {
+const emit = defineEmits(['onSubmit']);
+
+const handleFieldChange = (field: string, value: unknown) => {
     formData.value[field] = value;
 };
 
 const handleSubmit = () => {
-    console.log(formData.value);
+    emit('onSubmit', formData.value);
 };
 </script>
