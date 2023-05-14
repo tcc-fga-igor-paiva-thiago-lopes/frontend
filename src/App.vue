@@ -8,6 +8,8 @@
             <ion-header>
                 <ion-toolbar>
                     <ion-title class="menu-title">Menu</ion-title>
+
+                    <ConnectionStatusIcon slot="primary" />
                 </ion-toolbar>
             </ion-header>
 
@@ -28,7 +30,7 @@
                                 slot="end"
                                 size="large"
                                 :icon="logOut"
-                                @click="logout"
+                                @click="AuthService.logout"
                             ></ion-icon>
                         </ion-item>
 
@@ -52,44 +54,45 @@
     </ion-app>
 </template>
 
+<style></style>
+
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { useRoute } from 'vue-router';
+import { onBeforeMount, onBeforeUnmount } from 'vue';
+
 import {
     IonApp,
-    IonRouterOutlet,
     IonMenu,
-    IonHeader,
-    IonMenuToggle,
-    IonContent,
     IonList,
-    IonToolbar,
     IonItem,
+    IonIcon,
     IonTitle,
     IonLabel,
-    IonIcon,
     IonAvatar,
+    IonHeader,
+    IonContent,
+    IonToolbar,
+    IonMenuToggle,
+    IonRouterOutlet,
 } from '@ionic/vue';
 import { home, navigate, logOut } from 'ionicons/icons';
 
-import { storeToRefs } from 'pinia';
-import { onBeforeMount } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-
 import { useAppStore } from './store/app';
 import AuthService from './services/auth';
-
 import avatarSvg from './assets/avatar.svg';
+import ConnectionStatusIcon from '@/components/ConnectionStatusIcon.vue';
 
 const route = useRoute();
 
-const router = useRouter();
-
 const appStore = useAppStore();
 
-const { loadUsername } = appStore;
+const { loadUsername, readNetworkStatus, removeNetworkListeners } = appStore;
 
 const { username } = storeToRefs(appStore);
 
-const isMenuDisabled = () => route.name === 'Home' || route.name === 'SignUp';
+const isMenuDisabled = () =>
+    route.name === 'Welcome' || route.name === 'SignUp';
 
 const menuOptions = [
     {
@@ -106,11 +109,11 @@ const menuOptions = [
 
 onBeforeMount(async () => {
     await loadUsername();
+
+    await readNetworkStatus();
 });
 
-const logout = async () => {
-    await AuthService.deleteToken();
-
-    router.push({ name: 'Welcome' });
-};
+onBeforeUnmount(async () => {
+    await removeNetworkListeners();
+});
 </script>
