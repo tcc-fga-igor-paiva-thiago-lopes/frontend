@@ -2,6 +2,12 @@
     <ion-page>
         <ion-header :translucent="true">
             <ion-toolbar>
+                <ion-buttons slot="start">
+                    <ion-button @click="() => $router.back()">
+                        <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
+                    </ion-button>
+                </ion-buttons>
+
                 <ion-title>Login</ion-title>
             </ion-toolbar>
         </ion-header>
@@ -75,7 +81,10 @@ import {
     IonNote,
     IonItem,
     IonLabel,
+    IonIcon,
+    IonButtons,
 } from '@ionic/vue';
+import { arrowBack } from 'ionicons/icons';
 
 import APIAdapter from '@/services/api';
 import AuthService from '@/services/auth';
