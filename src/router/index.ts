@@ -1,6 +1,10 @@
-import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory } from '@ionic/vue-router';
+
 import AuthService from '@/services/auth';
+import { useAppStore } from '@/store/app';
+import { presentToast } from '@/utils/toast';
+
 import SignUp from '../views/SignUp.vue';
 import SignIn from '../views/SignIn.vue';
 import HomePage from '@/views/HomePage.vue';
@@ -49,12 +53,28 @@ const router = createRouter({
     routes,
 });
 
+const offlinePermittedRoutes = ['Home', 'NotFound'];
+
 router.beforeEach(async (to) => {
+    const { readNetworkStatus } = useAppStore();
+
+    const connectionStatus = await readNetworkStatus();
+
     if (to.meta.requiresAuth && !(await AuthService.hasToken())) {
         return {
-            path: '/login',
+            name: 'SignIn',
             query: { redirect: to.fullPath },
         };
+    } else if (
+        !connectionStatus.connected &&
+        !offlinePermittedRoutes.includes(to.name as string)
+    ) {
+        presentToast(
+            'Esta página não é permitida sem conexão com a Internet',
+            'danger'
+        );
+
+        return { name: 'Home' };
     }
 });
 
