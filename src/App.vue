@@ -3,7 +3,7 @@
         <ion-menu
             side="start"
             contentId="main-content"
-            :disabled="isMenuDisabled()"
+            :disabled="isMenuDisabled"
         >
             <ion-header>
                 <ion-toolbar>
@@ -35,7 +35,7 @@
                         </ion-item>
 
                         <ion-item
-                            v-for="option in menuOptions"
+                            v-for="option in availableMenuOptions"
                             :key="option.route"
                             @click="() => $router.push({ name: option.route })"
                         >
@@ -59,7 +59,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import { onBeforeMount, onBeforeUnmount } from 'vue';
+import { computed, onBeforeMount, onBeforeUnmount } from 'vue';
 
 import {
     IonApp,
@@ -90,16 +90,16 @@ const appStore = useAppStore();
 const { loadUsername, addNetworkChangeListener, removeNetworkListeners } =
     appStore;
 
-const { username } = storeToRefs(appStore);
+const { username, connectionStatus } = storeToRefs(appStore);
 
-const isMenuDisabled = () =>
-    route.name === 'Welcome' || route.name === 'SignUp';
+const disabledMenuRoutes = ['Welcome', 'SignUp', 'SignIn'];
 
 const menuOptions = [
     {
         route: 'Home',
         icon: home,
         name: 'Home',
+        offlinePermitted: true,
     },
     {
         route: 'FreightsIndex',
@@ -107,6 +107,16 @@ const menuOptions = [
         name: 'Fretes',
     },
 ];
+
+const isMenuDisabled = computed(() =>
+    disabledMenuRoutes.includes(route.name as string)
+);
+
+const availableMenuOptions = computed(() => {
+    if (connectionStatus.value.connected) return menuOptions;
+
+    return menuOptions.filter((item) => item.offlinePermitted);
+});
 
 onBeforeMount(async () => {
     await loadUsername();
