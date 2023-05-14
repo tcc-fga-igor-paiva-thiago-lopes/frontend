@@ -30,16 +30,22 @@ export const useAppStore = defineStore('application', {
             await Preferences.set({ key: 'username', value: username });
         },
         async readNetworkStatus() {
-            this._connectionStatus = await Network.getStatus();
+            return Network.getStatus();
+        },
+        async addNetworkChangeListener() {
+            this._connectionStatus = await this.readNetworkStatus();
 
             Network.addListener('networkStatusChange', (status) => {
                 this._connectionStatus = status;
             });
-
-            return this._connectionStatus;
         },
         async removeNetworkListeners() {
             await Network.removeAllListeners();
+
+            this._connectionStatus = {
+                connected: false,
+                connectionType: 'none',
+            };
         },
     },
 });
