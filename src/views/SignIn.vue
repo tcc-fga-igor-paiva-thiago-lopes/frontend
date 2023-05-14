@@ -60,6 +60,7 @@
 <script setup lang="ts">
 import axios from 'axios';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import {
     IonContent,
@@ -76,16 +77,18 @@ import {
     IonItem,
     IonLabel,
 } from '@ionic/vue';
-import { presentToast } from '@/utils/toast';
 import APIAdapter from '@/services/api';
 import AuthService from '@/services/auth';
-import { useRouter } from 'vue-router';
+import { useAppStore } from '@/store/app';
+import { presentToast } from '@/utils/toast';
 
 const loading = ref(false);
 const errorMessage = ref('');
 const email = ref('');
 const password = ref('');
 const router = useRouter();
+
+const { setUsername } = useAppStore();
 
 const validateForm = () => {
     if (!email.value || !password.value) {
@@ -110,6 +113,8 @@ const submit = async () => {
         });
 
         await AuthService.setToken(response.data.token);
+        await setUsername(response.data.name);
+
         router.push({ name: 'Home' });
     } catch (error) {
         console.error(error);
