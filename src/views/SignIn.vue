@@ -79,6 +79,7 @@ import {
 
 import APIAdapter from '@/services/api';
 import AuthService from '@/services/auth';
+import { useAppStore } from '@/store/app';
 import { presentToast } from '@/utils/toast';
 import APIError from '@/services/api/apiError';
 
@@ -87,6 +88,8 @@ const errorMessage = ref('');
 const email = ref('');
 const password = ref('');
 const router = useRouter();
+
+const { setUsername } = useAppStore();
 
 const validateForm = () => {
     if (!email.value || !password.value) {
@@ -124,6 +127,8 @@ const submit = async () => {
         });
 
         await AuthService.setToken(response.data.token);
+        await setUsername(response.data.name);
+
         router.push({ name: 'Home' });
     } catch (error) {
         console.error(error);
