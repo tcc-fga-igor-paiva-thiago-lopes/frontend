@@ -87,7 +87,8 @@ const route = useRoute();
 
 const appStore = useAppStore();
 
-const { loadUsername, readNetworkStatus, removeNetworkListeners } = appStore;
+const { loadUsername, addNetworkChangeListener, removeNetworkListeners } =
+    appStore;
 
 const { username } = storeToRefs(appStore);
 
@@ -105,7 +106,7 @@ const menuOptions = [
 onBeforeMount(async () => {
     await loadUsername();
 
-    await readNetworkStatus();
+    await addNetworkChangeListener();
 });
 
 onBeforeUnmount(async () => {
