@@ -1,3 +1,5 @@
+import router from '@/router';
+import { useAppStore } from '@/store/app';
 import { Preferences } from '@capacitor/preferences';
 
 export default class AuthService {
@@ -15,5 +17,15 @@ export default class AuthService {
 
     static async hasToken() {
         return (await this.getToken()) != null;
+    }
+
+    static async logout() {
+        const { setUsername } = useAppStore();
+
+        await AuthService.deleteToken();
+
+        await setUsername('');
+
+        router.push({ name: 'Welcome' });
     }
 }

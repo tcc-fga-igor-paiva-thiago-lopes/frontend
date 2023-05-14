@@ -7,6 +7,8 @@
                 </ion-buttons>
 
                 <ion-title>Página não encontrada</ion-title>
+
+                <ConnectionStatusIcon slot="primary" />
             </ion-toolbar>
         </ion-header>
 
@@ -63,6 +65,7 @@ import {
     IonButtons,
     IonMenuButton,
 } from '@ionic/vue';
-
 import { sad } from 'ionicons/icons';
+
+import ConnectionStatusIcon from '@/components/ConnectionStatusIcon.vue';
 </script>
