@@ -14,6 +14,24 @@
             <ion-content>
                 <ion-list>
                     <ion-menu-toggle>
+                        <ion-item lines="none" class="ion-margin-bottom">
+                            <ion-avatar slot="start">
+                                <img
+                                    :src="avatarSvg"
+                                    alt="Silhueta da cabeça de uma pessoa"
+                                />
+                            </ion-avatar>
+
+                            <ion-label>{{ username }}</ion-label>
+
+                            <ion-icon
+                                slot="end"
+                                size="large"
+                                :icon="logOut"
+                                @click="logout"
+                            ></ion-icon>
+                        </ion-item>
+
                         <ion-item
                             v-for="option in menuOptions"
                             :key="option.route"
@@ -48,12 +66,28 @@ import {
     IonTitle,
     IonLabel,
     IonIcon,
+    IonAvatar,
 } from '@ionic/vue';
+import { home, logOut } from 'ionicons/icons';
 
-import { home } from 'ionicons/icons';
-import { useRoute } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { onBeforeMount } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+import { useAppStore } from './store/app';
+import AuthService from './services/auth';
+
+import avatarSvg from './assets/avatar.svg';
 
 const route = useRoute();
+
+const router = useRouter();
+
+const appStore = useAppStore();
+
+const { loadUsername } = appStore;
+
+const { username } = storeToRefs(appStore);
 
 const isMenuDisabled = () => route.name === 'Home' || route.name === 'SignUp';
 
@@ -64,4 +98,14 @@ const menuOptions = [
         name: 'Home',
     },
 ];
+
+onBeforeMount(async () => {
+    await loadUsername();
+});
+
+const logout = async () => {
+    await AuthService.deleteToken();
+
+    router.push({ name: 'Welcome' });
+};
 </script>
