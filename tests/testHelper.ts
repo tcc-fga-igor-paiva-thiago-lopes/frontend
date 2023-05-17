@@ -5,6 +5,19 @@ import Database, { Database as DatabaseType } from 'better-sqlite3';
 export const getCSSProperty = (elWrapper: DOMWrapper<Element>, prop: string) =>
     getComputedStyle(elWrapper.element).getPropertyValue(prop);
 
+export const environmentVariablesWrapper = async (
+    variables: Record<string, any>,
+    callback: () => any
+) => {
+    const prevEnv = { ...process.env };
+
+    process.env = { ...process.env, ...variables };
+
+    await callback();
+
+    process.env = prevEnv;
+};
+
 export class TestHelper {
     private static _instance: TestHelper;
 
