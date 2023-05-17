@@ -166,6 +166,7 @@ import {
     validateRequiredFields,
     assignValidationErrorsFromResponse,
 } from '@/utils/errors';
+import APIError from '@/services/api/apiError';
 
 const router = useRouter();
 
@@ -280,11 +281,15 @@ const submit = async () => {
     const apiAdapter = new APIAdapter();
 
     try {
-        await apiAdapter.postWithoutAuth('/truck-drivers/', {
-            name: name.value,
-            email: email.value,
-            password: password.value,
-            password_confirmation: passwordConfirmation.value,
+        await apiAdapter.requestWithoutAuth({
+            method: 'POST',
+            url: '/truck-drivers/',
+            data: {
+                name: name.value,
+                email: email.value,
+                password: password.value,
+                password_confirmation: passwordConfirmation.value,
+            },
         });
 
         errorMessage.value = '';
@@ -294,14 +299,14 @@ const submit = async () => {
     } catch (error) {
         console.error(error);
 
-        if (axios.isAxiosError(error)) {
+        if (error instanceof APIError) {
             assignValidationErrorsFromResponse(
                 validationErrors.value,
                 error.response?.data,
                 formFieldsRefs()
             );
 
-            errorMessage.value = error.response?.data.message;
+            errorMessage.value = error.response.data.message;
 
             presentToast(errorMessage.value, 'danger');
         } else {

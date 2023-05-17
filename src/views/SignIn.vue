@@ -58,8 +58,8 @@
 </template>
 
 <script setup lang="ts">
-import axios from 'axios';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import {
     IonContent,
@@ -76,10 +76,12 @@ import {
     IonItem,
     IonLabel,
 } from '@ionic/vue';
-import { presentToast } from '@/utils/toast';
+
 import APIAdapter from '@/services/api';
 import AuthService from '@/services/auth';
-import { useRouter } from 'vue-router';
+import { presentToast } from '@/utils/toast';
+import { HttpResponse } from '@capacitor/core';
+import APIError from '@/services/api/apiError';
 
 const loading = ref(false);
 const errorMessage = ref('');
@@ -104,9 +106,13 @@ const submit = async () => {
     try {
         const api = new APIAdapter();
 
-        const response = await api.postWithoutAuth('/truck-drivers/login', {
-            email: email.value,
-            password: password.value,
+        const response = await api.requestWithoutAuth({
+            method: 'POST',
+            url: '/truck-drivers/login',
+            data: {
+                email: email.value,
+                password: password.value,
+            },
         });
 
         await AuthService.setToken(response.data.token);
@@ -114,8 +120,9 @@ const submit = async () => {
     } catch (error) {
         console.error(error);
 
-        if (axios.isAxiosError(error)) {
-            errorMessage.value = error.response?.data.message;
+        if (error instanceof APIError) {
+            errorMessage.value = error.response.data.message;
+
             presentToast(errorMessage.value, 'danger');
         } else {
             errorMessage.value =
