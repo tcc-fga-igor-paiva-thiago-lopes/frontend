@@ -1,17 +1,17 @@
 import { setActivePinia, createPinia } from 'pinia';
 
-import { TestHelper } from '../../testHelper';
+import { DatabaseHelper } from '../../databaseHelper';
 
 import { Account } from '@/models/account';
 import { useAccountsStore } from '@/store/accounts';
 
 beforeAll(async () => {
-    await TestHelper.instance.setupTestDB();
+    await DatabaseHelper.instance.setupTestDB();
 
     setActivePinia(createPinia());
 });
 
-afterAll(() => TestHelper.instance.teardownTestDB());
+afterAll(() => DatabaseHelper.instance.teardownTestDB());
 
 describe('accountsStore', () => {
     beforeEach(() => {

@@ -3,7 +3,7 @@ import { Preferences } from '@capacitor/preferences';
 import { CapacitorHttp, HttpOptions, HttpResponse } from '@capacitor/core';
 
 import APIError from '@/services/api/apiError';
-import { environmentVariablesWrapper } from '../../testHelper';
+import { environmentVariablesWrapper } from '../../helpers';
 
 jest.mock('@/router', () => ({
     default: { push: jest.fn(), currentRoute: { value: { name: 'Home' } } },

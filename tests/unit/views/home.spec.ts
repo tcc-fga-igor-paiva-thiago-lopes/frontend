@@ -2,15 +2,15 @@ import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 
 import HomePage from '@/views/HomePage.vue';
-import { TestHelper } from '../../testHelper';
+import { DatabaseHelper } from '../../databaseHelper';
 
 beforeAll(async () => {
     setActivePinia(createPinia());
 
-    await TestHelper.instance.setupTestDB();
+    await DatabaseHelper.instance.setupTestDB();
 });
 
-afterAll(() => TestHelper.instance.teardownTestDB);
+afterAll(() => DatabaseHelper.instance.teardownTestDB);
 
 describe('HomePage.vue', () => {
     it('renders home vue', async () => {

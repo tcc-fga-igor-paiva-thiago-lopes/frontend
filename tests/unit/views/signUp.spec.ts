@@ -7,7 +7,7 @@ import APIAdapter from '@/services/api';
 import { presentToast } from '@/utils/toast';
 
 import SignUp from '@/views/SignUp.vue';
-import { getCSSProperty } from '../../testHelper';
+import { getCSSProperty } from '../../helpers';
 
 jest.mock('@/services/api');
 jest.mock('@/utils/toast');
