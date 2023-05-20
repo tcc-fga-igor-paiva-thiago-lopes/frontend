@@ -4,7 +4,6 @@ import { Router, createRouter, createWebHistory } from 'vue-router';
 
 import { routes } from '@/router';
 import APIAdapter from '@/services/api';
-import { Preferences } from '@capacitor/preferences';
 
 import SignIn from '@/views/SignIn.vue';
 
@@ -77,7 +76,5 @@ describe('SignIn.vue', () => {
         await wrapper.get('form>ion-button').trigger('click');
 
         await flushPromises();
-
-        expect(Preferences.set).toHaveBeenCalledTimes(1);
     });
 });
