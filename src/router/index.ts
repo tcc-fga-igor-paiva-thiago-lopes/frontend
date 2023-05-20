@@ -56,6 +56,15 @@ router.beforeEach(async (to) => {
             query: { redirect: to.fullPath },
         };
     }
+
+    if (
+        (to.name === 'SignIn' || to.name === 'Welcome') &&
+        (await AuthService.hasToken())
+    ) {
+        return {
+            path: '/home',
+        };
+    }
 });
 
 export default router;
