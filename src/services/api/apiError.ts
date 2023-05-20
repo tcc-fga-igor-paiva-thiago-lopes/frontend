@@ -7,9 +7,6 @@ export class APIError extends Error {
         super(message);
 
         this.response = response;
-
-        // Set the prototype explicitly.
-        Object.setPrototypeOf(this, APIError.prototype);
     }
 }
 

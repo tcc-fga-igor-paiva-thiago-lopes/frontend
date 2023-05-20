@@ -15,8 +15,8 @@ export const DEFAULT_OPTIONS: Partial<HttpOptions> = {
     },
 };
 
-const getRequestConfig = async (
-    options: Partial<HttpOptions>,
+const getRequestOptions = async (
+    options: HttpOptions,
     requiresAuth = true
 ) => ({
     ...DEFAULT_OPTIONS,
@@ -66,72 +66,47 @@ export default class APIAdapter {
             : `${process.env.VUE_APP_API_URL}`;
     }
 
-    async requestWithoutAuth(options: HttpOptions) {
-        console.log(await this.mergeOptions(options, false));
+    requestWithoutAuth(options: HttpOptions) {
+        return this.runOperation('request', options, false);
+    }
 
-        const response = await CapacitorHttp.request(
-            await this.mergeOptions(options, false)
+    request(options: HttpOptions) {
+        return this.runOperation('request', options);
+    }
+
+    get(options: HttpOptions) {
+        return this.runOperation('get', options);
+    }
+
+    post(options: HttpOptions) {
+        return this.runOperation('post', options);
+    }
+
+    patch(options: HttpOptions) {
+        return this.runOperation('patch', options);
+    }
+
+    put(options: HttpOptions) {
+        return this.runOperation('put', options);
+    }
+
+    delete(options: HttpOptions) {
+        return this.runOperation('delete', options);
+    }
+
+    private async runOperation(
+        method: keyof typeof CapacitorHttp,
+        options: HttpOptions,
+        requiresAuth = true
+    ) {
+        const response = await CapacitorHttp[method](
+            await getRequestOptions(
+                { ...options, url: `${this.baseUrl}${options.url}` },
+                requiresAuth
+            )
         );
 
         return responseHandler(response);
-    }
-
-    async request(options: HttpOptions) {
-        const response = await CapacitorHttp.request(
-            await this.mergeOptions(options)
-        );
-
-        return responseHandler(response);
-    }
-
-    async get(options: HttpOptions) {
-        const response = await CapacitorHttp.get(
-            await this.mergeOptions(options)
-        );
-
-        return responseHandler(response);
-    }
-
-    async post(options: HttpOptions) {
-        const response = await CapacitorHttp.post(
-            await this.mergeOptions(options)
-        );
-
-        return responseHandler(response);
-    }
-
-    async patch(options: HttpOptions) {
-        const response = await CapacitorHttp.patch(
-            await this.mergeOptions(options)
-        );
-
-        return responseHandler(response);
-    }
-
-    async put(options: HttpOptions) {
-        const response = await CapacitorHttp.put(
-            await this.mergeOptions(options)
-        );
-
-        return responseHandler(response);
-    }
-
-    async delete(options: HttpOptions) {
-        const response = await CapacitorHttp.delete(
-            await this.mergeOptions(options)
-        );
-
-        return responseHandler(response);
-    }
-
-    private async mergeOptions(options: HttpOptions, requiresAuth = true) {
-        const defaultOptions = await getRequestConfig(options, requiresAuth);
-
-        return {
-            ...defaultOptions,
-            ...options,
-            url: `${this.baseUrl}${options.url}`,
-        };
     }
 
     private verifyApiUrlEnvVariable() {
