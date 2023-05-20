@@ -80,7 +80,6 @@ import {
 import APIAdapter from '@/services/api';
 import AuthService from '@/services/auth';
 import { presentToast } from '@/utils/toast';
-import { HttpResponse } from '@capacitor/core';
 import APIError from '@/services/api/apiError';
 
 const loading = ref(false);
@@ -92,6 +91,15 @@ const router = useRouter();
 const validateForm = () => {
     if (!email.value || !password.value) {
         errorMessage.value = 'Todos os campos com * são obrigatórios';
+        return false;
+    }
+
+    if (
+        !email.value.match(
+            /^(?=.{1,254}$)(?=.{1,64}@)[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+        )
+    ) {
+        errorMessage.value = 'E-mail inválido';
         return false;
     }
 
