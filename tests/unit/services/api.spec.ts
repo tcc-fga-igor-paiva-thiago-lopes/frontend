@@ -20,10 +20,6 @@ jest.mock('@capacitor/core', () => ({
     },
 }));
 
-jest.mock('@capacitor/preferences', () => ({
-    Preferences: { get: jest.fn() },
-}));
-
 let apiAdapter: APIAdapter;
 
 const DEFAULT_CONFIG: Partial<HttpOptions> = {
