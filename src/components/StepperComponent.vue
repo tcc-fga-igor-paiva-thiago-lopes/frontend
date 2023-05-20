@@ -2,13 +2,12 @@
     <div class="container">
         <div class="header">
             <template v-for="(step, idx) in steps" :key="step.name">
-                <div class="step">
+                <div class="step" @click="emit('changeStep', idx)">
                     <ion-icon
                         size="large"
                         :icon="step.icon"
                         style="width: 40px; height: 40px"
                         :color="idx <= activeStep ? 'primary' : 'medium'"
-                        @click="emit('changeStep', idx)"
                     ></ion-icon>
 
                     <ion-text class="ion-text-center step-title">
