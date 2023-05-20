@@ -33,28 +33,4 @@ describe('AuthService', () => {
 
         expect(Preferences.remove).toHaveBeenCalledWith({ key: 'token' });
     });
-
-    // TODO: fix these tests
-    // it('should log in and set token', async () => {
-    //     const expectedResponse: AxiosResponse = {
-    //         data: { token: 'loggedin' },
-    //         status: 200,
-    //         statusText: 'OK',
-    //         headers: {},
-    //         config: {},
-    //     };
-
-    //     jest.spyOn(apiAdapter, 'postWithoutAuth').mockImplementation(() =>
-    //         Promise.resolve(expectedResponse)
-    //     );
-
-    //     await AuthService.logIn('test', 'test');
-    //     const token = await AuthService.getToken();
-    //     expect(token).toBe('loggedin');
-    // });
-
-    // it('should log out and delete token', async () => {
-    //     await AuthService.logOut();
-    //     expect(await AuthService.hasToken).toBeFalsy();
-    // });
 });
