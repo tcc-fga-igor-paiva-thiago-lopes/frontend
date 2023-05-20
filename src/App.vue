@@ -17,12 +17,11 @@
                 <ion-list>
                     <ion-menu-toggle>
                         <ion-item lines="none" class="ion-margin-bottom">
-                            <ion-avatar slot="start">
-                                <img
-                                    :src="avatarSvg"
-                                    alt="Silhueta da cabeça de uma pessoa"
-                                />
-                            </ion-avatar>
+                            <ion-icon
+                                slot="start"
+                                class="person-circle-icon"
+                                :icon="personCircleSharp"
+                            ></ion-icon>
 
                             <ion-label>{{ username }}</ion-label>
 
@@ -54,7 +53,12 @@
     </ion-app>
 </template>
 
-<style></style>
+<style>
+.person-circle-icon {
+    width: 48px;
+    height: 48px;
+}
+</style>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
@@ -69,18 +73,16 @@ import {
     IonIcon,
     IonTitle,
     IonLabel,
-    IonAvatar,
     IonHeader,
     IonContent,
     IonToolbar,
     IonMenuToggle,
     IonRouterOutlet,
 } from '@ionic/vue';
-import { home, logOut } from 'ionicons/icons';
+import { home, logOut, personCircleSharp } from 'ionicons/icons';
 
 import { useAppStore } from './store/app';
 import AuthService from './services/auth';
-import avatarSvg from './assets/avatar.svg';
 import ConnectionStatusIcon from '@/components/ConnectionStatusIcon.vue';
 
 const route = useRoute();
