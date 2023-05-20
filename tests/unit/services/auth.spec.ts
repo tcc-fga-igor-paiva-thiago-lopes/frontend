@@ -1,14 +1,6 @@
 import AuthService from '@/services/auth';
 import { Preferences } from '@capacitor/preferences';
 
-jest.mock('@capacitor/preferences', () => ({
-    Preferences: {
-        get: jest.fn(),
-        set: jest.fn(),
-        remove: jest.fn(),
-    },
-}));
-
 describe('AuthService', () => {
     it('should create token in preferences', async () => {
         await AuthService.setToken('test01');
