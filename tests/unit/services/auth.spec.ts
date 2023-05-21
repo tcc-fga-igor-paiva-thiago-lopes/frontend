@@ -1,7 +1,27 @@
 import AuthService from '@/services/auth';
+import { createPinia, setActivePinia } from 'pinia';
 import { Preferences } from '@capacitor/preferences';
 
+import { DatabaseHelper } from '../../databaseHelper';
+
+const mockDataSource = DatabaseHelper.dataSource();
+
+jest.mock('@/database/accountsDataSource', () => {
+    return jest.fn().mockImplementation(() => ({
+        __esModule: true,
+        default: mockDataSource,
+    }));
+});
+
+jest.mock('@/database', () => {
+    return jest.fn().mockImplementation(() => ({ default: {} }));
+});
+
 describe('AuthService', () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+    });
+
     it('should create token in preferences', async () => {
         await AuthService.setToken('test01');
         expect(Preferences.set).toHaveBeenCalledWith({

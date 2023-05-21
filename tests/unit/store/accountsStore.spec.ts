@@ -1,15 +1,23 @@
 import { setActivePinia, createPinia } from 'pinia';
 
-import { DatabaseHelper } from '../../databaseHelper';
-
 import { Account } from '@/models/account';
 import { useAccountsStore } from '@/store/accounts';
+import { DatabaseHelper } from '../../databaseHelper';
 
-beforeAll(async () => {
-    await DatabaseHelper.instance.setupTestDB();
+const mockDataSource = DatabaseHelper.dataSource();
 
-    setActivePinia(createPinia());
+jest.mock('@/database/accountsDataSource', () => {
+    return jest.fn().mockImplementation(() => ({
+        __esModule: true,
+        default: mockDataSource,
+    }));
 });
+
+jest.mock('@/database', () => {
+    return jest.fn().mockImplementation(() => ({ default: {} }));
+});
+
+beforeAll(async () => DatabaseHelper.instance.setupTestDB(mockDataSource));
 
 afterAll(() => DatabaseHelper.instance.teardownTestDB());
 

@@ -7,14 +7,16 @@ interface IApplicationState {
     _connectionStatus: ConnectionStatus;
 }
 
+export const initialState = (): IApplicationState => ({
+    _username: '',
+    _connectionStatus: {
+        connected: false,
+        connectionType: 'none',
+    },
+});
+
 export const useAppStore = defineStore('application', {
-    state: (): IApplicationState => ({
-        _username: '',
-        _connectionStatus: {
-            connected: false,
-            connectionType: 'none',
-        },
-    }),
+    state: (): IApplicationState => initialState(),
     getters: {
         username: (state: IApplicationState) => state._username,
         connectionStatus: (state: IApplicationState) => state._connectionStatus,
