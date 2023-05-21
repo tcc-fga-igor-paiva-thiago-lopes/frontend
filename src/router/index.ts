@@ -45,6 +45,7 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/freights',
         name: 'FreightsIndex',
         component: FreightsIndex,
+        meta: { requiresAuth: true },
     },
     {
         // Always leave this as last one
