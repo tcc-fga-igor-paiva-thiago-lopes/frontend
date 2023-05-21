@@ -23,6 +23,14 @@
                 >
                     Criar conta
                 </ion-button>
+
+                <ion-button
+                    shape="round"
+                    class="signup-button"
+                    :onclick="() => $router.push({ name: 'SignIn' })"
+                >
+                    Fazer login
+                </ion-button>
             </div>
         </ion-content>
     </ion-page>

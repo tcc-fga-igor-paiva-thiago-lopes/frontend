@@ -3,22 +3,37 @@ import { mount, flushPromises, VueWrapper } from '@vue/test-utils';
 import { Router, createRouter, createWebHistory } from 'vue-router';
 
 import { routes } from '@/router';
-import APIAdapter from '@/services/api';
 import { presentToast } from '@/utils/toast';
+import { Preferences } from '@capacitor/preferences';
 
 import SignUp from '@/views/SignUp.vue';
-import { getCSSProperty } from '../../testHelper';
+import { getCSSProperty } from '../../helpers';
+import APIAdapter from '@/services/api';
+import APIError from '@/services/api/apiError';
 
-jest.mock('@/services/api');
 jest.mock('@/utils/toast');
 
+const mockRequestWithoutAuth = jest.fn();
+
+jest.mock('@/services/api', () => {
+    return jest.fn().mockImplementation(() => {
+        return {
+            requestWithoutAuth: mockRequestWithoutAuth,
+        };
+    });
+});
+
 let router: Router;
+const presentToastMock = presentToast as jest.Mock<any, any>;
 
 beforeAll(() => {
     setActivePinia(createPinia());
 });
 
 beforeEach(async () => {
+    presentToastMock.mockClear();
+    mockRequestWithoutAuth.mockClear();
+
     router = createRouter({
         history: createWebHistory(),
         routes: routes,
@@ -178,6 +193,22 @@ describe('SignUp.vue', () => {
             },
         });
 
+        const expectedResponse = {
+            status: 201,
+            headers: {},
+            url: 'http://localhost:5000/truck-drivers',
+            data: {
+                id: 23,
+                name: 'bbbb',
+                email: 'bbbb@mail.com',
+                last_sign_in_at: null,
+                created_at: '2023-04-03 23:40:51.702511+00:00',
+                updated_at: '2023-04-03 23:40:51.702511+00:00',
+            },
+        };
+
+        mockRequestWithoutAuth.mockResolvedValueOnce(expectedResponse);
+
         wrapper.findComponent(inputQueryString('name')).setValue('John');
 
         wrapper
@@ -204,10 +235,22 @@ describe('SignUp.vue', () => {
             'passwordConfirmation'
         );
 
-        expect(APIAdapter).toHaveBeenCalledTimes(1);
+        expect(APIAdapter).toHaveBeenCalled();
+        expect(mockRequestWithoutAuth).toHaveBeenCalledWith({
+            method: 'POST',
+            url: '/truck-drivers/',
+            data: {
+                name: 'John',
+                email: 'john@mail.com',
+                password: '12345678',
+                password_confirmation: '12345678',
+            },
+        });
 
-        expect(presentToast).toHaveBeenCalledTimes(1);
-        expect(presentToast).toHaveBeenCalledWith(
+        expect(Preferences.get).toHaveBeenCalledTimes(0);
+
+        expect(presentToastMock).toHaveBeenCalledTimes(1);
+        expect(presentToastMock).toHaveBeenCalledWith(
             'Conta criada com sucesso!',
             'success'
         );
@@ -216,5 +259,61 @@ describe('SignUp.vue', () => {
         expect(getCSSProperty(emailNote, 'display')).toBeFalsy();
         expect(getCSSProperty(passwordNote, 'display')).toBeFalsy();
         expect(getCSSProperty(passwordConfirmationNote, 'display')).toBeFalsy();
+    });
+
+    it('shows API error message when request fails', async () => {
+        const wrapper = mount(SignUp, {
+            global: {
+                plugins: [router],
+            },
+        });
+
+        const expectedResponse = {
+            status: 422,
+            headers: {},
+            url: 'http://localhost:5000/truck-drivers',
+            data: { message: 'Email já cadastrado' },
+        };
+
+        mockRequestWithoutAuth.mockRejectedValueOnce(
+            new APIError(expectedResponse)
+        );
+
+        wrapper.findComponent(inputQueryString('name')).setValue('John');
+
+        wrapper
+            .findComponent(inputQueryString('email'))
+            .setValue('john@mail.com');
+
+        wrapper
+            .findComponent(inputQueryString('password'))
+            .setValue('12345678');
+
+        wrapper
+            .findComponent(inputQueryString('passwordConfirmation'))
+            .setValue('12345678');
+
+        await wrapper.get('form>ion-button').trigger('click');
+
+        await flushPromises();
+
+        expect(mockRequestWithoutAuth).toHaveBeenCalledWith({
+            method: 'POST',
+            url: '/truck-drivers/',
+            data: {
+                name: 'John',
+                email: 'john@mail.com',
+                password: '12345678',
+                password_confirmation: '12345678',
+            },
+        });
+
+        expect(wrapper.find('ion-text>h6').text()).toBe('Email já cadastrado');
+
+        expect(presentToastMock).toHaveBeenCalledTimes(1);
+        expect(presentToastMock).toHaveBeenCalledWith(
+            'Email já cadastrado',
+            'danger'
+        );
     });
 });
