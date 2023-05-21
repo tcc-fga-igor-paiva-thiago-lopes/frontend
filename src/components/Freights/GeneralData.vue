@@ -54,7 +54,7 @@
         </ion-item>
 
         <ion-item class="form-item" ref="cargoWeightRef">
-            <ion-label position="stacked">Peso carga</ion-label>
+            <ion-label position="stacked">Peso carga (Toneladas)</ion-label>
             <ion-input
                 type="number"
                 name="cargoWeight"
@@ -83,7 +83,7 @@
         </ion-item>
 
         <ion-item class="form-item" ref="agreedPaymentRef">
-            <ion-label position="stacked">Pagamento acordado</ion-label>
+            <ion-label position="stacked">Pagamento acordado (R$)</ion-label>
             <ion-input
                 type="number"
                 inputmode="decimal"
@@ -109,6 +109,8 @@
                     (e) => emit('fieldChange', 'dueDatetime', e.target.value)
                 "
             />
+
+            <ion-note slot="helper">Data limite acordada para o frete</ion-note>
         </ion-item>
 
         <ion-item class="form-item" ref="startDatetimeRef">
@@ -154,7 +156,7 @@
 </style>
 
 <script setup lang="ts">
-import { IonItem, IonLabel, IonInput, IonCheckbox } from '@ionic/vue';
+import { IonItem, IonLabel, IonInput, IonNote, IonCheckbox } from '@ionic/vue';
 import { toRefs } from 'vue';
 
 import DatetimeButton from '@/components/DatetimeButton.vue';

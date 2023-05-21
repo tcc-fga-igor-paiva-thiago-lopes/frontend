@@ -1,7 +1,7 @@
 <template>
     <form class="form">
         <ion-item class="form-item" ref="distanceRef">
-            <ion-label position="stacked">Distância</ion-label>
+            <ion-label position="stacked">Distância (km)</ion-label>
             <ion-input
                 type="number"
                 name="distance"
