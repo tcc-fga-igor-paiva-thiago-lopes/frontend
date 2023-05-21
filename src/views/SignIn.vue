@@ -3,7 +3,9 @@
         <ion-header :translucent="true">
             <ion-toolbar>
                 <ion-buttons slot="start">
-                    <ion-button @click="() => $router.back()">
+                    <ion-button
+                        @click="() => $router.push({ name: 'Welcome' })"
+                    >
                         <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
                     </ion-button>
                 </ion-buttons>

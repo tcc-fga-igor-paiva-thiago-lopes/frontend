@@ -60,7 +60,7 @@ const router = createRouter({
     routes,
 });
 
-const offlinePermittedRoutes = ['Home', 'NotFound'];
+const offlinePermittedRoutes = ['Home', 'Welcome', 'NotFound'];
 
 router.beforeEach(async (to) => {
     const { readNetworkStatus } = useAppStore();
