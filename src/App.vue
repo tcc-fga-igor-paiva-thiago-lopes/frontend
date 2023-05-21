@@ -50,18 +50,24 @@ import {
     IonIcon,
 } from '@ionic/vue';
 
-import { home } from 'ionicons/icons';
+import { home, navigate } from 'ionicons/icons';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
-const isMenuDisabled = () => route.name === 'Home' || route.name === 'SignUp';
+const isMenuDisabled = () =>
+    route.name === 'Welcome' || route.name === 'SignUp';
 
 const menuOptions = [
     {
         route: 'Home',
         icon: home,
         name: 'Home',
+    },
+    {
+        route: 'FreightsIndex',
+        icon: navigate,
+        name: 'Fretes',
     },
 ];
 </script>

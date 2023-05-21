@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
-import SignUp from '../views/SignUp.vue';
+import SignUp from '@/views/SignUp.vue';
 import HomePage from '@/views/HomePage.vue';
-import NotFound from '../views/NotFound.vue';
-import WelcomePage from '../views/WelcomePage.vue';
+import NotFound from '@/views/NotFound.vue';
+import WelcomePage from '@/views/WelcomePage.vue';
+import FreightsIndex from '@/views/FreightsIndex.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -25,6 +26,11 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/signup',
         name: 'SignUp',
         component: SignUp,
+    },
+    {
+        path: '/freights',
+        name: 'FreightsIndex',
+        component: FreightsIndex,
     },
     {
         // Always leave this as last one
