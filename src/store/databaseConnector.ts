@@ -1,6 +1,6 @@
 import accountsDataSource, {
     DataSourceType,
-} from '@/database/data_sources/accountsDataSource';
+} from '@/database/accountsDataSource';
 
 import sqliteConnection, { SQLiteConnectionType } from '@/database';
 import { Capacitor } from '@capacitor/core';

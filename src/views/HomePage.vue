@@ -48,8 +48,8 @@ import {
 import { storeToRefs } from 'pinia';
 import { Ref, onMounted, ref } from 'vue';
 
-import { useAccountsStore } from '@/store';
 import { presentToast } from '@/utils/toast';
+import { useAccountsStore } from '@/store/accounts';
 import PaginationService from '@/utils/pagination/paginationService';
 import ManageAccounts from '@/components/Management/MainComponent.vue';
 import ConnectionStatusIcon from '@/components/ConnectionStatusIcon.vue';
