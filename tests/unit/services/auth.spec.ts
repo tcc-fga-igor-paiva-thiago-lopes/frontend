@@ -1,6 +1,10 @@
 import AuthService from '@/services/auth';
-import { createPinia, setActivePinia } from 'pinia';
+import { setActivePinia } from 'pinia';
 import { Preferences } from '@capacitor/preferences';
+
+import router from '@/router';
+import { createTestingPinia } from '@pinia/testing';
+import { initialState, useAppStore } from '@/store/app';
 
 import { DatabaseHelper } from '../../databaseHelper';
 
@@ -17,9 +21,21 @@ jest.mock('@/database', () => {
     return jest.fn().mockImplementation(() => ({ default: {} }));
 });
 
+jest.mock('@/router', () => ({
+    __esModule: true,
+    default: { push: jest.fn(), currentRoute: { value: { name: 'Home' } } },
+}));
+
 describe('AuthService', () => {
     beforeEach(() => {
-        setActivePinia(createPinia());
+        setActivePinia(
+            createTestingPinia({
+                stubActions: false,
+                initialState: {
+                    application: initialState(),
+                },
+            })
+        );
     });
 
     it('should create token in preferences', async () => {
@@ -52,5 +68,22 @@ describe('AuthService', () => {
         await AuthService.deleteToken();
 
         expect(Preferences.remove).toHaveBeenCalledWith({ key: 'token' });
+    });
+
+    it('should remove username and token from preferences in logout', async () => {
+        const appStore = useAppStore();
+
+        appStore._username = 'John';
+
+        expect(appStore.username).toEqual('John');
+
+        await AuthService.logout();
+
+        expect(Preferences.remove).toHaveBeenCalledWith({ key: 'token' });
+        // With stubActions = True (default) we can check if action was called
+        // expect(appStore.setUsername).toHaveBeenCalledWith('');
+
+        expect(appStore.username).toEqual('');
+        expect(router.push).toHaveBeenCalledWith({ name: 'Welcome' });
     });
 });
