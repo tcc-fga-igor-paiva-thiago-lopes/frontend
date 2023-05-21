@@ -21,8 +21,9 @@
                         <ion-label position="stacked">Nome *</ion-label>
                         <ion-input
                             required
-                            :name="name"
+                            name="name"
                             v-model="name"
+                            autocomplete="name"
                             placeholder="Digite seu nome"
                         >
                         </ion-input>
@@ -39,9 +40,10 @@
                         <ion-input
                             required
                             type="email"
-                            :name="email"
+                            name="email"
                             v-model="email"
                             inputmode="email"
+                            autocomplete="email"
                             @ionInput="handleEmailChange"
                             placeholder="Digite seu e-mail"
                         >
@@ -62,8 +64,9 @@
                         <ion-input
                             required
                             type="password"
-                            :name="password"
+                            name="password"
                             v-model="password"
+                            autocomplete="new-password"
                             placeholder="Digite sua senha"
                         >
                         </ion-input>
@@ -82,7 +85,8 @@
                         <ion-input
                             required
                             type="password"
-                            :name="passwordConfirmation"
+                            name="passwordConfirmation"
+                            autocomplete="new-password"
                             v-model="passwordConfirmation"
                             placeholder="Confirme sua senha"
                         >
