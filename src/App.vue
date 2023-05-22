@@ -9,7 +9,7 @@
                 <ion-toolbar>
                     <ion-title class="menu-title">Menu</ion-title>
 
-                    <ConnectionStatusIcon slot="primary" />
+                    <ConnectionStatus slot="primary" type="chip" />
                 </ion-toolbar>
             </ion-header>
 
@@ -83,7 +83,7 @@ import { home, navigate, logOut, personCircleSharp } from 'ionicons/icons';
 
 import { useAppStore } from './store/app';
 import AuthService from './services/auth';
-import ConnectionStatusIcon from '@/components/ConnectionStatusIcon.vue';
+import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
 const route = useRoute();
 

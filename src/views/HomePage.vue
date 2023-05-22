@@ -8,7 +8,7 @@
 
                 <ion-title>Página inicial</ion-title>
 
-                <ConnectionStatusIcon slot="primary" />
+                <ConnectionStatus slot="primary" />
             </ion-toolbar>
         </ion-header>
 
@@ -52,7 +52,7 @@ import { presentToast } from '@/utils/toast';
 import { useAccountsStore } from '@/store/accounts';
 import PaginationService from '@/utils/pagination/paginationService';
 import ManageAccounts from '@/components/Management/MainComponent.vue';
-import ConnectionStatusIcon from '@/components/ConnectionStatusIcon.vue';
+import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
 const store = useAccountsStore();
 
