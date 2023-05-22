@@ -37,7 +37,7 @@ export const useAppStore = defineStore('application', {
         async addNetworkChangeListener() {
             this._connectionStatus = await this.readNetworkStatus();
 
-            Network.addListener('networkStatusChange', (status) => {
+            return Network.addListener('networkStatusChange', (status) => {
                 this._connectionStatus = status;
             });
         },
