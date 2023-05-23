@@ -14,8 +14,8 @@
             </ion-header>
 
             <ion-content>
-                <ion-list>
-                    <ion-menu-toggle>
+                <ion-menu-toggle>
+                    <ion-list>
                         <ion-item lines="none" class="ion-margin-bottom">
                             <ion-icon
                                 slot="start"
@@ -34,8 +34,10 @@
                         </ion-item>
 
                         <ion-item
-                            v-for="option in availableMenuOptions"
+                            v-for="option in menuOptions"
+                            button
                             :key="option.route"
+                            :disabled="!option.available"
                             @click="() => $router.push({ name: option.route })"
                         >
                             <ion-icon
@@ -44,8 +46,8 @@
                             ></ion-icon>
                             <ion-label>{{ option.name }}</ion-label>
                         </ion-item>
-                    </ion-menu-toggle>
-                </ion-list>
+                    </ion-list>
+                </ion-menu-toggle>
             </ion-content>
         </ion-menu>
 
@@ -62,7 +64,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { computed, onBeforeMount, onBeforeUnmount } from 'vue';
 
 import {
@@ -83,7 +85,16 @@ import { home, navigate, logOut, personCircleSharp } from 'ionicons/icons';
 
 import { useAppStore } from './store/app';
 import AuthService from './services/auth';
+import { presentToast } from './utils/toast';
+import { offlinePermittedRoutes } from '@/router';
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
+
+interface IMenuOption {
+    icon: string;
+    name: string;
+    route: string;
+    offlinePermitted?: boolean;
+}
 
 const route = useRoute();
 
@@ -96,7 +107,7 @@ const { username, connectionStatus } = storeToRefs(appStore);
 
 const disabledMenuRoutes = ['Welcome', 'SignUp', 'SignIn'];
 
-const menuOptions = [
+const allMenuOptions: IMenuOption[] = [
     {
         route: 'Home',
         icon: home,
@@ -114,11 +125,14 @@ const isMenuDisabled = computed(() =>
     disabledMenuRoutes.includes(route.name as string)
 );
 
-const availableMenuOptions = computed(() => {
-    if (connectionStatus.value.connected) return menuOptions;
-
-    return menuOptions.filter((item) => item.offlinePermitted);
-});
+const menuOptions = computed(() =>
+    allMenuOptions.map((option) => ({
+        ...option,
+        available:
+            connectionStatus.value.connected ||
+            (!connectionStatus.value.connected && !!option.offlinePermitted),
+    }))
+);
 
 onBeforeMount(async () => {
     await loadUsername();
