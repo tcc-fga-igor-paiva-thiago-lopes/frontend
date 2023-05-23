@@ -9,7 +9,7 @@ export const presentToast = async (
         message,
         position,
         color,
-        duration: 1500,
+        duration: 2500,
     });
 
     await toast.present();

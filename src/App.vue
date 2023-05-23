@@ -97,6 +97,7 @@ interface IMenuOption {
 }
 
 const route = useRoute();
+const router = useRouter();
 
 const appStore = useAppStore();
 
@@ -142,5 +143,19 @@ onBeforeMount(async () => {
 
 onBeforeUnmount(async () => {
     await removeNetworkListeners();
+});
+
+appStore.$subscribe(async (_, state) => {
+    if (
+        !state._connectionStatus.connected &&
+        !offlinePermittedRoutes.includes(route.name as string)
+    ) {
+        await presentToast(
+            'Esta página não é permitida sem conexão com a Internet',
+            'danger'
+        );
+
+        router.push({ name: 'Home' });
+    }
 });
 </script>
