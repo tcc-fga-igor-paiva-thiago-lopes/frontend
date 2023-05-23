@@ -60,9 +60,9 @@ const router = createRouter({
     routes,
 });
 
-const offlinePermittedRoutes = ['Home', 'Welcome', 'NotFound'];
+export const offlinePermittedRoutes = ['Home', 'Welcome', 'NotFound'];
 
-router.beforeEach(async (to) => {
+router.beforeEach(async (to, from) => {
     const { readNetworkStatus } = useAppStore();
 
     const connectionStatus = await readNetworkStatus();
@@ -72,7 +72,9 @@ router.beforeEach(async (to) => {
             name: 'SignIn',
             query: { redirect: to.fullPath },
         };
-    } else if (
+    }
+
+    if (
         !connectionStatus.connected &&
         !offlinePermittedRoutes.includes(to.name as string)
     ) {
@@ -81,7 +83,11 @@ router.beforeEach(async (to) => {
             'danger'
         );
 
-        return { name: 'Home' };
+        if (!offlinePermittedRoutes.includes(from.name as string)) {
+            return { name: 'Home' };
+        }
+
+        return false;
     }
 
     if (
