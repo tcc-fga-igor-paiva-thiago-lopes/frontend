@@ -8,6 +8,7 @@ import HomePage from '@/views/HomePage.vue';
 import NotFound from '@/views/NotFound.vue';
 import WelcomePage from '@/views/WelcomePage.vue';
 import FreightsIndex from '@/views/FreightsIndex.vue';
+import CategoriesGroups from '@/views/CategoriesGroups.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -42,6 +43,12 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/freights',
         name: 'FreightsIndex',
         component: FreightsIndex,
+    },
+    {
+        path: '/categories-groups',
+        name: 'CategoriesGroups',
+        component: CategoriesGroups,
+        meta: { requiresAuth: true },
     },
     {
         // Always leave this as last one
