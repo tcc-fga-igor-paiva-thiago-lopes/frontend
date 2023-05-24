@@ -50,7 +50,7 @@ import {
     IonIcon,
 } from '@ionic/vue';
 
-import { home, navigate } from 'ionicons/icons';
+import { home, navigate, pricetags } from 'ionicons/icons';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -68,6 +68,11 @@ const menuOptions = [
         route: 'FreightsIndex',
         icon: navigate,
         name: 'Fretes',
+    },
+    {
+        route: 'CategoriesGroups',
+        icon: pricetags,
+        name: 'Grupos de categorias',
     },
 ];
 </script>
