@@ -39,7 +39,7 @@ import { IonChip, IonLabel } from '@ionic/vue';
 import { useAppStore } from '@/store/app';
 
 interface IProps {
-    type: 'icon' | 'chip';
+    type?: 'icon' | 'chip';
 }
 
 const props = withDefaults(defineProps<IProps>(), { type: 'icon' });
