@@ -1,19 +1,29 @@
-import { createPinia, setActivePinia } from 'pinia';
+import { createTestingPinia } from '@pinia/testing';
 import { mount, flushPromises } from '@vue/test-utils';
 import { Router, createRouter, createWebHistory } from 'vue-router';
 
 import { routes } from '@/router';
 import APIAdapter from '@/services/api';
-
 import SignIn from '@/views/SignIn.vue';
+import { initialState } from '@/store/app';
+import { DatabaseHelper } from '../../databaseHelper';
+
+const mockDataSource = DatabaseHelper.dataSource();
+
+jest.mock('@/database/databaseDataSource', () => {
+    return jest.fn().mockImplementation(() => ({
+        __esModule: true,
+        default: mockDataSource,
+    }));
+});
+
+jest.mock('@/database', () => {
+    return jest.fn().mockImplementation(() => ({ default: {} }));
+});
 
 jest.mock('@/services/api');
 
 let router: Router;
-
-beforeAll(() => {
-    setActivePinia(createPinia());
-});
 
 beforeEach(async () => {
     router = createRouter({
@@ -35,7 +45,15 @@ describe('SignIn.vue', () => {
         `ion-item:nth-child(${fieldsOrderMap[field]})>ion-input`;
 
     it('renders signin vue', () => {
-        const wrapper = mount(SignIn);
+        const wrapper = mount(SignIn, {
+            global: {
+                plugins: [
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
+            },
+        });
 
         const button = wrapper.find('form>ion-button');
 
@@ -44,7 +62,15 @@ describe('SignIn.vue', () => {
     });
 
     it('shows error message when fields are not filled', async () => {
-        const wrapper = mount(SignIn);
+        const wrapper = mount(SignIn, {
+            global: {
+                plugins: [
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
+            },
+        });
 
         wrapper.get('form>ion-button').trigger('click');
 
@@ -60,7 +86,12 @@ describe('SignIn.vue', () => {
     it('sends request when all required data is filled properly', async () => {
         const wrapper = mount(SignIn, {
             global: {
-                plugins: [router],
+                plugins: [
+                    router,
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
             },
         });
 

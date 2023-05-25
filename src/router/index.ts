@@ -1,9 +1,12 @@
-import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory } from '@ionic/vue-router';
 
-import SignIn from '@/views/SignIn.vue';
-import SignUp from '@/views/SignUp.vue';
 import AuthService from '@/services/auth';
+import { useAppStore } from '@/store/app';
+import { presentToast } from '@/utils/toast';
+
+import SignUp from '../views/SignUp.vue';
+import SignIn from '../views/SignIn.vue';
 import HomePage from '@/views/HomePage.vue';
 import NotFound from '@/views/NotFound.vue';
 import WelcomePage from '@/views/WelcomePage.vue';
@@ -42,6 +45,7 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/freights',
         name: 'FreightsIndex',
         component: FreightsIndex,
+        meta: { requiresAuth: true },
     },
     {
         // Always leave this as last one
@@ -56,12 +60,34 @@ const router = createRouter({
     routes,
 });
 
-router.beforeEach(async (to) => {
+export const offlinePermittedRoutes = ['Home', 'Welcome', 'NotFound'];
+
+router.beforeEach(async (to, from) => {
+    const { readNetworkStatus } = useAppStore();
+
+    const connectionStatus = await readNetworkStatus();
+
     if (to.meta.requiresAuth && !(await AuthService.hasToken())) {
         return {
-            path: '/login',
+            name: 'SignIn',
             query: { redirect: to.fullPath },
         };
+    }
+
+    if (
+        !connectionStatus.connected &&
+        !offlinePermittedRoutes.includes(to.name as string)
+    ) {
+        presentToast(
+            'Esta página não é permitida sem conexão com a Internet',
+            'danger'
+        );
+
+        if (!offlinePermittedRoutes.includes(from.name as string)) {
+            return { name: 'Home' };
+        }
+
+        return false;
     }
 
     if (

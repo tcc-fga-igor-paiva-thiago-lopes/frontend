@@ -10,19 +10,23 @@ export class DatabaseHelper {
         return this._instance;
     }
 
-    private dbConnect!: DataSource;
-    private testdb!: DatabaseType;
-
-    async setupTestDB() {
-        this.testdb = new Database(':memory:', { verbose: console.log });
-
-        this.dbConnect = new DataSource({
+    public static dataSource() {
+        return new DataSource({
             name: 'default',
             type: 'better-sqlite3',
             database: ':memory:',
             entities: ['src/models/**/*.ts'],
             synchronize: true,
         });
+    }
+
+    private dbConnect!: DataSource;
+    private testdb!: DatabaseType;
+
+    async setupTestDB(dataSource: DataSource) {
+        this.testdb = new Database(':memory:', { verbose: console.log });
+
+        this.dbConnect = dataSource;
 
         await this.dbConnect.initialize();
 

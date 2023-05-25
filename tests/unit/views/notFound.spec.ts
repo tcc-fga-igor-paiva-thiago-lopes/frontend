@@ -1,10 +1,20 @@
 import { mount } from '@vue/test-utils';
 
+import { initialState } from '@/store/app';
 import NotFound from '@/views/NotFound.vue';
+import { createTestingPinia } from '@pinia/testing';
 
 describe('NotFound.vue', () => {
     it('renders not found vue', async () => {
-        const wrapper = mount(NotFound);
+        const wrapper = mount(NotFound, {
+            global: {
+                plugins: [
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
+            },
+        });
 
         const notFoundMsg = wrapper.find('ion-content>div>ion-text');
         const redirectBtn = wrapper.find('ion-content>div>ion-button');
@@ -21,6 +31,11 @@ describe('NotFound.vue', () => {
 
         const wrapper = mount(NotFound, {
             global: {
+                plugins: [
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
                 mocks: {
                     $router: mockRouter,
                 },

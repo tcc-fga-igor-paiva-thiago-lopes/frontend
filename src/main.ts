@@ -33,7 +33,7 @@ import {
 } from 'jeep-sqlite/loader';
 import { Capacitor } from '@capacitor/core';
 import { CapacitorSQLite } from '@capacitor-community/sqlite';
-import AccountsDataSource from './database/data_sources/accountsDataSource';
+import AccountsDataSource from './database/databaseDataSource';
 import sqliteConnection from '@/database';
 import { createPinia } from 'pinia';
 
@@ -92,7 +92,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         if (platform === 'web') {
             // save the database from memory to store
-            await sqliteConnection.saveToStore('ionic-vue-user');
+            await sqliteConnection.saveToStore(
+                process.env.VUE_APP_DB_NAME || 'truck-driver-app'
+            );
         }
 
         router.isReady().then(() => {
