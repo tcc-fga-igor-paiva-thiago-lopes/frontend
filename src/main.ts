@@ -31,11 +31,12 @@ import {
     defineCustomElements as jeepSqlite,
     applyPolyfills,
 } from 'jeep-sqlite/loader';
+import { createPinia } from 'pinia';
 import { Capacitor } from '@capacitor/core';
 import { CapacitorSQLite } from '@capacitor-community/sqlite';
-import AccountsDataSource from './database/databaseDataSource';
+
 import sqliteConnection from '@/database';
-import { createPinia } from 'pinia';
+import dataSource from './database/dataSource';
 
 applyPolyfills().then(() => {
     jeepSqlite(window);
@@ -82,7 +83,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             return {};
         });
 
-        for (const connection of [AccountsDataSource]) {
+        for (const connection of [dataSource]) {
             if (!connection.isInitialized) {
                 await connection.initialize();
             }

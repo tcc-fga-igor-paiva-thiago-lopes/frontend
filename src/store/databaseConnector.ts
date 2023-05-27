@@ -1,6 +1,4 @@
-import accountsDataSource, {
-    DataSourceType,
-} from '@/database/databaseDataSource';
+import dataSource, { DataSourceType } from '@/database/dataSource';
 
 import sqliteConnection, { SQLiteConnectionType } from '@/database';
 import { Capacitor } from '@capacitor/core';
@@ -17,7 +15,7 @@ const getDatabaseInfo = (): DatabaseInfo => {
     return {
         sqlite: sqliteConnection,
         platform,
-        connection: accountsDataSource,
+        connection: dataSource,
     };
 };
 
