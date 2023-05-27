@@ -16,20 +16,20 @@ export interface IFreight extends Record<string, any> {
     agreedPayment: number;
     distance: number;
     startDate: Date;
-    dueDate?: Date | null;
-    finishedDate?: Date | null;
-    originCity?: string | null;
-    originState?: string | null;
-    originCountry?: string | null;
-    originLatitude?: number | null;
-    originLongitude?: number | null;
-    destinationCity?: string | null;
-    destinationState?: string | null;
-    destinationCountry?: string | null;
-    destinationLatitude?: number | null;
-    destinationLongitude?: number | null;
+    dueDate?: Date;
+    finishedDate?: Date;
+    originCity: string;
+    originState: string;
+    originCountry?: string;
+    originLatitude?: number;
+    originLongitude?: number;
+    destinationCity: string;
+    destinationState: string;
+    destinationCountry?: string;
+    destinationLatitude?: number;
+    destinationLongitude?: number;
     createdAt: Date;
-    updatedAt?: Date | null;
+    updatedAt?: Date;
 }
 
 @Entity('FREIGHT')
@@ -64,10 +64,10 @@ export class Freight extends AppBaseEntity implements IFreight {
     @Column({ name: 'finished_date' })
     finishedDate!: Date;
 
-    @Column({ name: 'origin_city' })
+    @Column({ name: 'origin_city', nullable: false })
     originCity!: string;
 
-    @Column({ name: 'origin_state' })
+    @Column({ name: 'origin_state', nullable: false })
     originState!: string;
 
     @Column({ name: 'origin_country' })
@@ -79,10 +79,10 @@ export class Freight extends AppBaseEntity implements IFreight {
     @Column({ name: 'origin_longitude' })
     originLongitude!: number;
 
-    @Column({ name: 'destination_city' })
+    @Column({ name: 'destination_city', nullable: false })
     destinationCity!: string;
 
-    @Column({ name: 'destination_state' })
+    @Column({ name: 'destination_state', nullable: false })
     destinationState!: string;
 
     @Column({ name: 'destination_country' })

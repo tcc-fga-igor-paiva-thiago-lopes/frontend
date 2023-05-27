@@ -65,13 +65,13 @@ export class AddsFreightTable1685069028734 implements MigrationInterface {
                         name: 'origin_city',
                         type: 'varchar',
                         length: '50',
-                        isNullable: true,
+                        isNullable: false,
                     },
                     {
                         name: 'origin_state',
                         type: 'character',
                         length: '2',
-                        isNullable: true,
+                        isNullable: false,
                     },
                     {
                         name: 'origin_country',
@@ -93,13 +93,13 @@ export class AddsFreightTable1685069028734 implements MigrationInterface {
                         name: 'destination_city',
                         type: 'varchar',
                         length: '50',
-                        isNullable: true,
+                        isNullable: false,
                     },
                     {
                         name: 'destination_state',
                         type: 'character',
                         length: '2',
-                        isNullable: true,
+                        isNullable: false,
                     },
                     {
                         name: 'destination_country',
