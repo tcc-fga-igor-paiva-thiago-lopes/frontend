@@ -18,7 +18,8 @@ export const initialState = (): IApplicationState => ({
         open: false,
     },
     _connectionStatus: {
-        connected: false,
+        // Setting to true to avoid redirection when acessing offline not permitted page
+        connected: true,
         connectionType: 'none',
     },
 });
