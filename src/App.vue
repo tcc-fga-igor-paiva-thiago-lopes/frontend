@@ -14,6 +14,9 @@
             </ion-header>
 
             <ion-content>
+                <ion-loading :is-open="loading.open" :message="loading.message">
+                </ion-loading>
+
                 <ion-menu-toggle>
                     <ion-list>
                         <ion-item lines="none" class="ion-margin-bottom">
@@ -76,6 +79,7 @@ import {
     IonTitle,
     IonLabel,
     IonHeader,
+    IonLoading,
     IonContent,
     IonToolbar,
     IonMenuToggle,
@@ -101,10 +105,15 @@ const router = useRouter();
 
 const appStore = useAppStore();
 
-const { loadUsername, addNetworkChangeListener, removeNetworkListeners } =
-    appStore;
+const {
+    loadUsername,
+    openLoading,
+    closeLoading,
+    addNetworkChangeListener,
+    removeNetworkListeners,
+} = appStore;
 
-const { username, connectionStatus } = storeToRefs(appStore);
+const { username, loading, connectionStatus } = storeToRefs(appStore);
 
 const disabledMenuRoutes = ['Welcome', 'SignUp', 'SignIn'];
 
@@ -136,9 +145,15 @@ const menuOptions = computed(() =>
 );
 
 onBeforeMount(async () => {
-    await loadUsername();
+    openLoading();
 
-    await addNetworkChangeListener();
+    try {
+        await loadUsername();
+
+        await addNetworkChangeListener();
+    } finally {
+        closeLoading();
+    }
 });
 
 onBeforeUnmount(async () => {

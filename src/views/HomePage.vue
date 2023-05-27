@@ -13,7 +13,7 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
-            <ion-loading v-if="loading"></ion-loading>
+            <ion-loading :is-open="loading"></ion-loading>
 
             <ManageAccounts
                 itemName="Conta"

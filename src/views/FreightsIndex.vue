@@ -13,7 +13,7 @@
         </ion-header>
 
         <ion-content :fullscreen="true" class="ion-padding-horizontal">
-            <ion-loading v-if="loading"></ion-loading>
+            <ion-loading :is-open="loading"></ion-loading>
 
             <FreightsForm @on-submit="addFreight" />
         </ion-content>
