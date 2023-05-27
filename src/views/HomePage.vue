@@ -16,9 +16,9 @@
             <ion-loading v-if="loading"></ion-loading>
 
             <ManageAccounts
-                labelField="name"
                 itemName="Conta"
                 itemsName="Contas"
+                :label="(item) => item.name"
                 :items="accounts"
                 :addItem="addItem"
                 :showItem="showItem"

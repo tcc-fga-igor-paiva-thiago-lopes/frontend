@@ -9,7 +9,10 @@
         >
             <!-- <ion-checkbox slot="start"></ion-checkbox> -->
 
-            <ion-label text-wrap>{{ item[labelField] }}</ion-label>
+            <ion-label text-wrap>
+                <h2>{{ label(item) }}</h2>
+                <p v-if="subLabel">{{ subLabel(item) }}</p>
+            </ion-label>
 
             <div
                 slot="end"
@@ -89,8 +92,9 @@ interface IProps {
     items: any[];
     itemName: string;
     itemsName: string;
-    labelField: string;
     paginationService: PaginationService<unknown>;
+    label: (item: any) => string;
+    subLabel?: (item: any) => string;
     editItem: (item: any) => void;
     showItem: (item: any) => void;
     removeItem: (item: any) => Promise<any>;
@@ -102,7 +106,7 @@ const props = defineProps<IProps>();
 const { items, itemsName, paginationService } = toRefs(props);
 
 // eslint-disable-next-line vue/no-setup-props-destructure
-const { editItem, removeItem, loadMoreItems } = props;
+const { editItem, removeItem, label, subLabel, loadMoreItems } = props;
 
 const hasPagination = () =>
     items.value.length < paginationService.value.totalResults;

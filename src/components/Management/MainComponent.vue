@@ -28,9 +28,10 @@
         <ion-card-content class="content">
             <ItemsIndex
                 :items="items"
-                :labelField="labelField"
                 :itemName="itemName"
                 :itemsName="itemsName"
+                :label="label"
+                :subLabel="subLabel"
                 :showItem="showItem"
                 :editItem="editItem"
                 :removeItem="handleRemoval"
@@ -77,8 +78,9 @@ interface IProps {
     items: any[];
     itemName: string;
     itemsName: string;
-    labelField: string;
     paginationService: PaginationService<unknown>;
+    label: (item: any) => string;
+    subLabel?: (item: any) => string;
     addItem: () => void;
     editItem: (item: any) => void;
     showItem: (item: any) => void;
@@ -89,7 +91,7 @@ interface IProps {
 const props = defineProps<IProps>();
 
 // eslint-disable-next-line vue/no-setup-props-destructure
-const { addItem, removeItem, loadMoreItems } = props;
+const { addItem, removeItem, label, subLabel, loadMoreItems } = props;
 
 const { items, itemName, itemsName } = toRefs(props);
 
