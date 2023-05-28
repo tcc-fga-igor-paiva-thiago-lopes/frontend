@@ -24,14 +24,7 @@
     </ion-page>
 </template>
 
-<style>
-.dividerline {
-    margin: 0 8px;
-    width: 32px;
-    height: 2px;
-    background-color: #000;
-}
-</style>
+<style></style>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
