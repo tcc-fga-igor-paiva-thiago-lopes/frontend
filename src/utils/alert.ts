@@ -1,11 +1,12 @@
-import { alertController } from '@ionic/vue';
+import { IonicSafeString, alertController } from '@ionic/vue';
 
 interface IAlertOptions {
     title: string;
-    message: string;
+    message: string | IonicSafeString;
     cancelText?: string;
     confirmText?: string;
-    cancelClass?: string;
+    cssClass?: string | string[];
+    cancelClass?: string | string[];
     confirmClass?: string | string[];
     cancelAction?: () => void;
     confirmAction: () => void;
@@ -18,12 +19,14 @@ export const presentConfirmationAlert = async ({
     confirmAction,
     cancelClass,
     confirmClass,
+    cssClass,
     cancelText = 'Cancelar',
     confirmText = 'OK',
 }: IAlertOptions) => {
     const alert = await alertController.create({
         header: title,
         message,
+        cssClass,
         buttons: [
             {
                 text: cancelText,

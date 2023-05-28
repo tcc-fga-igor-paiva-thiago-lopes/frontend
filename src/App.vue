@@ -32,7 +32,7 @@
                                 slot="end"
                                 size="large"
                                 :icon="logOut"
-                                @click="AuthService.logout"
+                                @click="handleLogout"
                             ></ion-icon>
                         </ion-item>
 
@@ -63,6 +63,15 @@
     width: 48px;
     height: 48px;
 }
+
+.custom-alert .alert-wrapper {
+    --max-width: 90%;
+}
+
+button.alert-button.alert-button-confirm {
+    background-color: var(--ion-color-danger);
+    color: var(--ion-color-danger-contrast);
+}
 </style>
 
 <script setup lang="ts">
@@ -84,6 +93,7 @@ import {
     IonToolbar,
     IonMenuToggle,
     IonRouterOutlet,
+    IonicSafeString,
 } from '@ionic/vue';
 import { home, navigate, logOut, personCircleSharp } from 'ionicons/icons';
 
@@ -93,6 +103,7 @@ import { presentToast } from './utils/toast';
 import { isRouteOfflinePermitted } from './utils/offline';
 
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
+import { presentConfirmationAlert } from './utils/alert';
 
 interface IMenuOption {
     icon: string;
@@ -144,6 +155,22 @@ const menuOptions = computed(() =>
             (!connectionStatus.value.connected && !!option.offlinePermitted),
     }))
 );
+
+const handleLogout = async () => {
+    const message = new IonicSafeString(`
+        Tem certeza que deseja encerrar sua sessão?<br /><br />
+        Você precisará se conectar novamente e todos os dados salvos poderão ser apagados
+    `);
+
+    await presentConfirmationAlert({
+        message,
+        confirmText: 'Sim',
+        cssClass: 'custom-alert',
+        title: 'Encerrar sessão',
+        confirmClass: 'alert-button-confirm',
+        confirmAction: () => AuthService.logout(),
+    });
+};
 
 onBeforeMount(async () => {
     openLoading();
