@@ -90,7 +90,8 @@ import { home, navigate, logOut, personCircleSharp } from 'ionicons/icons';
 import { useAppStore } from './store/app';
 import AuthService from './services/auth';
 import { presentToast } from './utils/toast';
-import { offlinePermittedRoutes } from '@/router';
+import { isRouteOfflinePermitted } from './utils/offline';
+
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
 interface IMenuOption {
@@ -113,7 +114,7 @@ const {
     removeNetworkListeners,
 } = appStore;
 
-const { username, loading, connectionStatus } = storeToRefs(appStore);
+const { username, loading, platform, connectionStatus } = storeToRefs(appStore);
 
 const disabledMenuRoutes = ['Welcome', 'SignUp', 'SignIn'];
 
@@ -150,20 +151,23 @@ onBeforeMount(async () => {
     try {
         await loadUsername();
 
-        await addNetworkChangeListener();
+        if (platform.value !== 'web') await addNetworkChangeListener();
     } finally {
         closeLoading();
     }
 });
 
 onBeforeUnmount(async () => {
-    await removeNetworkListeners();
+    if (platform.value !== 'web') await removeNetworkListeners();
 });
 
 appStore.$subscribe(async (_, state) => {
     if (
-        !state._connectionStatus.connected &&
-        !offlinePermittedRoutes.includes(route.name as string)
+        await isRouteOfflinePermitted(
+            route.name as string,
+            false,
+            state._connectionStatus.connected
+        )
     ) {
         await presentToast(
             'Esta página não é permitida sem conexão com a Internet',

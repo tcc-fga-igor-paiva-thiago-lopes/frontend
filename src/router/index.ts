@@ -2,8 +2,8 @@ import { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 
 import AuthService from '@/services/auth';
-import { useAppStore } from '@/store/app';
 import { presentToast } from '@/utils/toast';
+import { isRouteOfflinePermitted } from '@/utils/offline';
 
 import SignUp from '../views/SignUp.vue';
 import SignIn from '../views/SignIn.vue';
@@ -70,10 +70,6 @@ const router = createRouter({
 export const offlinePermittedRoutes = ['Home', 'Welcome', 'NotFound'];
 
 router.beforeEach(async (to, from) => {
-    const { readNetworkStatus } = useAppStore();
-
-    const connectionStatus = await readNetworkStatus();
-
     if (to.meta.requiresAuth && !(await AuthService.hasToken())) {
         return {
             name: 'SignIn',
@@ -81,10 +77,7 @@ router.beforeEach(async (to, from) => {
         };
     }
 
-    if (
-        !connectionStatus.connected &&
-        !offlinePermittedRoutes.includes(to.name as string)
-    ) {
+    if (await isRouteOfflinePermitted(to.name as string)) {
         presentToast(
             'Esta página não é permitida sem conexão com a Internet',
             'danger'

@@ -2,9 +2,13 @@ import { defineStore } from 'pinia';
 import { IonicSafeString } from '@ionic/vue';
 import { Preferences } from '@capacitor/preferences';
 import { ConnectionStatus, Network } from '@capacitor/network';
+import { Capacitor } from '@capacitor/core';
+
+type Platform = 'android' | 'ios' | 'web';
 
 interface IApplicationState {
     _username: string;
+    _platform: Platform;
     _loading: {
         open: boolean;
         message?: string | IonicSafeString;
@@ -14,6 +18,7 @@ interface IApplicationState {
 
 export const initialState = (): IApplicationState => ({
     _username: '',
+    _platform: Capacitor.getPlatform() as Platform,
     _loading: {
         open: false,
     },
@@ -29,6 +34,7 @@ export const useAppStore = defineStore('application', {
     getters: {
         loading: (state: IApplicationState) => state._loading,
         username: (state: IApplicationState) => state._username,
+        platform: (state: IApplicationState) => state._platform,
         connectionStatus: (state: IApplicationState) => state._connectionStatus,
     },
     actions: {
