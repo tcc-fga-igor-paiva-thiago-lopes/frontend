@@ -35,12 +35,6 @@
                 @field-change="handleFieldChange"
             />
         </template>
-
-        <template v-if="step === 0" v-slot:backBtn>
-            <ion-button color="danger" @click="handleSubmit"
-                >Criar frete</ion-button
-            >
-        </template>
     </StepperComponent>
 </template>
 
