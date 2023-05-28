@@ -56,36 +56,23 @@
 </style>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, toRefs } from 'vue';
 import { IonButton } from '@ionic/vue';
 import { menu, navigate } from 'ionicons/icons';
 
 import GeneralData from './GeneralData.vue';
+import { IFormData } from '@/store/freights';
 import LocationInfo from './LocationInfo.vue';
 import StepperComponent from '@/components/StepperComponent.vue';
-import { IFormData } from '.';
+
+interface IProps {
+    formData: IFormData;
+}
+const props = defineProps<IProps>();
+
+const { formData } = toRefs(props);
 
 const step = ref(0);
-
-const formData = ref<IFormData>({
-    finished: false,
-    name: '',
-    description: '',
-    cargoType: '',
-    cargoWeight: '',
-    contractor: '',
-    agreedPayment: '',
-    startDatetime: new Date().toISOString(),
-    dueDatetime: '',
-    finishedDatetime: '',
-    distance: '',
-    originCountry: 'Brasil',
-    originCity: '',
-    originState: '',
-    destinationCountry: 'Brasil',
-    destinationCity: '',
-    destinationState: '',
-});
 
 const steps = [
     {
@@ -102,10 +89,10 @@ const steps = [
     },
 ];
 
-const emit = defineEmits(['onSubmit']);
+const emit = defineEmits(['onSubmit', 'onFieldChange']);
 
 const handleFieldChange = (field: string, value: unknown) => {
-    formData.value[field] = value;
+    emit('onFieldChange', field, value);
 };
 
 const handleSubmit = () => {

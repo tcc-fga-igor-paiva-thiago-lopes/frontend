@@ -11,51 +11,28 @@
             <ion-label>Finalizado?</ion-label>
         </ion-item>
 
-        <ion-item class="form-item" ref="nameRef">
-            <ion-label position="stacked">Nome *</ion-label>
-            <ion-input
-                required
-                name="name"
-                type="text"
-                :value="name"
-                autocomplete="name"
-                placeholder="Digite um nome para este frete"
-                @ionChange="(e) => emit('fieldChange', 'name', e.target.value)"
-            >
-            </ion-input>
-        </ion-item>
-
-        <ion-item class="form-item" ref="descriptionRef">
-            <ion-label position="stacked">Descrição *</ion-label>
-            <ion-input
-                required
-                type="text"
-                name="description"
-                :value="description"
-                placeholder="Digite uma descrição para este frete"
-                @ionChange="
-                    (e) => emit('fieldChange', 'description', e.target.value)
-                "
-            >
-            </ion-input>
-        </ion-item>
-
         <ion-item class="form-item" ref="cargoTypeRef">
-            <ion-label position="stacked">Tipo de carga</ion-label>
+            <ion-label position="stacked">Tipo de carga *</ion-label>
             <ion-input
+                required
                 type="text"
                 name="cargoType"
+                :maxlength="30"
                 :value="cargoType"
                 placeholder="Digite o tipo de carga deste frete"
                 @ionChange="
                     (e) => emit('fieldChange', 'cargoType', e.target.value)
                 "
-            ></ion-input>
+            >
+            </ion-input>
+
+            <ion-note slot="helper">Tamanho máximo 30 caracteres</ion-note>
         </ion-item>
 
         <ion-item class="form-item" ref="cargoWeightRef">
-            <ion-label position="stacked">Peso carga (Toneladas)</ion-label>
+            <ion-label position="stacked">Peso carga (Toneladas) *</ion-label>
             <ion-input
+                required
                 type="number"
                 name="cargoWeight"
                 inputmode="decimal"
@@ -69,22 +46,27 @@
         </ion-item>
 
         <ion-item class="form-item" ref="contractorRef">
-            <ion-label position="stacked">Contratante</ion-label>
+            <ion-label position="stacked">Contratante *</ion-label>
             <ion-input
+                required
                 type="text"
                 name="contractor"
                 :value="contractor"
+                :maxlength="60"
                 placeholder="Digite o contratante deste frete"
                 @ionChange="
                     (e) => emit('fieldChange', 'contractor', e.target.value)
                 "
             >
             </ion-input>
+
+            <ion-note slot="helper">Tamanho máximo 60 caracteres</ion-note>
         </ion-item>
 
         <ion-item class="form-item" ref="agreedPaymentRef">
-            <ion-label position="stacked">Pagamento acordado (R$)</ion-label>
+            <ion-label position="stacked">Pagamento acordado (R$) *</ion-label>
             <ion-input
+                required
                 type="number"
                 inputmode="decimal"
                 name="agreedPayment"
@@ -141,6 +123,27 @@
                 "
             />
         </ion-item>
+
+        <ion-item class="form-item" ref="descriptionRef">
+            <ion-label position="stacked">Descrição *</ion-label>
+
+            <ion-textarea
+                required
+                type="text"
+                inputmode="text"
+                name="description"
+                :maxlength="500"
+                :auto-grow="true"
+                :value="description"
+                placeholder="Digite uma descrição para este frete"
+                @ionChange="
+                    (e) => emit('fieldChange', 'description', e.target.value)
+                "
+            >
+            </ion-textarea>
+
+            <ion-note slot="helper">Tamanho máximo 500 caracteres</ion-note>
+        </ion-item>
     </form>
 </template>
 
@@ -156,14 +159,20 @@
 </style>
 
 <script setup lang="ts">
-import { IonItem, IonLabel, IonInput, IonNote, IonCheckbox } from '@ionic/vue';
+import {
+    IonItem,
+    IonLabel,
+    IonInput,
+    IonNote,
+    IonTextarea,
+    IonCheckbox,
+} from '@ionic/vue';
 import { toRefs } from 'vue';
 
 import DatetimeButton from '@/components/DatetimeButton.vue';
 
 interface IProps {
     finished: boolean;
-    name: string;
     description: string;
     cargoType: string;
     cargoWeight: string;
@@ -177,7 +186,6 @@ const props = defineProps<IProps>();
 
 const {
     finished,
-    name,
     description,
     cargoType,
     cargoWeight,

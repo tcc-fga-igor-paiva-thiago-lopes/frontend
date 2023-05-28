@@ -1,13 +1,14 @@
 <template>
     <form class="form">
         <ion-item class="form-item" ref="distanceRef">
-            <ion-label position="stacked">Distância (km)</ion-label>
+            <ion-label position="stacked">Distância (km) *</ion-label>
             <ion-input
+                required
                 type="number"
                 name="distance"
                 inputmode="decimal"
                 :value="distance"
-                placeholder="Digite a distância entre origem e destino"
+                placeholder="Digite a distância entre origem e destino em quilômetros"
                 @ionChange="
                     (e) => emit('fieldChange', 'distance', e.target.value)
                 "
@@ -23,8 +24,9 @@
 
                 <div class="ion-padding" slot="content">
                     <ion-item class="form-item" ref="originCityRef">
-                        <ion-label position="stacked">Cidade</ion-label>
+                        <ion-label position="stacked">Cidade *</ion-label>
                         <ion-input
+                            required
                             type="text"
                             name="originCity"
                             :value="originCity"
@@ -42,12 +44,42 @@
                     </ion-item>
 
                     <ion-item class="form-item" ref="originStateRef">
-                        <ion-label position="stacked">Estado</ion-label>
-                        <ion-input
+                        <ion-label position="stacked">Estado *</ion-label>
+
+                        <ion-select
+                            ok-text="OK"
+                            cancel-text="Fechar"
+                            interface="alert"
+                            name="originState"
+                            placeholder="Digite a sigla do estado de origem"
+                            :value="originState"
+                            @ionChange="
+                                (e) =>
+                                    emit(
+                                        'fieldChange',
+                                        'originState',
+                                        e.target.value
+                                    )
+                            "
+                        >
+                            <IonSelectOption
+                                v-for="[
+                                    acronym,
+                                    state,
+                                ] in statesAcronymAndNames"
+                                :value="acronym"
+                                :key="acronym"
+                                >{{ `${state} (${acronym})` }}</IonSelectOption
+                            >
+                        </ion-select>
+
+                        <!-- <ion-input
+                            required
                             type="text"
                             name="originState"
+                            :maxlength="2"
                             :value="originState"
-                            placeholder="Digite o estado de origem"
+                            placeholder="Digite a sigla do estado de origem"
                             @ionChange="
                                 (e) =>
                                     emit(
@@ -58,10 +90,15 @@
                             "
                         >
                         </ion-input>
+
+                        <ion-note slot="helper"
+                            >Sigla do estado, tamanho máximo 2
+                            caracteres</ion-note
+                        > -->
                     </ion-item>
 
                     <ion-item class="form-item" ref="originCountryRef">
-                        <ion-label position="stacked">Cidade</ion-label>
+                        <ion-label position="stacked">País</ion-label>
                         <ion-input
                             type="text"
                             name="originCountry"
@@ -88,8 +125,9 @@
 
                 <div class="ion-padding" slot="content">
                     <ion-item class="form-item" ref="destinationCityRef">
-                        <ion-label position="stacked">Cidade</ion-label>
+                        <ion-label position="stacked">Cidade *</ion-label>
                         <ion-input
+                            required
                             type="text"
                             name="destinationCity"
                             :value="destinationCity"
@@ -107,12 +145,42 @@
                     </ion-item>
 
                     <ion-item class="form-item" ref="destinationStateRef">
-                        <ion-label position="stacked">Estado</ion-label>
-                        <ion-input
+                        <ion-label position="stacked">Estado *</ion-label>
+
+                        <ion-select
+                            ok-text="OK"
+                            cancel-text="Fechar"
+                            interface="alert"
+                            name="destinationState"
+                            placeholder="Digite a sigla do estado de destino"
+                            :value="destinationState"
+                            @ionChange="
+                                (e) =>
+                                    emit(
+                                        'fieldChange',
+                                        'destinationState',
+                                        e.target.value
+                                    )
+                            "
+                        >
+                            <IonSelectOption
+                                v-for="[
+                                    acronym,
+                                    state,
+                                ] in statesAcronymAndNames"
+                                :value="acronym"
+                                :key="acronym"
+                                >{{ `${state} (${acronym})` }}</IonSelectOption
+                            >
+                        </ion-select>
+
+                        <!-- <ion-input
+                            required
                             type="text"
                             name="destinationState"
+                            :maxlength="2"
                             :value="destinationState"
-                            placeholder="Digite o estado de destino"
+                            placeholder="Digite a sigla do estado de destino"
                             @ionChange="
                                 (e) =>
                                     emit(
@@ -123,10 +191,15 @@
                             "
                         >
                         </ion-input>
+
+                        <ion-note slot="helper"
+                            >Sigla do estado, tamanho máximo 2
+                            caracteres</ion-note
+                        > -->
                     </ion-item>
 
                     <ion-item class="form-item" ref="destinationCountryRef">
-                        <ion-label position="stacked">Cidade</ion-label>
+                        <ion-label position="stacked">País</ion-label>
                         <ion-input
                             type="text"
                             name="destinationCountry"
@@ -165,10 +238,14 @@ import {
     IonItem,
     IonLabel,
     IonInput,
+    IonSelect,
     IonAccordion,
+    IonSelectOption,
     IonAccordionGroup,
 } from '@ionic/vue';
 import { toRefs } from 'vue';
+
+import { STATES_TO_NAME } from '@/utils/location';
 
 interface IProps {
     distance: string;
@@ -192,4 +269,6 @@ const {
 } = toRefs(props);
 
 const emit = defineEmits(['fieldChange']);
+
+const statesAcronymAndNames = Object.entries(STATES_TO_NAME);
 </script>

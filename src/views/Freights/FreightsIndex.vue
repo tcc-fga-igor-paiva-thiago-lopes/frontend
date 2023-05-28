@@ -43,6 +43,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
 import { Ref, onMounted, ref } from 'vue';
 
 import {
@@ -69,6 +70,8 @@ const loading = ref(false);
 
 const store = useFreightsStore();
 
+const router = useRouter();
+
 const { loadPaginated } = store;
 
 const { freights } = storeToRefs(store);
@@ -78,7 +81,7 @@ const paginationService: Ref<PaginationService<unknown>> = ref(
 );
 
 const addItem = async () => {
-    console.log('add new item');
+    router.push({ name: 'FreightsCreate' });
 };
 
 const showItem = (item: any) => {
@@ -105,7 +108,8 @@ const freightLabel = (item: Freight) => {
 };
 
 const freightSubLabel = (item: Freight) => {
-    return `${item.originCity} (${item.originState}) -> ${item.destinationCity} (${item.destinationState})`;
+    // return `${item.originCity} (${item.originState}) --> ${item.destinationCity} (${item.destinationState})`;
+    return `${item.originCity} --> ${item.destinationCity}`;
 };
 
 onMounted(async () => {

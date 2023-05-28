@@ -5,8 +5,29 @@ import { Freight, IFreight } from '@/models/freight';
 import { inMemberOperation } from './helpers';
 import { runDatabaseOperation } from './databaseConnector';
 
+export interface IFormData extends Record<string, unknown> {
+    finished: boolean;
+    name: string;
+    description: string;
+    cargoType: string;
+    cargoWeight: string;
+    contractor: string;
+    agreedPayment: string;
+    startDatetime: string;
+    dueDatetime: string;
+    finishedDatetime: string;
+    distance: string;
+    originCountry: string;
+    originCity: string;
+    originState: string;
+    destinationCountry: string;
+    destinationCity: string;
+    destinationState: string;
+}
+
 interface IFreightsStoreState {
     _freights: Freight[];
+    _newFreight: IFormData;
 }
 
 const findFreightByAttrs = (attrs: Partial<IFreight>) =>
@@ -14,12 +35,35 @@ const findFreightByAttrs = (attrs: Partial<IFreight>) =>
 
 export const useFreightsStore = defineStore('freights', {
     state: (): IFreightsStoreState => ({
+        _newFreight: {
+            finished: false,
+            name: '',
+            description: '',
+            cargoType: '',
+            cargoWeight: '',
+            contractor: '',
+            agreedPayment: '',
+            startDatetime: '',
+            dueDatetime: '',
+            finishedDatetime: '',
+            distance: '',
+            originCountry: 'Brasil',
+            originCity: '',
+            originState: '',
+            destinationCountry: 'Brasil',
+            destinationCity: '',
+            destinationState: '',
+        },
         _freights: [] as Freight[],
     }),
     getters: {
         freights: (state: IFreightsStoreState) => state._freights,
+        newFreight: (state: IFreightsStoreState) => state._newFreight,
     },
     actions: {
+        setNewFreightAttr(field: keyof IFreight, value: any) {
+            this._newFreight[field] = value;
+        },
         mergeFreights(freights: Freight[]) {
             this._freights = [...this._freights, ...freights];
         },

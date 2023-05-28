@@ -11,6 +11,7 @@ import HomePage from '@/views/HomePage.vue';
 import NotFound from '@/views/NotFound.vue';
 import WelcomePage from '@/views/WelcomePage.vue';
 import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
+import FreightsCreate from '@/views/Freights/FreightsCreate.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -45,6 +46,12 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/freights',
         name: 'FreightsIndex',
         component: FreightsIndex,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/create',
+        name: 'FreightsCreate',
+        component: FreightsCreate,
         meta: { requiresAuth: true },
     },
     {
