@@ -1,7 +1,15 @@
 <template>
-    <ion-page>
+    <ion-page id="main-content">
         <ion-header :translucent="true">
             <ion-toolbar>
+                <ion-buttons slot="start">
+                    <ion-button
+                        @click="() => $router.push({ name: 'Welcome' })"
+                    >
+                        <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
+                    </ion-button>
+                </ion-buttons>
+
                 <ion-title>Login</ion-title>
             </ion-toolbar>
         </ion-header>
@@ -75,10 +83,14 @@ import {
     IonNote,
     IonItem,
     IonLabel,
+    IonIcon,
+    IonButtons,
 } from '@ionic/vue';
+import { arrowBack } from 'ionicons/icons';
 
 import APIAdapter from '@/services/api';
 import AuthService from '@/services/auth';
+import { useAppStore } from '@/store/app';
 import { presentToast } from '@/utils/toast';
 import APIError from '@/services/api/apiError';
 
@@ -87,6 +99,8 @@ const errorMessage = ref('');
 const email = ref('');
 const password = ref('');
 const router = useRouter();
+
+const { setUsername } = useAppStore();
 
 const validateForm = () => {
     if (!email.value || !password.value) {
@@ -124,6 +138,8 @@ const submit = async () => {
         });
 
         await AuthService.setToken(response.data.token);
+        await setUsername(response.data.name);
+
         router.push({ name: 'Home' });
     } catch (error) {
         console.error(error);

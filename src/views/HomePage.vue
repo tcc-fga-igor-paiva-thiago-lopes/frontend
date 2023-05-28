@@ -7,6 +7,8 @@
                 </ion-buttons>
 
                 <ion-title>Página inicial</ion-title>
+
+                <ConnectionStatus slot="primary" />
             </ion-toolbar>
         </ion-header>
 
@@ -43,13 +45,14 @@ import {
     IonMenuButton,
 } from '@ionic/vue';
 
-import { Ref, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useAccountsStore } from '@/store';
+import { Ref, onMounted, ref } from 'vue';
 
 import { presentToast } from '@/utils/toast';
+import { useAccountsStore } from '@/store/accounts';
 import PaginationService from '@/utils/pagination/paginationService';
 import ManageAccounts from '@/components/Management/MainComponent.vue';
+import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
 const store = useAccountsStore();
 

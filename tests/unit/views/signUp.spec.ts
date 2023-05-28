@@ -1,15 +1,30 @@
-import { createPinia, setActivePinia } from 'pinia';
 import { mount, flushPromises, VueWrapper } from '@vue/test-utils';
 import { Router, createRouter, createWebHistory } from 'vue-router';
 
 import { routes } from '@/router';
 import { presentToast } from '@/utils/toast';
+import { createTestingPinia } from '@pinia/testing';
 import { Preferences } from '@capacitor/preferences';
 
 import SignUp from '@/views/SignUp.vue';
-import { getCSSProperty } from '../../helpers';
 import APIAdapter from '@/services/api';
+import { initialState } from '@/store/app';
 import APIError from '@/services/api/apiError';
+import { getCSSProperty } from '../../helpers';
+import { DatabaseHelper } from '../../databaseHelper';
+
+const mockDataSource = DatabaseHelper.dataSource();
+
+jest.mock('@/database/databaseDataSource', () => {
+    return jest.fn().mockImplementation(() => ({
+        __esModule: true,
+        default: mockDataSource,
+    }));
+});
+
+jest.mock('@/database', () => {
+    return jest.fn().mockImplementation(() => ({ default: {} }));
+});
 
 jest.mock('@/utils/toast');
 
@@ -25,10 +40,6 @@ jest.mock('@/services/api', () => {
 
 let router: Router;
 const presentToastMock = presentToast as jest.Mock<any, any>;
-
-beforeAll(() => {
-    setActivePinia(createPinia());
-});
 
 beforeEach(async () => {
     presentToastMock.mockClear();
@@ -60,7 +71,15 @@ describe('SignUp.vue', () => {
         `ion-item:nth-child(${fieldsOrderMap[field]})>ion-input`;
 
     it('renders signup vue', () => {
-        const wrapper = mount(SignUp);
+        const wrapper = mount(SignUp, {
+            global: {
+                plugins: [
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
+            },
+        });
 
         const button = wrapper.find('form>ion-button');
 
@@ -69,7 +88,15 @@ describe('SignUp.vue', () => {
     });
 
     it('shows error message when fields are not filled', async () => {
-        const wrapper = mount(SignUp);
+        const wrapper = mount(SignUp, {
+            global: {
+                plugins: [
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
+            },
+        });
 
         wrapper.get('form>ion-button').trigger('click');
 
@@ -103,7 +130,15 @@ describe('SignUp.vue', () => {
     });
 
     it('shows error message when password length is smaller than 8', async () => {
-        const wrapper = mount(SignUp);
+        const wrapper = mount(SignUp, {
+            global: {
+                plugins: [
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
+            },
+        });
 
         wrapper.findComponent(inputQueryString('name')).setValue('John');
 
@@ -132,7 +167,15 @@ describe('SignUp.vue', () => {
     });
 
     it('shows error message when password and confirmation are different', async () => {
-        const wrapper = mount(SignUp);
+        const wrapper = mount(SignUp, {
+            global: {
+                plugins: [
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
+            },
+        });
 
         wrapper.findComponent(inputQueryString('name')).setValue('John');
 
@@ -172,7 +215,15 @@ describe('SignUp.vue', () => {
     });
 
     it('shows error message when email is invalid', async () => {
-        const wrapper = mount(SignUp);
+        const wrapper = mount(SignUp, {
+            global: {
+                plugins: [
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
+            },
+        });
 
         wrapper.findComponent(inputQueryString('email')).setValue('john@mail.');
 
@@ -189,7 +240,12 @@ describe('SignUp.vue', () => {
     it('sends request when all required data is filled properly', async () => {
         const wrapper = mount(SignUp, {
             global: {
-                plugins: [router],
+                plugins: [
+                    router,
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
             },
         });
 
@@ -264,7 +320,12 @@ describe('SignUp.vue', () => {
     it('shows API error message when request fails', async () => {
         const wrapper = mount(SignUp, {
             global: {
-                plugins: [router],
+                plugins: [
+                    router,
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
             },
         });
 

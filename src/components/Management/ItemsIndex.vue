@@ -25,7 +25,7 @@
                 ></ion-icon>
 
                 <ion-icon
-                    :icon="trash"
+                    :icon="trashSharp"
                     size="large"
                     color="danger"
                     title="Remover item"
@@ -80,8 +80,8 @@ import {
     IonInfiniteScroll,
     IonInfiniteScrollContent,
 } from '@ionic/vue';
+import { trashSharp, pencil } from 'ionicons/icons';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core';
-import { trash, pencil } from 'ionicons/icons';
 
 import PaginationService from '@/utils/pagination/paginationService';
 

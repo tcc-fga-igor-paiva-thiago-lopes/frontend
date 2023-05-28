@@ -7,6 +7,8 @@
                 </ion-buttons>
 
                 <ion-title>Fretes</ion-title>
+
+                <ConnectionStatus slot="primary" />
             </ion-toolbar>
         </ion-header>
 
@@ -43,6 +45,7 @@ import {
 
 import { IFormData } from '@/components/Freights';
 import FreightsForm from '@/components/Freights/FreightsForm.vue';
+import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
 const loading = ref(false);
 

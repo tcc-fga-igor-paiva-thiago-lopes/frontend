@@ -1,11 +1,9 @@
 import { mount } from '@vue/test-utils';
-import { createPinia, setActivePinia } from 'pinia';
+
+import { initialState } from '@/store/app';
+import { createTestingPinia } from '@pinia/testing';
 
 import WelcomePage from '@/views/WelcomePage.vue';
-
-beforeAll(() => {
-    setActivePinia(createPinia());
-});
 
 describe('WelcomePage.vue', () => {
     it('renders welcome vue', async () => {
@@ -22,6 +20,11 @@ describe('WelcomePage.vue', () => {
 
         const wrapper = mount(WelcomePage, {
             global: {
+                plugins: [
+                    createTestingPinia({
+                        initialState: { application: initialState() },
+                    }),
+                ],
                 mocks: {
                     $router: mockRouter,
                 },
