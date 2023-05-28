@@ -8,7 +8,7 @@
                 name="distance"
                 inputmode="decimal"
                 :value="distance"
-                placeholder="Digite a distância entre origem e destino em quilômetros"
+                placeholder="Digite a distância entre origem e destino"
                 @ionChange="
                     (e) => emit('fieldChange', 'distance', e.target.value)
                 "
@@ -29,6 +29,7 @@
                             required
                             type="text"
                             name="originCity"
+                            :maxlength="50"
                             :value="originCity"
                             placeholder="Digite a cidade de origem"
                             @ionChange="
@@ -41,6 +42,10 @@
                             "
                         >
                         </ion-input>
+
+                        <ion-note slot="helper"
+                            >Tamanho máximo 50 caracteres</ion-note
+                        >
                     </ion-item>
 
                     <ion-item class="form-item" ref="originStateRef">
@@ -130,6 +135,7 @@
                             required
                             type="text"
                             name="destinationCity"
+                            :maxlength="50"
                             :value="destinationCity"
                             placeholder="Digite a cidade de destino"
                             @ionChange="
@@ -142,6 +148,10 @@
                             "
                         >
                         </ion-input>
+
+                        <ion-note slot="helper"
+                            >Tamanho máximo 50 caracteres</ion-note
+                        >
                     </ion-item>
 
                     <ion-item class="form-item" ref="destinationStateRef">
@@ -236,6 +246,7 @@
 <script setup lang="ts">
 import {
     IonItem,
+    IonNote,
     IonLabel,
     IonInput,
     IonSelect,
