@@ -55,7 +55,7 @@ export class Freight extends AppBaseEntity implements IFreight {
     @Column({ nullable: false })
     distance!: number;
 
-    @Column({ name: 'start_date', nullable: false })
+    @Column({ name: 'start_date' })
     startDate!: Date;
 
     @Column({ name: 'due_date' })

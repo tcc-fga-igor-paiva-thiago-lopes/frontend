@@ -49,7 +49,7 @@ export class AddsFreightTable1685069028734 implements MigrationInterface {
                     {
                         name: 'start_date',
                         type: 'datetime',
-                        isNullable: false,
+                        isNullable: true,
                     },
                     {
                         name: 'due_date',
