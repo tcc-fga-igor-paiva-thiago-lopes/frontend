@@ -54,9 +54,12 @@
                         <ion-select
                             ok-text="OK"
                             cancel-text="Fechar"
-                            interface="alert"
                             name="originState"
+                            interface="action-sheet"
                             placeholder="Digite a sigla do estado de origem"
+                            :interface-options="{
+                                cssClass: 'action-sheet-custom-class',
+                            }"
                             :value="originState"
                             @ionChange="
                                 (e) =>
@@ -77,29 +80,6 @@
                                 >{{ `${state} (${acronym})` }}</IonSelectOption
                             >
                         </ion-select>
-
-                        <!-- <ion-input
-                            required
-                            type="text"
-                            name="originState"
-                            :maxlength="2"
-                            :value="originState"
-                            placeholder="Digite a sigla do estado de origem"
-                            @ionChange="
-                                (e) =>
-                                    emit(
-                                        'fieldChange',
-                                        'originState',
-                                        e.target.value
-                                    )
-                            "
-                        >
-                        </ion-input>
-
-                        <ion-note slot="helper"
-                            >Sigla do estado, tamanho máximo 2
-                            caracteres</ion-note
-                        > -->
                     </ion-item>
 
                     <ion-item class="form-item" ref="originCountryRef">
@@ -160,8 +140,11 @@
                         <ion-select
                             ok-text="OK"
                             cancel-text="Fechar"
-                            interface="alert"
                             name="destinationState"
+                            interface="action-sheet"
+                            :interface-options="{
+                                cssClass: 'action-sheet-custom-class',
+                            }"
                             placeholder="Digite a sigla do estado de destino"
                             :value="destinationState"
                             @ionChange="
@@ -183,29 +166,6 @@
                                 >{{ `${state} (${acronym})` }}</IonSelectOption
                             >
                         </ion-select>
-
-                        <!-- <ion-input
-                            required
-                            type="text"
-                            name="destinationState"
-                            :maxlength="2"
-                            :value="destinationState"
-                            placeholder="Digite a sigla do estado de destino"
-                            @ionChange="
-                                (e) =>
-                                    emit(
-                                        'fieldChange',
-                                        'destinationState',
-                                        e.target.value
-                                    )
-                            "
-                        >
-                        </ion-input>
-
-                        <ion-note slot="helper"
-                            >Sigla do estado, tamanho máximo 2
-                            caracteres</ion-note
-                        > -->
                     </ion-item>
 
                     <ion-item class="form-item" ref="destinationCountryRef">
@@ -240,6 +200,11 @@
 
 .form-item {
     margin: 8px 0;
+}
+
+.action-sheet-custom-class .action-sheet-cancel {
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
 }
 </style>
 
