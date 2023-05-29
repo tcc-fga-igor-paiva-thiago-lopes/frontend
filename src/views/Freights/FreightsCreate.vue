@@ -41,8 +41,8 @@ import {
     IonMenuButton,
 } from '@ionic/vue';
 
-import { IFormData, useFreightsStore } from '@/store/freights';
-
+import { IFormData } from '@/components/Freights';
+import { useFreightsStore } from '@/store/freights';
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 import FreightsForm from '@/components/Freights/FreightsForm.vue';
 

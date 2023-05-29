@@ -100,10 +100,10 @@ import { home, navigate, logOut, personCircleSharp } from 'ionicons/icons';
 import { useAppStore } from './store/app';
 import AuthService from './services/auth';
 import { presentToast } from './utils/toast';
+import { presentConfirmationAlert } from './utils/alert';
 import { isRouteOfflinePermitted } from './utils/offline';
 
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
-import { presentConfirmationAlert } from './utils/alert';
 
 interface IMenuOption {
     icon: string;

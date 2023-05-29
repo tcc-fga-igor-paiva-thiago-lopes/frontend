@@ -1,19 +1,25 @@
 <template>
     <form class="form">
-        <ion-item class="form-item" ref="distanceRef">
+        <ion-item class="form-item" :ref="fields.distance.ref">
             <ion-label position="stacked">Distância (km) *</ion-label>
             <ion-input
                 required
                 type="number"
                 name="distance"
                 inputmode="decimal"
-                :value="distance"
+                :value="fields.distance.value"
                 placeholder="Digite a distância entre origem e destino"
                 @ionChange="
                     (e) => emit('fieldChange', 'distance', e.target.value)
                 "
             >
             </ion-input>
+
+            <InputErrorNote
+                field="distance"
+                defaultMsg="Distância inválida"
+                :validationErrors="validationErrors"
+            />
         </ion-item>
 
         <ion-accordion-group multiple :value="['origin', 'destination']">
@@ -23,14 +29,14 @@
                 </ion-item>
 
                 <div class="ion-padding" slot="content">
-                    <ion-item class="form-item" ref="originCityRef">
+                    <ion-item class="form-item" :ref="fields.originCity.ref">
                         <ion-label position="stacked">Cidade *</ion-label>
                         <ion-input
                             required
                             type="text"
                             name="originCity"
                             :maxlength="50"
-                            :value="originCity"
+                            :value="fields.originCity.value"
                             placeholder="Digite a cidade de origem"
                             @ionChange="
                                 (e) =>
@@ -46,9 +52,15 @@
                         <ion-note slot="helper"
                             >Tamanho máximo 50 caracteres</ion-note
                         >
+
+                        <InputErrorNote
+                            field="originCity"
+                            defaultMsg="Cidade de origem inválida"
+                            :validationErrors="validationErrors"
+                        />
                     </ion-item>
 
-                    <ion-item class="form-item" ref="originStateRef">
+                    <ion-item class="form-item" :ref="fields.originState.ref">
                         <ion-label position="stacked">Estado *</ion-label>
 
                         <ion-select
@@ -60,7 +72,7 @@
                             :interface-options="{
                                 cssClass: 'action-sheet-custom-class',
                             }"
-                            :value="originState"
+                            :value="fields.originState.value"
                             @ionChange="
                                 (e) =>
                                     emit(
@@ -80,14 +92,20 @@
                                 >{{ `${state} (${acronym})` }}</IonSelectOption
                             >
                         </ion-select>
+
+                        <InputErrorNote
+                            field="originState"
+                            defaultMsg="Estado de origem inválido"
+                            :validationErrors="validationErrors"
+                        />
                     </ion-item>
 
-                    <ion-item class="form-item" ref="originCountryRef">
+                    <ion-item class="form-item" :ref="fields.originCountry.ref">
                         <ion-label position="stacked">País</ion-label>
                         <ion-input
                             type="text"
                             name="originCountry"
-                            :value="originCountry"
+                            :value="fields.originCountry.value"
                             placeholder="Digite o país de origem"
                             @ionChange="
                                 (e) =>
@@ -99,6 +117,12 @@
                             "
                         >
                         </ion-input>
+
+                        <InputErrorNote
+                            field="originCountry"
+                            defaultMsg="País de origem inválido"
+                            :validationErrors="validationErrors"
+                        />
                     </ion-item>
                 </div>
             </ion-accordion>
@@ -109,14 +133,17 @@
                 </ion-item>
 
                 <div class="ion-padding" slot="content">
-                    <ion-item class="form-item" ref="destinationCityRef">
+                    <ion-item
+                        class="form-item"
+                        :ref="fields.destinationCity.ref"
+                    >
                         <ion-label position="stacked">Cidade *</ion-label>
                         <ion-input
                             required
                             type="text"
                             name="destinationCity"
                             :maxlength="50"
-                            :value="destinationCity"
+                            :value="fields.destinationCity.value"
                             placeholder="Digite a cidade de destino"
                             @ionChange="
                                 (e) =>
@@ -132,9 +159,18 @@
                         <ion-note slot="helper"
                             >Tamanho máximo 50 caracteres</ion-note
                         >
+
+                        <InputErrorNote
+                            field="destinationCity"
+                            defaultMsg="Cidade de destino inválida"
+                            :validationErrors="validationErrors"
+                        />
                     </ion-item>
 
-                    <ion-item class="form-item" ref="destinationStateRef">
+                    <ion-item
+                        class="form-item"
+                        :ref="fields.destinationState.ref"
+                    >
                         <ion-label position="stacked">Estado *</ion-label>
 
                         <ion-select
@@ -146,7 +182,7 @@
                                 cssClass: 'action-sheet-custom-class',
                             }"
                             placeholder="Digite a sigla do estado de destino"
-                            :value="destinationState"
+                            :value="fields.destinationState.value"
                             @ionChange="
                                 (e) =>
                                     emit(
@@ -166,14 +202,23 @@
                                 >{{ `${state} (${acronym})` }}</IonSelectOption
                             >
                         </ion-select>
+
+                        <InputErrorNote
+                            field="destinationState"
+                            defaultMsg="Estado de destino inválido"
+                            :validationErrors="validationErrors"
+                        />
                     </ion-item>
 
-                    <ion-item class="form-item" ref="destinationCountryRef">
+                    <ion-item
+                        class="form-item"
+                        :ref="fields.destinationCountry.ref"
+                    >
                         <ion-label position="stacked">País</ion-label>
                         <ion-input
                             type="text"
                             name="destinationCountry"
-                            :value="destinationCountry"
+                            :value="fields.destinationCountry.value"
                             placeholder="Digite o país de destino"
                             @ionChange="
                                 (e) =>
@@ -185,6 +230,12 @@
                             "
                         >
                         </ion-input>
+
+                        <InputErrorNote
+                            field="destinationState"
+                            defaultMsg="País de destino inválido"
+                            :validationErrors="validationErrors"
+                        />
                     </ion-item>
                 </div>
             </ion-accordion>
@@ -209,6 +260,8 @@
 </style>
 
 <script setup lang="ts">
+import { Ref, toRefs } from 'vue';
+
 import {
     IonItem,
     IonNote,
@@ -219,30 +272,19 @@ import {
     IonSelectOption,
     IonAccordionGroup,
 } from '@ionic/vue';
-import { toRefs } from 'vue';
 
 import { STATES_TO_NAME } from '@/utils/location';
+import { ILocationInfoFields } from '.';
+import { ValidationErrors } from '@/utils/errors';
+import InputErrorNote from '../InputErrorNote.vue';
 
 interface IProps {
-    distance: string;
-    originCountry: string;
-    originCity: string;
-    originState: string;
-    destinationCountry: string;
-    destinationCity: string;
-    destinationState: string;
+    fields: ILocationInfoFields;
+    validationErrors: ValidationErrors;
 }
 const props = defineProps<IProps>();
 
-const {
-    distance,
-    originCountry,
-    originCity,
-    originState,
-    destinationCountry,
-    destinationCity,
-    destinationState,
-} = toRefs(props);
+const { fields, validationErrors } = toRefs(props);
 
 const emit = defineEmits(['fieldChange']);
 
