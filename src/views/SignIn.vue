@@ -46,10 +46,7 @@
                     </ion-item>
                 </ion-list>
 
-                <ion-text
-                    color="danger on-align-self-center"
-                    v-if="!loading && !!errorMessage"
-                >
+                <ion-text color="danger" v-if="!loading && !!errorMessage">
                     <h6>{{ errorMessage }}</h6>
                 </ion-text>
 
