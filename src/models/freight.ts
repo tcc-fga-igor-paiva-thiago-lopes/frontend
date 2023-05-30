@@ -55,13 +55,13 @@ export class Freight extends AppBaseEntity implements IFreight {
     @Column({ nullable: false })
     distance!: number;
 
-    @Column({ name: 'start_date' })
+    @Column({ name: 'start_date', nullable: false })
     startDate!: Date;
 
-    @Column({ name: 'due_date' })
+    @Column({ name: 'due_date', nullable: true })
     dueDate!: Date;
 
-    @Column({ name: 'finished_date' })
+    @Column({ name: 'finished_date', nullable: true })
     finishedDate!: Date;
 
     @Column({ name: 'origin_city', nullable: false })
@@ -70,13 +70,13 @@ export class Freight extends AppBaseEntity implements IFreight {
     @Column({ name: 'origin_state', nullable: false })
     originState!: string;
 
-    @Column({ name: 'origin_country' })
+    @Column({ name: 'origin_country', nullable: true })
     originCountry!: string;
 
-    @Column({ name: 'origin_latitude' })
+    @Column({ name: 'origin_latitude', nullable: true })
     originLatitude!: number;
 
-    @Column({ name: 'origin_longitude' })
+    @Column({ name: 'origin_longitude', nullable: true })
     originLongitude!: number;
 
     @Column({ name: 'destination_city', nullable: false })
@@ -85,19 +85,19 @@ export class Freight extends AppBaseEntity implements IFreight {
     @Column({ name: 'destination_state', nullable: false })
     destinationState!: string;
 
-    @Column({ name: 'destination_country' })
+    @Column({ name: 'destination_country', nullable: true })
     destinationCountry!: string;
 
-    @Column({ name: 'destination_latitude' })
+    @Column({ name: 'destination_latitude', nullable: true })
     destinationLatitude!: number;
 
-    @Column({ name: 'destination_longitude' })
+    @Column({ name: 'destination_longitude', nullable: true })
     destinationLongitude!: number;
 
     @CreateDateColumn({ name: 'created_at', nullable: false })
     createdAt!: Date;
 
-    @UpdateDateColumn({ name: 'updated_at' })
+    @UpdateDateColumn({ name: 'updated_at', nullable: true })
     updatedAt!: Date;
 
     static async findPaginated(pageSize: number, pageNum = 1) {
