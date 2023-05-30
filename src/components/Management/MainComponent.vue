@@ -82,9 +82,9 @@ interface IProps {
     label: (item: any) => string;
     subLabel?: (item: any) => string;
     addItem: () => void;
-    editItem: (item: any) => void;
-    showItem: (item: any) => void;
-    removeItem: (item: any) => void;
+    editItem: (item: any) => Promise<void>;
+    showItem: (item: any) => Promise<void>;
+    removeItem: (item: any) => Promise<void>;
     loadMoreItems: () => Promise<unknown>;
 }
 

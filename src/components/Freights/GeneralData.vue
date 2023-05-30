@@ -3,6 +3,7 @@
         <ion-item lines="none">
             <ion-checkbox
                 slot="start"
+                :disabled="readonly"
                 :value="fields.finished.value"
                 @ionChange="(e) => setAttribute('finished', e.target.checked)"
             ></ion-checkbox>
@@ -16,13 +17,16 @@
                 type="text"
                 name="cargo"
                 :maxlength="30"
+                :disabled="readonly"
                 :value="fields.cargo.value"
                 placeholder="Digite o tipo de carga deste frete"
                 @ionChange="(e) => setAttribute('cargo', e.target.value)"
             >
             </ion-input>
 
-            <ion-note slot="helper">Tamanho máximo 30 caracteres</ion-note>
+            <ion-note v-if="!readonly" slot="helper"
+                >Tamanho máximo 30 caracteres</ion-note
+            >
 
             <InputErrorNote
                 field="cargo"
@@ -38,6 +42,7 @@
                 type="number"
                 name="cargoWeight"
                 inputmode="decimal"
+                :disabled="readonly"
                 :value="fields.cargoWeight.value"
                 placeholder="Digite o peso da carga deste frete"
                 @ionChange="(e) => setAttribute('cargoWeight', e.target.value)"
@@ -57,14 +62,17 @@
                 required
                 type="text"
                 name="contractor"
-                :value="fields.contractor.value"
                 :maxlength="60"
+                :disabled="readonly"
+                :value="fields.contractor.value"
                 placeholder="Digite o contratante deste frete"
                 @ionChange="(e) => setAttribute('contractor', e.target.value)"
             >
             </ion-input>
 
-            <ion-note slot="helper">Tamanho máximo 60 caracteres</ion-note>
+            <ion-note v-if="!readonly" slot="helper"
+                >Tamanho máximo 60 caracteres</ion-note
+            >
 
             <InputErrorNote
                 field="contractor"
@@ -80,6 +88,7 @@
                 type="number"
                 inputmode="decimal"
                 name="agreedPayment"
+                :disabled="readonly"
                 :value="fields.agreedPayment.value"
                 placeholder="Digite o pagamento acordado"
                 @ionChange="
@@ -102,11 +111,14 @@
 
             <DatetimeButton
                 identifier="dueDate"
+                :disabled="readonly"
                 :value="fields.dueDate.value"
                 @valueChange="(e) => setAttribute('dueDate', e.target.value)"
             />
 
-            <ion-note slot="helper">Data limite acordada para o frete</ion-note>
+            <ion-note v-if="!readonly" slot="helper"
+                >Data limite acordada para o frete</ion-note
+            >
         </ion-item>
 
         <ion-item class="form-item" :ref="fields.startDate.ref">
@@ -116,6 +128,7 @@
 
             <DatetimeButton
                 identifier="startDate"
+                :disabled="readonly"
                 :value="fields.startDate.value"
                 @valueChange="(e) => setAttribute('startDate', e.target.value)"
             />
@@ -127,25 +140,23 @@
             />
         </ion-item>
 
-        <ion-item
-            class="form-item"
-            :ref="fields.finishedDate.ref"
-            :disabled="!fields.finished.value"
-        >
+        <ion-item class="form-item" :ref="fields.finishedDate.ref">
             <ion-label position="stacked" style="margin-bottom: 16px"
                 >Data de conclusão</ion-label
             >
 
             <DatetimeButton
                 identifier="finishedDate"
-                :disabled="!fields.finished.value"
                 :value="fields.finishedDate.value"
+                :disabled="readonly || !fields.finished.value"
                 @valueChange="
                     (e) => setAttribute('finishedDate', e.target.value)
                 "
             />
 
-            <ion-note slot="helper">Só pode ser defindio</ion-note>
+            <ion-note v-if="!readonly" slot="helper"
+                >Só pode ser alterado se o frete estiver finalizado</ion-note
+            >
         </ion-item>
 
         <ion-item class="form-item" :ref="fields.description.ref">
@@ -158,13 +169,16 @@
                 name="description"
                 :maxlength="500"
                 :auto-grow="true"
+                :disabled="readonly"
                 :value="fields.description.value"
                 placeholder="Digite uma descrição para este frete"
                 @ionChange="(e) => setAttribute('description', e.target.value)"
             >
             </ion-textarea>
 
-            <ion-note slot="helper">Tamanho máximo 500 caracteres</ion-note>
+            <ion-note v-if="!readonly" slot="helper"
+                >Tamanho máximo 500 caracteres</ion-note
+            >
 
             <InputErrorNote
                 field="description"
@@ -204,11 +218,12 @@ import { ValidationErrors } from '@/utils/errors';
 import { IGeneralDataFields } from '.';
 
 interface IProps {
+    readonly?: boolean;
     fields: IGeneralDataFields;
     validationErrors: ValidationErrors;
     setAttribute: (field: string, value: unknown) => void;
 }
 const props = defineProps<IProps>();
 
-const { fields, validationErrors, setAttribute } = toRefs(props);
+const { fields, readonly, validationErrors, setAttribute } = toRefs(props);
 </script>

@@ -21,8 +21,8 @@
                 :label="freightLabel"
                 :subLabel="freightSubLabel"
                 :items="freights"
-                :addItem="addItem"
-                :showItem="showItem"
+                :addItem="createFreight"
+                :showItem="showFreight"
                 :editItem="editItem"
                 :removeItem="removeItem"
                 :loadMoreItems="loadMoreItems"
@@ -65,7 +65,7 @@ const store = useFreightsStore();
 
 const router = useRouter();
 
-const { loadPaginated } = store;
+const { loadPaginated, removeFreight } = store;
 
 const { freights } = storeToRefs(store);
 
@@ -73,20 +73,20 @@ const paginationService: Ref<PaginationService<unknown>> = ref(
     new PaginationService(loadPaginated, 10)
 );
 
-const addItem = async () => {
-    router.push({ name: 'FreightsCreate' });
+const createFreight = async () => {
+    await router.push({ name: 'FreightCreate' });
 };
 
-const showItem = (item: any) => {
-    console.log('Show: ', item);
+const showFreight = async (item: Freight) => {
+    await router.push({ name: 'FreightShow', params: { freightId: item.id } });
 };
 
-const editItem = (item: any) => {
+const editItem = async (item: any) => {
     console.log('Edit: ', item);
 };
 
-const removeItem = (item: any) => {
-    console.log('Remove: ', item);
+const removeItem = async (item: Freight) => {
+    await removeFreight(item.id);
 };
 
 const loadMoreItems = () => paginationService.value.getNextPage();

@@ -1,5 +1,8 @@
 <template>
-    <ion-datetime-button :datetime="identifier"></ion-datetime-button>
+    <ion-datetime-button
+        :datetime="identifier"
+        :disabled="disabled"
+    ></ion-datetime-button>
 
     <ion-modal :keep-contents-mounted="true">
         <ion-datetime
@@ -19,12 +22,13 @@ import { IonModal, IonDatetime, IonDatetimeButton } from '@ionic/vue';
 import { toRefs } from 'vue';
 
 interface IProps {
-    value: string;
     identifier: string;
+    disabled?: boolean;
+    value?: string | null;
 }
-const props = defineProps<IProps>();
+const props = withDefaults(defineProps<IProps>(), { disabled: false });
 
-const { value, identifier } = toRefs(props);
+const { value, disabled, identifier } = toRefs(props);
 
 const emit = defineEmits(['valueChange']);
 </script>

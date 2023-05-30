@@ -10,8 +10,9 @@ import SignIn from '../views/SignIn.vue';
 import HomePage from '@/views/HomePage.vue';
 import NotFound from '@/views/NotFound.vue';
 import WelcomePage from '@/views/WelcomePage.vue';
+import FreightShow from '@/views/Freights/FreightShow.vue';
 import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
-import FreightsCreate from '@/views/Freights/FreightsCreate.vue';
+import FreightCreate from '@/views/Freights/FreightCreate.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -42,6 +43,7 @@ export const routes: Array<RouteRecordRaw> = [
         component: SignIn,
         meta: { requiresAuth: false },
     },
+
     {
         path: '/freights',
         name: 'FreightsIndex',
@@ -50,8 +52,14 @@ export const routes: Array<RouteRecordRaw> = [
     },
     {
         path: '/freights/create',
-        name: 'FreightsCreate',
-        component: FreightsCreate,
+        name: 'FreightCreate',
+        component: FreightCreate,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/:freightId(\\d+)',
+        name: 'FreightShow',
+        component: FreightShow,
         meta: { requiresAuth: true },
     },
     {

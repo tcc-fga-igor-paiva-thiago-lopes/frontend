@@ -89,7 +89,7 @@ const handleFormSubmit = async ({
 
     await presentToast('Frete criada com sucesso!', 'success');
 
-    router.replace({ name: 'FreightsIndex' });
+    await router.replace({ name: 'FreightsIndex' });
 };
 
 const changeField = (field: string, value: unknown) => {

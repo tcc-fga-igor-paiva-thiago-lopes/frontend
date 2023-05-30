@@ -7,6 +7,7 @@
                 type="number"
                 name="distance"
                 inputmode="decimal"
+                :disabled="readonly"
                 :value="fields.distance.value"
                 placeholder="Digite a distância entre origem e destino"
                 @ionChange="(e) => setAttribute('distance', e.target.value)"
@@ -34,6 +35,7 @@
                             type="text"
                             name="originCity"
                             :maxlength="50"
+                            :disabled="readonly"
                             :value="fields.originCity.value"
                             placeholder="Digite a cidade de origem"
                             @ionChange="
@@ -43,7 +45,7 @@
                         >
                         </ion-input>
 
-                        <ion-note slot="helper"
+                        <ion-note v-if="!readonly" slot="helper"
                             >Tamanho máximo 50 caracteres</ion-note
                         >
 
@@ -63,10 +65,11 @@
                             name="originState"
                             interface="action-sheet"
                             placeholder="Digite a sigla do estado de origem"
+                            :disabled="readonly"
+                            :value="fields.originState.value"
                             :interface-options="{
                                 cssClass: 'action-sheet-custom-class',
                             }"
-                            :value="fields.originState.value"
                             @ionChange="
                                 (e) =>
                                     setAttribute('originState', e.target.value)
@@ -95,6 +98,7 @@
                         <ion-input
                             type="text"
                             name="originCountry"
+                            :disabled="readonly"
                             :value="fields.originCountry.value"
                             placeholder="Digite o país de origem"
                             @ionChange="
@@ -132,6 +136,7 @@
                             type="text"
                             name="destinationCity"
                             :maxlength="50"
+                            :disabled="readonly"
                             :value="fields.destinationCity.value"
                             placeholder="Digite a cidade de destino"
                             @ionChange="
@@ -144,7 +149,7 @@
                         >
                         </ion-input>
 
-                        <ion-note slot="helper"
+                        <ion-note v-if="!readonly" slot="helper"
                             >Tamanho máximo 50 caracteres</ion-note
                         >
 
@@ -166,11 +171,12 @@
                             cancel-text="Fechar"
                             name="destinationState"
                             interface="action-sheet"
+                            :disabled="readonly"
+                            :value="fields.destinationState.value"
                             :interface-options="{
                                 cssClass: 'action-sheet-custom-class',
                             }"
                             placeholder="Digite a sigla do estado de destino"
-                            :value="fields.destinationState.value"
                             @ionChange="
                                 (e) =>
                                     setAttribute(
@@ -205,6 +211,7 @@
                         <ion-input
                             type="text"
                             name="destinationCountry"
+                            :disabled="readonly"
                             :value="fields.destinationCountry.value"
                             placeholder="Digite o país de destino"
                             @ionChange="
@@ -265,13 +272,14 @@ import { ValidationErrors } from '@/utils/errors';
 import InputErrorNote from '../InputErrorNote.vue';
 
 interface IProps {
+    readonly?: boolean;
     fields: ILocationInfoFields;
     validationErrors: ValidationErrors;
     setAttribute: (field: string, value: unknown) => void;
 }
 const props = defineProps<IProps>();
 
-const { fields, validationErrors } = toRefs(props);
+const { fields, readonly, validationErrors } = toRefs(props);
 
 const statesAcronymAndNames = Object.entries(STATES_TO_NAME);
 </script>

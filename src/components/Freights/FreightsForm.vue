@@ -2,6 +2,7 @@
     <StepperComponent
         :steps="steps"
         :activeStep="step"
+        :hideSubmit="readonly"
         lastStepActionLabel="Criar frete"
         contentPadding="0 0 16px 0"
         @lastStepAction="handleSubmit"
@@ -10,6 +11,7 @@
         <template v-slot:content>
             <GeneralData
                 v-if="step === 0"
+                :readonly="readonly"
                 :fields="generalDataFields"
                 :setAttribute="setAttribute"
                 :validationErrors="generalDataValidationErrors"
@@ -17,6 +19,7 @@
 
             <LocationInfo
                 v-if="step === 1"
+                :readonly="readonly"
                 :fields="locationInfoFields"
                 :setAttribute="setAttribute"
                 :validationErrors="locationInfoValidationErrors"
@@ -58,12 +61,13 @@ import {
 } from '@/utils/errors';
 
 interface IProps {
+    readonly?: boolean;
     formData: IFormData;
     setAttribute: (field: string, value: unknown) => void;
 }
 const props = defineProps<IProps>();
 
-const { formData, setAttribute } = toRefs(props);
+const { readonly, formData, setAttribute } = toRefs(props);
 
 const emit = defineEmits(['onSubmit']);
 

@@ -7,7 +7,11 @@ import { runDatabaseOperation } from './databaseConnector';
 import { useAppStore } from './app';
 import APIAdapter from '@/services/api';
 import { IFormData } from '@/components/Freights';
-import { convertAttributes, stringToFloat } from '@/utils/conversion';
+import {
+    stringToFloat,
+    instanceToObject,
+    convertAttributes,
+} from '@/utils/conversion';
 
 interface IFreightsStoreState {
     _freights: Freight[];
@@ -84,8 +88,19 @@ export const useFreightsStore = defineStore('freights', {
 
             return paginationRet;
         },
-        async findFreight(id: IFreight['id']) {
-            return Freight.findOneBy({ id });
+        async findFreight(id: IFreight['id'], asFormData = false) {
+            const freight = await Freight.findOneBy({ id });
+
+            if (!freight) return null;
+
+            if (asFormData) {
+                return instanceToObject<Freight>(
+                    freight,
+                    Freight.getRepository()
+                ) as IFormData;
+            }
+
+            return freight;
         },
         async createFreight() {
             let freight: Freight;

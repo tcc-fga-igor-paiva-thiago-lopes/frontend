@@ -5,7 +5,7 @@
             lines="full"
             v-for="item in items"
             :key="item.id"
-            @click="() => showItem(item)"
+            @click="(ev) => handleShow(ev, item)"
         >
             <!-- <ion-checkbox slot="start"></ion-checkbox> -->
 
@@ -95,8 +95,8 @@ interface IProps {
     paginationService: PaginationService<unknown>;
     label: (item: any) => string;
     subLabel?: (item: any) => string;
-    editItem: (item: any) => void;
-    showItem: (item: any) => void;
+    editItem: (item: any) => Promise<void>;
+    showItem: (item: any) => Promise<void>;
     removeItem: (item: any) => Promise<any>;
     loadMoreItems: () => Promise<unknown>;
 }
@@ -106,7 +106,8 @@ const props = defineProps<IProps>();
 const { items, itemsName, paginationService } = toRefs(props);
 
 // eslint-disable-next-line vue/no-setup-props-destructure
-const { editItem, removeItem, label, subLabel, loadMoreItems } = props;
+const { showItem, editItem, removeItem, label, subLabel, loadMoreItems } =
+    props;
 
 const hasPagination = () =>
     items.value.length < paginationService.value.totalResults;
@@ -117,16 +118,22 @@ const getPaginationMessage = () => {
     return `Exibindo ${items.value.length} ${lowerCaseName} de ${paginationService.value.totalResults} ${lowerCaseName}`;
 };
 
-const handleEdit = (ev: MouseEvent, item: any) => {
-    editItem(item);
-
+const handleShow = async (ev: MouseEvent, item: any) => {
     ev.stopPropagation();
+
+    await showItem(item);
+};
+
+const handleEdit = async (ev: MouseEvent, item: any) => {
+    ev.stopPropagation();
+
+    await editItem(item);
 };
 
 const handleRemoval = async (ev: MouseEvent, item: any) => {
-    await removeItem(item);
-
     ev.stopPropagation();
+
+    await removeItem(item);
 };
 
 const handleInfiniteScroll = async (ev: IonInfiniteScrollCustomEvent<void>) => {
