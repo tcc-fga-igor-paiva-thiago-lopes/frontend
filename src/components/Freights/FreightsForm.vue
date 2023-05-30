@@ -11,15 +11,15 @@
             <GeneralData
                 v-if="step === 0"
                 :fields="generalDataFields"
+                :setAttribute="setAttribute"
                 :validationErrors="generalDataValidationErrors"
-                @field-change="handleFieldChange"
             />
 
             <LocationInfo
                 v-if="step === 1"
                 :fields="locationInfoFields"
+                :setAttribute="setAttribute"
                 :validationErrors="locationInfoValidationErrors"
-                @field-change="handleFieldChange"
             />
 
             <ion-text color="danger" v-if="!!errorMessage">
@@ -59,12 +59,13 @@ import {
 
 interface IProps {
     formData: IFormData;
+    setAttribute: (field: string, value: unknown) => void;
 }
 const props = defineProps<IProps>();
 
-const { formData } = toRefs(props);
+const { formData, setAttribute } = toRefs(props);
 
-const emit = defineEmits(['onSubmit', 'onFieldChange']);
+const emit = defineEmits(['onSubmit']);
 
 const steps = [
     {
@@ -89,9 +90,9 @@ const finishedRef = ref('');
 const cargoWeightRef = ref('');
 const contractorRef = ref('');
 const agreedPaymentRef = ref('');
-const dueDatetimeRef = ref('');
-const startDatetimeRef = ref('');
-const finishedDatetimeRef = ref('');
+const dueDateRef = ref('');
+const startDateRef = ref('');
+const finishedDateRef = ref('');
 const descriptionRef = ref('');
 
 const distanceRef = ref('');
@@ -126,17 +127,17 @@ const generalDataFields = computed<IGeneralDataFields>(() => ({
         value: formData.value.agreedPayment,
         ref: agreedPaymentRef,
     },
-    dueDatetime: {
-        value: formData.value.dueDatetime,
-        ref: dueDatetimeRef,
+    dueDate: {
+        value: formData.value.dueDate,
+        ref: dueDateRef,
     },
-    startDatetime: {
-        value: formData.value.startDatetime,
-        ref: startDatetimeRef,
+    startDate: {
+        value: formData.value.startDate,
+        ref: startDateRef,
     },
-    finishedDatetime: {
-        value: formData.value.finishedDatetime,
-        ref: finishedDatetimeRef,
+    finishedDate: {
+        value: formData.value.finishedDate,
+        ref: finishedDateRef,
     },
     description: {
         value: formData.value.description,
@@ -178,10 +179,6 @@ const locationInfoFields = computed<ILocationInfoFields>(() => ({
 const freightRequiredFields = Freight.getRepository()
     .metadata.columns.filter((column) => !column.isNullable)
     .map((column) => column.propertyName);
-
-const handleFieldChange = (field: string, value: unknown) => {
-    emit('onFieldChange', field, value);
-};
 
 const validateGeneralData = () => {
     let validFields = true;
@@ -251,7 +248,28 @@ const handleStepChange = (newStep: number) => {
 
 const handleSubmit = () => {
     if (validateLocationInfo()) {
-        emit('onSubmit', formData.value);
+        emit('onSubmit', {
+            generalDataValidationErrors,
+            locationInfoValidationErrors,
+            refs: {
+                cargo: cargoRef,
+                finished: finishedRef,
+                cargoWeight: cargoWeightRef,
+                contractor: contractorRef,
+                agreedPayment: agreedPaymentRef,
+                dueDate: dueDateRef,
+                startDate: startDateRef,
+                finishedDate: finishedDateRef,
+                description: descriptionRef,
+                distance: distanceRef,
+                originCity: originCityRef,
+                originState: originStateRef,
+                originCountry: originCountryRef,
+                destinationCity: destinationCityRef,
+                destinationState: destinationStateRef,
+                destinationCountry: destinationCountryRef,
+            },
+        });
     }
 };
 </script>

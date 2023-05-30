@@ -4,7 +4,10 @@ import { inMemberOperation } from './helpers';
 import { Freight, IFreight } from '@/models/freight';
 import { runDatabaseOperation } from './databaseConnector';
 
+import { useAppStore } from './app';
+import APIAdapter from '@/services/api';
 import { IFormData } from '@/components/Freights';
+import { convertAttributes, stringToFloat } from '@/utils/conversion';
 
 interface IFreightsStoreState {
     _freights: Freight[];
@@ -14,35 +17,53 @@ interface IFreightsStoreState {
 const findFreightByAttrs = (attrs: Partial<IFreight>) =>
     Freight.findOneBy(attrs);
 
+const fieldsConversion = {
+    distance: stringToFloat,
+    cargoWeight: stringToFloat,
+    agreedPayment: stringToFloat,
+};
+
+const convertAttrs = (attrs: IFormData) => {
+    return convertAttributes({
+        attrs,
+        fieldsConversion,
+        repository: Freight.getRepository(),
+    });
+};
+
+export const initialState = (): IFreightsStoreState => ({
+    _newFreight: {
+        finished: false,
+        name: '',
+        description: '',
+        cargo: '',
+        cargoWeight: '',
+        contractor: '',
+        agreedPayment: '',
+        startDate: '',
+        dueDate: '',
+        finishedDate: '',
+        distance: '',
+        originCountry: 'Brasil',
+        originCity: '',
+        originState: '',
+        destinationCountry: 'Brasil',
+        destinationCity: '',
+        destinationState: '',
+    },
+    _freights: [] as Freight[],
+});
+
+const apiAdapter = new APIAdapter('/freights');
+
 export const useFreightsStore = defineStore('freights', {
-    state: (): IFreightsStoreState => ({
-        _newFreight: {
-            finished: false,
-            name: '',
-            description: '',
-            cargo: '',
-            cargoWeight: '',
-            contractor: '',
-            agreedPayment: '',
-            startDatetime: '',
-            dueDatetime: '',
-            finishedDatetime: '',
-            distance: '',
-            originCountry: 'Brasil',
-            originCity: '',
-            originState: '',
-            destinationCountry: 'Brasil',
-            destinationCity: '',
-            destinationState: '',
-        },
-        _freights: [] as Freight[],
-    }),
+    state: (): IFreightsStoreState => initialState(),
     getters: {
         freights: (state: IFreightsStoreState) => state._freights,
         newFreight: (state: IFreightsStoreState) => state._newFreight,
     },
     actions: {
-        setNewFreightAttr(field: keyof IFreight, value: any) {
+        setNewFreightAttr(field: keyof IFormData, value: any) {
             this._newFreight[field] = value;
         },
         mergeFreights(freights: Freight[]) {
@@ -66,7 +87,25 @@ export const useFreightsStore = defineStore('freights', {
         async findFreight(id: IFreight['id']) {
             return Freight.findOneBy({ id });
         },
-        async addFreight(attributes: Partial<IFreight>) {
+        async createFreight() {
+            let freight: Freight;
+            const [attributes, apiAttrs] = convertAttrs(this._newFreight);
+
+            const appStore = useAppStore();
+
+            await runDatabaseOperation(async () => {
+                freight = await Freight.createWithAttrs(attributes);
+
+                this._freights.push(freight);
+            });
+
+            this._newFreight = initialState()._newFreight;
+
+            if (appStore.connectionStatus.connected) {
+                return apiAdapter.post({ url: '/', data: apiAttrs });
+            }
+        },
+        async addFreightByAttrs(attributes: Partial<IFreight>) {
             return runDatabaseOperation(async () => {
                 this._freights.push(await Freight.createWithAttrs(attributes));
             });

@@ -17,8 +17,8 @@
 
             <FreightsForm
                 :formData="newFreight"
-                @on-submit="createFreight"
-                @on-field-change="handleFieldChange"
+                :setAttribute="changeField"
+                @on-submit="handleFormSubmit"
             />
         </ion-content>
     </ion-page>
@@ -28,7 +28,8 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { Ref, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import {
     IonPage,
@@ -41,28 +42,61 @@ import {
     IonMenuButton,
 } from '@ionic/vue';
 
-import { IFormData } from '@/components/Freights';
+import { presentToast } from '@/utils/toast';
+import APIError from '@/services/api/apiError';
 import { useFreightsStore } from '@/store/freights';
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 import FreightsForm from '@/components/Freights/FreightsForm.vue';
+import {
+    ValidationErrors,
+    assignValidationErrorsFromResponse,
+} from '@/utils/errors';
 
 const loading = ref(false);
 
+const router = useRouter();
+
 const store = useFreightsStore();
 
-const { setNewFreightAttr } = store;
+const { createFreight, setNewFreightAttr } = store;
 
 const { newFreight } = storeToRefs(store);
 
-const createFreight = (data: IFormData) => {
-    console.log('freight data: ', data);
+const handleFormSubmit = async ({
+    validationsErrors,
+    refs,
+}: {
+    validationsErrors: Ref<ValidationErrors>[];
+    refs: Record<string, Ref<any>>;
+}) => {
+    try {
+        await createFreight();
+    } catch (error) {
+        console.error(error);
+
+        if (error instanceof APIError) {
+            validationsErrors.forEach((validationErrors) => {
+                assignValidationErrorsFromResponse(
+                    validationErrors.value,
+                    (error as APIError).response?.data,
+                    refs
+                );
+            });
+        }
+
+        await presentToast('Falha ao criar frete', 'danger');
+    }
+
+    await presentToast('Frete criada com sucesso!', 'success');
+
+    router.replace({ name: 'FreightsIndex' });
 };
 
-const handleFieldChange = (field: string, value: unknown) => {
+const changeField = (field: string, value: unknown) => {
     setNewFreightAttr(field, value);
 };
 
 onMounted(() => {
-    setNewFreightAttr('startDatetime', new Date().toISOString());
+    setNewFreightAttr('startDate', new Date().toISOString());
 });
 </script>

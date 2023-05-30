@@ -10,9 +10,9 @@ export interface IFormData extends Record<string, unknown> {
     cargoWeight: string;
     contractor: string;
     agreedPayment: string;
-    startDatetime: string;
-    dueDatetime: string;
-    finishedDatetime: string;
+    startDate: string;
+    dueDate: string;
+    finishedDate: string;
     distance: string;
     originCountry: string;
     originCity: string;
@@ -47,15 +47,15 @@ export interface IGeneralDataFields extends Record<string, any> {
         value: string;
         ref: Ref<any>;
     };
-    startDatetime: {
+    startDate: {
         value: string;
         ref: Ref<any>;
     };
-    dueDatetime: {
+    dueDate: {
         value: string;
         ref: Ref<any>;
     };
-    finishedDatetime: {
+    finishedDate: {
         value: string;
         ref: Ref<any>;
     };

@@ -9,9 +9,7 @@
                 inputmode="decimal"
                 :value="fields.distance.value"
                 placeholder="Digite a distância entre origem e destino"
-                @ionChange="
-                    (e) => emit('fieldChange', 'distance', e.target.value)
-                "
+                @ionChange="(e) => setAttribute('distance', e.target.value)"
             >
             </ion-input>
 
@@ -40,11 +38,7 @@
                             placeholder="Digite a cidade de origem"
                             @ionChange="
                                 (e) =>
-                                    emit(
-                                        'fieldChange',
-                                        'originCity',
-                                        e.target.value
-                                    )
+                                    setAttribute('originCity', e.target.value)
                             "
                         >
                         </ion-input>
@@ -75,11 +69,7 @@
                             :value="fields.originState.value"
                             @ionChange="
                                 (e) =>
-                                    emit(
-                                        'fieldChange',
-                                        'originState',
-                                        e.target.value
-                                    )
+                                    setAttribute('originState', e.target.value)
                             "
                         >
                             <IonSelectOption
@@ -109,8 +99,7 @@
                             placeholder="Digite o país de origem"
                             @ionChange="
                                 (e) =>
-                                    emit(
-                                        'fieldChange',
+                                    setAttribute(
                                         'originCountry',
                                         e.target.value
                                     )
@@ -147,8 +136,7 @@
                             placeholder="Digite a cidade de destino"
                             @ionChange="
                                 (e) =>
-                                    emit(
-                                        'fieldChange',
+                                    setAttribute(
                                         'destinationCity',
                                         e.target.value
                                     )
@@ -185,8 +173,7 @@
                             :value="fields.destinationState.value"
                             @ionChange="
                                 (e) =>
-                                    emit(
-                                        'fieldChange',
+                                    setAttribute(
                                         'destinationState',
                                         e.target.value
                                     )
@@ -222,8 +209,7 @@
                             placeholder="Digite o país de destino"
                             @ionChange="
                                 (e) =>
-                                    emit(
-                                        'fieldChange',
+                                    setAttribute(
                                         'destinationCountry',
                                         e.target.value
                                     )
@@ -281,12 +267,11 @@ import InputErrorNote from '../InputErrorNote.vue';
 interface IProps {
     fields: ILocationInfoFields;
     validationErrors: ValidationErrors;
+    setAttribute: (field: string, value: unknown) => void;
 }
 const props = defineProps<IProps>();
 
 const { fields, validationErrors } = toRefs(props);
-
-const emit = defineEmits(['fieldChange']);
 
 const statesAcronymAndNames = Object.entries(STATES_TO_NAME);
 </script>

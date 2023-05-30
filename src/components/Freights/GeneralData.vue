@@ -4,9 +4,7 @@
             <ion-checkbox
                 slot="start"
                 :value="fields.finished.value"
-                @ionChange="
-                    (e) => emit('fieldChange', 'finished', e.target.checked)
-                "
+                @ionChange="(e) => setAttribute('finished', e.target.checked)"
             ></ion-checkbox>
             <ion-label>Finalizado?</ion-label>
         </ion-item>
@@ -20,7 +18,7 @@
                 :maxlength="30"
                 :value="fields.cargo.value"
                 placeholder="Digite o tipo de carga deste frete"
-                @ionChange="(e) => emit('fieldChange', 'cargo', e.target.value)"
+                @ionChange="(e) => setAttribute('cargo', e.target.value)"
             >
             </ion-input>
 
@@ -42,9 +40,7 @@
                 inputmode="decimal"
                 :value="fields.cargoWeight.value"
                 placeholder="Digite o peso da carga deste frete"
-                @ionChange="
-                    (e) => emit('fieldChange', 'cargoWeight', e.target.value)
-                "
+                @ionChange="(e) => setAttribute('cargoWeight', e.target.value)"
             >
             </ion-input>
 
@@ -64,9 +60,7 @@
                 :value="fields.contractor.value"
                 :maxlength="60"
                 placeholder="Digite o contratante deste frete"
-                @ionChange="
-                    (e) => emit('fieldChange', 'contractor', e.target.value)
-                "
+                @ionChange="(e) => setAttribute('contractor', e.target.value)"
             >
             </ion-input>
 
@@ -89,7 +83,7 @@
                 :value="fields.agreedPayment.value"
                 placeholder="Digite o pagamento acordado"
                 @ionChange="
-                    (e) => emit('fieldChange', 'agreedPayment', e.target.value)
+                    (e) => setAttribute('agreedPayment', e.target.value)
                 "
             >
             </ion-input>
@@ -101,53 +95,57 @@
             />
         </ion-item>
 
-        <ion-item class="form-item" :ref="fields.dueDatetime.ref">
+        <ion-item class="form-item" :ref="fields.dueDate.ref">
             <ion-label position="stacked" style="margin-bottom: 16px"
                 >Data limite</ion-label
             >
 
             <DatetimeButton
-                identifier="dueDatetime"
-                :value="fields.dueDatetime.value"
-                @valueChange="
-                    (e) => emit('fieldChange', 'dueDatetime', e.target.value)
-                "
+                identifier="dueDate"
+                :value="fields.dueDate.value"
+                @valueChange="(e) => setAttribute('dueDate', e.target.value)"
             />
 
             <ion-note slot="helper">Data limite acordada para o frete</ion-note>
         </ion-item>
 
-        <ion-item class="form-item" :ref="fields.startDatetime.ref">
+        <ion-item class="form-item" :ref="fields.startDate.ref">
             <ion-label position="stacked" style="margin-bottom: 16px"
-                >Data de início</ion-label
+                >Data de início *</ion-label
             >
 
             <DatetimeButton
-                identifier="startDatetime"
-                :value="fields.startDatetime.value"
-                @valueChange="
-                    (e) => emit('fieldChange', 'startDatetime', e.target.value)
-                "
+                identifier="startDate"
+                :value="fields.startDate.value"
+                @valueChange="(e) => setAttribute('startDate', e.target.value)"
+            />
+
+            <InputErrorNote
+                field="startDate"
+                defaultMsg="Data de início inválida"
+                :validationErrors="validationErrors"
             />
         </ion-item>
 
         <ion-item
             class="form-item"
-            :ref="fields.finishedDatetime.ref"
-            v-if="fields.finished.value"
+            :ref="fields.finishedDate.ref"
+            :disabled="!fields.finished.value"
         >
             <ion-label position="stacked" style="margin-bottom: 16px"
                 >Data de conclusão</ion-label
             >
 
             <DatetimeButton
-                identifier="finishedDatetime"
-                :value="fields.finishedDatetime.value"
+                identifier="finishedDate"
+                :disabled="!fields.finished.value"
+                :value="fields.finishedDate.value"
                 @valueChange="
-                    (e) =>
-                        emit('fieldChange', 'finishedDatetime', e.target.value)
+                    (e) => setAttribute('finishedDate', e.target.value)
                 "
             />
+
+            <ion-note slot="helper">Só pode ser defindio</ion-note>
         </ion-item>
 
         <ion-item class="form-item" :ref="fields.description.ref">
@@ -162,9 +160,7 @@
                 :auto-grow="true"
                 :value="fields.description.value"
                 placeholder="Digite uma descrição para este frete"
-                @ionChange="
-                    (e) => emit('fieldChange', 'description', e.target.value)
-                "
+                @ionChange="(e) => setAttribute('description', e.target.value)"
             >
             </ion-textarea>
 
@@ -210,10 +206,9 @@ import { IGeneralDataFields } from '.';
 interface IProps {
     fields: IGeneralDataFields;
     validationErrors: ValidationErrors;
+    setAttribute: (field: string, value: unknown) => void;
 }
 const props = defineProps<IProps>();
 
-const { fields, validationErrors } = toRefs(props);
-
-const emit = defineEmits(['fieldChange']);
+const { fields, validationErrors, setAttribute } = toRefs(props);
 </script>
