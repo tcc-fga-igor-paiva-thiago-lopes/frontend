@@ -11,6 +11,7 @@ import HomePage from '@/views/HomePage.vue';
 import NotFound from '@/views/NotFound.vue';
 import WelcomePage from '@/views/WelcomePage.vue';
 import FreightShow from '@/views/Freights/FreightShow.vue';
+import FreightEdit from '@/views/Freights/FreightEdit.vue';
 import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
 import FreightCreate from '@/views/Freights/FreightCreate.vue';
 
@@ -60,6 +61,12 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/freights/:freightId(\\d+)',
         name: 'FreightShow',
         component: FreightShow,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/:freightId(\\d+)/edit',
+        name: 'FreightEdit',
+        component: FreightEdit,
         meta: { requiresAuth: true },
     },
     {

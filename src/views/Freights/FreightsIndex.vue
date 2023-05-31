@@ -77,32 +77,39 @@ const createFreight = async () => {
     await router.push({ name: 'FreightCreate' });
 };
 
-const showFreight = async (item: Freight) => {
-    await router.push({ name: 'FreightShow', params: { freightId: item.id } });
+const showFreight = async (freight: Freight) => {
+    await router.push({
+        name: 'FreightShow',
+        params: { freightId: freight.id },
+    });
 };
 
-const editItem = async (item: any) => {
-    console.log('Edit: ', item);
+const editItem = async (freight: Freight) => {
+    await router.push({
+        name: 'FreightEdit',
+        params: { freightId: freight.id },
+    });
 };
 
-const removeItem = async (item: Freight) => {
-    await removeFreight(item.id);
+const removeItem = async (freight: Freight) => {
+    await removeFreight(freight.id);
 };
 
 const loadMoreItems = () => paginationService.value.getNextPage();
 
-const freightLabel = (item: Freight) => {
-    const startDate = formatDateDynamicYear(item.startDate);
+const freightLabel = (freight: Freight) => {
+    const startDate = formatDateDynamicYear(freight.startDate);
     const finishedDate =
-        item.finishedDate && formatDateDynamicYear(item.finishedDate);
-    const cargoType = item.cargo.charAt(0).toUpperCase() + item.cargo.slice(1);
+        freight.finishedDate && formatDateDynamicYear(freight.finishedDate);
+    const cargoType =
+        freight.cargo.charAt(0).toUpperCase() + freight.cargo.slice(1);
 
     return `${cargoType} (${startDate} - ${finishedDate || ''})`;
 };
 
-const freightSubLabel = (item: Freight) => {
-    // return `${item.originCity} (${item.originState}) --> ${item.destinationCity} (${item.destinationState})`;
-    return `${item.originCity} --> ${item.destinationCity}`;
+const freightSubLabel = (freight: Freight) => {
+    // return `${freight.originCity} (${freight.originState}) --> ${freight.destinationCity} (${freight.destinationState})`;
+    return `${freight.originCity} --> ${freight.destinationCity}`;
 };
 
 onMounted(async () => {

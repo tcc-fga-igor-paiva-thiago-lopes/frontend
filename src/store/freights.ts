@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia';
 
-import { inMemberOperation } from './helpers';
+import { inMemberOperation, generalOperation } from './helpers';
 import { Freight, IFreight } from '@/models/freight';
-import { runDatabaseOperation } from './databaseConnector';
+import { runDatabaseOperation } from './helpers/databaseConnector';
 
-import { useAppStore } from './app';
 import APIAdapter from '@/services/api';
 import { IFormData } from '@/components/Freights';
 import {
@@ -12,10 +11,12 @@ import {
     instanceToObject,
     convertAttributes,
 } from '@/utils/conversion';
+import { callOperation } from './helpers/apiConnector';
 
 interface IFreightsStoreState {
     _freights: Freight[];
     _newFreight: IFormData;
+    _editFreight: IFormData;
 }
 
 const findFreightByAttrs = (attrs: Partial<IFreight>) =>
@@ -35,26 +36,29 @@ const convertAttrs = (attrs: IFormData) => {
     });
 };
 
+const emptyFreightFormData = (): IFormData => ({
+    finished: false,
+    name: '',
+    description: '',
+    cargo: '',
+    cargoWeight: '',
+    contractor: '',
+    agreedPayment: '',
+    startDate: '',
+    dueDate: '',
+    finishedDate: '',
+    distance: '',
+    originCountry: 'Brasil',
+    originCity: '',
+    originState: '',
+    destinationCountry: 'Brasil',
+    destinationCity: '',
+    destinationState: '',
+});
+
 export const initialState = (): IFreightsStoreState => ({
-    _newFreight: {
-        finished: false,
-        name: '',
-        description: '',
-        cargo: '',
-        cargoWeight: '',
-        contractor: '',
-        agreedPayment: '',
-        startDate: '',
-        dueDate: '',
-        finishedDate: '',
-        distance: '',
-        originCountry: 'Brasil',
-        originCity: '',
-        originState: '',
-        destinationCountry: 'Brasil',
-        destinationCity: '',
-        destinationState: '',
-    },
+    _newFreight: emptyFreightFormData(),
+    _editFreight: emptyFreightFormData(),
     _freights: [] as Freight[],
 });
 
@@ -65,10 +69,14 @@ export const useFreightsStore = defineStore('freights', {
     getters: {
         freights: (state: IFreightsStoreState) => state._freights,
         newFreight: (state: IFreightsStoreState) => state._newFreight,
+        editFreight: (state: IFreightsStoreState) => state._editFreight,
     },
     actions: {
         setNewFreightAttr(field: keyof IFormData, value: any) {
             this._newFreight[field] = value;
+        },
+        setEditFreightAttr(field: keyof IFormData, value: any) {
+            this._editFreight[field] = value;
         },
         mergeFreights(freights: Freight[]) {
             this._freights = [...this._freights, ...freights];
@@ -88,6 +96,15 @@ export const useFreightsStore = defineStore('freights', {
 
             return paginationRet;
         },
+        async findEditFreight(id: IFreight['id']) {
+            const foundFreight = await this.findFreight(id, true);
+
+            if (!foundFreight) return false;
+
+            this._editFreight = foundFreight as IFormData;
+
+            return true;
+        },
         async findFreight(id: IFreight['id'], asFormData = false) {
             const freight = await Freight.findOneBy({ id });
 
@@ -106,19 +123,15 @@ export const useFreightsStore = defineStore('freights', {
             let freight: Freight;
             const [attributes, apiAttrs] = convertAttrs(this._newFreight);
 
-            const appStore = useAppStore();
-
             await runDatabaseOperation(async () => {
                 freight = await Freight.createWithAttrs(attributes);
 
                 this._freights.push(freight);
             });
 
-            this._newFreight = initialState()._newFreight;
+            this._newFreight = emptyFreightFormData();
 
-            if (appStore.connectionStatus.connected) {
-                return apiAdapter.post({ url: '/', data: apiAttrs });
-            }
+            callOperation(apiAdapter.post, { url: '/', data: apiAttrs });
         },
         async addFreightByAttrs(attributes: Partial<IFreight>) {
             return runDatabaseOperation(async () => {
@@ -138,15 +151,24 @@ export const useFreightsStore = defineStore('freights', {
                 await this.loadFreightsFromDatabase();
             });
         },
-        async updateFreight(id: IFreight['id'], attrs: Partial<IFreight>) {
+        async updateFreight(id: IFreight['id']) {
+            const [attributes, apiAttrs] = convertAttrs(this._editFreight);
+
+            await this.updateFreightByAttrs(id, attributes);
+
+            this._editFreight = emptyFreightFormData();
+
+            callOperation(apiAdapter.patch, { url: `/${id}`, data: apiAttrs });
+        },
+        async updateFreightByAttrs(
+            id: IFreight['id'],
+            attrs: Partial<IFreight>
+        ) {
             return runDatabaseOperation(async () => {
-                await inMemberOperation<Freight, Partial<IFreight>>({
-                    findAttrs: { id },
+                await generalOperation({
                     successMsg: 'Frete editado com sucesso!',
                     errorMsg: 'Falha ao editar frete.',
-                    findFunc: findFreightByAttrs,
-                    actionFunc: (instance) =>
-                        instance.saveWithAttributes(attrs),
+                    actionFunc: () => Freight.update(id, attrs),
                 });
 
                 await this.loadFreightsFromDatabase();

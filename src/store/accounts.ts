@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 import { Account, IAccount } from '@/models/account';
 
 import { inMemberOperation } from './helpers';
-import { runDatabaseOperation } from './databaseConnector';
+import { runDatabaseOperation } from './helpers/databaseConnector';
 
 interface IAccountsStoreState {
     _accounts: Account[];
