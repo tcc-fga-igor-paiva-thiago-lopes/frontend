@@ -17,6 +17,7 @@
 
             <FreightsForm
                 v-if="!!freightFound"
+                edit
                 :formData="editFreight"
                 :setAttribute="changeField"
                 @on-submit="handleFormSubmit"

@@ -29,6 +29,12 @@
                 <h6>{{ errorMessage }}</h6>
             </ion-text>
         </template>
+
+        <template v-if="edit && step === 0" v-slot:backBtn>
+            <ion-button color="danger" @click="handleSubmit"
+                >Criar frete</ion-button
+            >
+        </template>
     </StepperComponent>
 </template>
 
@@ -46,7 +52,7 @@
 <script setup lang="ts">
 import { Ref, computed, ref, toRefs } from 'vue';
 
-import { IonText } from '@ionic/vue';
+import { IonText, IonButton } from '@ionic/vue';
 import { menu, navigate } from 'ionicons/icons';
 
 import { Freight } from '@/models/freight';
@@ -61,13 +67,17 @@ import {
 } from '@/utils/errors';
 
 interface IProps {
+    edit?: boolean;
     readonly?: boolean;
     formData: IFormData;
     setAttribute: (field: string, value: unknown) => void;
 }
-const props = defineProps<IProps>();
+const props = withDefaults(defineProps<IProps>(), {
+    edit: false,
+    readonly: false,
+});
 
-const { readonly, formData, setAttribute } = toRefs(props);
+const { edit, readonly, formData, setAttribute } = toRefs(props);
 
 const emit = defineEmits(['onSubmit']);
 
@@ -251,7 +261,7 @@ const handleStepChange = (newStep: number) => {
 };
 
 const handleSubmit = () => {
-    if (validateLocationInfo()) {
+    if (edit.value || validateLocationInfo()) {
         emit('onSubmit', {
             generalDataValidationErrors,
             locationInfoValidationErrors,
