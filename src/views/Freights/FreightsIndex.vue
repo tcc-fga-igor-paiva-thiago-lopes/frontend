@@ -23,8 +23,8 @@
                 :items="freights"
                 :addItem="createFreight"
                 :showItem="showFreight"
-                :editItem="editItem"
-                :removeItem="removeItem"
+                :editItem="editFreight"
+                :removeItem="deleteFreight"
                 :loadMoreItems="loadMoreItems"
                 :paginationService="paginationService"
             />
@@ -84,14 +84,14 @@ const showFreight = async (freight: Freight) => {
     });
 };
 
-const editItem = async (freight: Freight) => {
+const editFreight = async (freight: Freight) => {
     await router.push({
         name: 'FreightEdit',
         params: { freightId: freight.id },
     });
 };
 
-const removeItem = async (freight: Freight) => {
+const deleteFreight = async (freight: Freight) => {
     await removeFreight(freight.id);
 };
 

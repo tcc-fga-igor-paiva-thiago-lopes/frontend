@@ -15,7 +15,6 @@ export enum FreightCargo {
     PRESSURIZED_BULK = 'Granel Pressurizada',
     SOLID_BULK = 'Granel Sólido',
     NEW_BULK = 'Neogranel',
-    DANGER = 'Frigorificada',
     DANGEROUS_GENERAL = 'Perigosa Geral',
     DANGEROUS_CONTAINERIZED = 'Perigosa Conteinerizada',
     DANGEROUS_REFRIGERATED = 'Perigosa Frigorificada',
