@@ -64,7 +64,7 @@
                             cancel-text="Fechar"
                             name="originState"
                             interface="action-sheet"
-                            placeholder="Digite a sigla do estado de origem"
+                            placeholder="Selecione o estado de origem"
                             :disabled="readonly"
                             :value="fields.originState.value"
                             :interface-options="{
@@ -176,7 +176,7 @@
                             :interface-options="{
                                 cssClass: 'action-sheet-custom-class',
                             }"
-                            placeholder="Digite a sigla do estado de destino"
+                            placeholder="Selecione o estado de destino"
                             @ionChange="
                                 (e) =>
                                     setAttribute(
@@ -253,7 +253,7 @@
 </style>
 
 <script setup lang="ts">
-import { Ref, toRefs } from 'vue';
+import { toRefs } from 'vue';
 
 import {
     IonItem,

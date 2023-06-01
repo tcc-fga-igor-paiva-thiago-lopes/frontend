@@ -7,12 +7,29 @@ import {
 } from 'typeorm';
 import { AppBaseEntity } from './appBaseEntity';
 
+export enum FreightCargo {
+    GENERAL = 'Geral',
+    CONTAINERIZED = 'Conteinerizada',
+    REFRIGERATED = 'Frigorificada',
+    LIQUID_BULK = 'Granel Líquido',
+    PRESSURIZED_BULK = 'Granel Pressurizada',
+    SOLID_BULK = 'Granel Sólido',
+    NEW_BULK = 'Neogranel',
+    DANGER = 'Frigorificada',
+    DANGEROUS_GENERAL = 'Perigosa Geral',
+    DANGEROUS_CONTAINERIZED = 'Perigosa Conteinerizada',
+    DANGEROUS_REFRIGERATED = 'Perigosa Frigorificada',
+    DANGEROUS_LIQUID_BULK = 'Perigosa Granel Líquido',
+    DANGEROUS_PRESSURIZED_BULK = 'Perigosa Granel Pressurizada',
+    DANGEROUS_SOLID_BULK = 'Perigosa Granel Sólido',
+}
+
 export interface IFreight extends Record<string, any> {
     id: number;
     cargo: string;
     description: string;
     contractor: string;
-    cargoWeight: string;
+    cargoWeight: number;
     agreedPayment: number;
     distance: number;
     startDate: Date;
@@ -37,7 +54,7 @@ export class Freight extends AppBaseEntity implements IFreight {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column({ nullable: false })
+    @Column({ nullable: false, enum: FreightCargo })
     cargo!: string;
 
     @Column({ nullable: false })
@@ -47,7 +64,7 @@ export class Freight extends AppBaseEntity implements IFreight {
     contractor!: string;
 
     @Column({ name: 'cargo_weight', nullable: false })
-    cargoWeight!: string;
+    cargoWeight!: number;
 
     @Column({ name: 'agreed_payment', nullable: false })
     agreedPayment!: number;

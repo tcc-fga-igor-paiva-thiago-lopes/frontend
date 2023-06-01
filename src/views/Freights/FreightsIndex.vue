@@ -70,7 +70,7 @@ const { loadPaginated, removeFreight } = store;
 const { freights } = storeToRefs(store);
 
 const paginationService: Ref<PaginationService<unknown>> = ref(
-    new PaginationService(loadPaginated, 10)
+    new PaginationService(loadPaginated)
 );
 
 const createFreight = async () => {

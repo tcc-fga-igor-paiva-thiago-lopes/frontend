@@ -1,5 +1,22 @@
 import { Table, QueryRunner, MigrationInterface } from 'typeorm';
 
+const cargoEnumValues = [
+    'Geral',
+    'Conteinerizada',
+    'Frigorificada',
+    'Granel Líquido',
+    'Granel Pressurizada',
+    'Granel Sólido',
+    'Neogranel',
+    'Frigorificada',
+    'Perigosa Geral',
+    'Perigosa Conteinerizada',
+    'Perigosa Frigorificada',
+    'Perigosa Granel Líquido',
+    'Perigosa Granel Pressurizada',
+    'Perigosa Granel Sólido',
+];
+
 export class AddsFreightTable1685069028734 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
@@ -16,7 +33,7 @@ export class AddsFreightTable1685069028734 implements MigrationInterface {
                     {
                         name: 'cargo',
                         type: 'varchar',
-                        length: '50',
+                        length: '30',
                         isNullable: false,
                     },
                     {
@@ -127,6 +144,15 @@ export class AddsFreightTable1685069028734 implements MigrationInterface {
                         name: 'updated_at',
                         type: 'datetime',
                         isNullable: true,
+                    },
+                ],
+                checks: [
+                    {
+                        name: 'CHK_CARGO_ENUM_VALUES',
+                        columnNames: ['cargo'],
+                        expression: `cargo IN(${cargoEnumValues
+                            .map((item) => `'${item}'`)
+                            .join(',')})`,
                     },
                 ],
             }),

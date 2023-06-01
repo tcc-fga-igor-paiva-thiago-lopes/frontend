@@ -3,7 +3,7 @@
         <ion-item lines="none">
             <ion-checkbox
                 slot="start"
-                :readonly="readonly"
+                :disabled="readonly"
                 :value="fields.finished.value"
                 @ionChange="(e) => setAttribute('finished', e.target.checked)"
             ></ion-checkbox>
@@ -12,21 +12,27 @@
 
         <ion-item class="form-item" :ref="fields.cargo.ref">
             <ion-label position="stacked">Tipo de carga *</ion-label>
-            <ion-input
-                required
-                type="text"
+
+            <ion-select
+                ok-text="OK"
+                cancel-text="Fechar"
                 name="cargo"
-                :maxlength="30"
-                :readonly="readonly"
+                interface="action-sheet"
+                placeholder="Selecione o tipo de carga deste frete"
+                :disabled="readonly"
                 :value="fields.cargo.value"
-                placeholder="Digite o tipo de carga deste frete"
+                :interface-options="{
+                    cssClass: 'action-sheet-custom-class',
+                }"
                 @ionChange="(e) => setAttribute('cargo', e.target.value)"
             >
-            </ion-input>
-
-            <ion-note v-if="!readonly" slot="helper"
-                >Tamanho máximo 30 caracteres</ion-note
-            >
+                <IonSelectOption
+                    v-for="cargoType in cargoTypes"
+                    :value="cargoType"
+                    :key="cargoType"
+                    >{{ cargoType }}</IonSelectOption
+                >
+            </ion-select>
 
             <InputErrorNote
                 field="cargo"
@@ -198,6 +204,11 @@
 .form-item {
     margin: 8px 0;
 }
+
+.action-sheet-custom-class .action-sheet-cancel {
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+}
 </style>
 
 <script setup lang="ts">
@@ -208,13 +219,16 @@ import {
     IonLabel,
     IonInput,
     IonNote,
+    IonSelect,
     IonTextarea,
     IonCheckbox,
+    IonSelectOption,
 } from '@ionic/vue';
 
 import DatetimeButton from '@/components/DatetimeButton.vue';
 import InputErrorNote from '../InputErrorNote.vue';
 import { ValidationErrors } from '@/utils/errors';
+import { FreightCargo } from '@/models/freight';
 import { IGeneralDataFields } from '.';
 
 interface IProps {
@@ -226,4 +240,6 @@ interface IProps {
 const props = defineProps<IProps>();
 
 const { fields, readonly, validationErrors, setAttribute } = toRefs(props);
+
+const cargoTypes = Object.values(FreightCargo);
 </script>
