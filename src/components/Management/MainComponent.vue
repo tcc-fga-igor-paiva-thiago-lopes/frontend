@@ -10,11 +10,7 @@
 
                 <ion-text>
                     <h6 class="results-text">
-                        {{
-                            `${
-                                paginationService.totalResults
-                            } ${itemsName.toLowerCase()} encontrados(as)`
-                        }}
+                        {{ resultsText }}
                     </h6>
                 </ion-text>
             </div>
@@ -59,7 +55,7 @@
 </style>
 
 <script setup lang="ts">
-import { toRefs } from 'vue';
+import { computed, toRefs } from 'vue';
 import {
     IonButton,
     IonIcon,
@@ -93,7 +89,13 @@ const props = defineProps<IProps>();
 // eslint-disable-next-line vue/no-setup-props-destructure
 const { addItem, removeItem, label, subLabel, loadMoreItems } = props;
 
-const { items, itemName, itemsName } = toRefs(props);
+const { items, itemName, itemsName, paginationService } = toRefs(props);
+
+const resultsText = computed(() => {
+    const totalResults = paginationService.value.totalResults;
+
+    return `${totalResults} ${itemsName.value.toLowerCase()} encontrados(as)`;
+});
 
 const handleRemoval = async (item: any) => {
     await presentConfirmationAlert({

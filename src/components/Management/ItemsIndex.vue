@@ -39,7 +39,7 @@
     </ion-list>
 
     <ion-infinite-scroll
-        :disabled="!hasPagination()"
+        :disabled="!hasPagination"
         @ionInfinite="handleInfiniteScroll"
     >
         <ion-infinite-scroll-content
@@ -50,8 +50,8 @@
     </ion-infinite-scroll>
 
     <ion-text class="ion-text-center">
-        <h5 :class="!hasPagination() ? 'pagination-message' : ''">
-            {{ getPaginationMessage() }}
+        <h5 :class="!hasPagination ? 'pagination-message' : ''">
+            {{ paginationMessage }}
         </h5>
     </ion-text>
 </template>
@@ -73,7 +73,7 @@ button.alert-button.alert-button-confirm {
 </style>
 
 <script setup lang="ts">
-import { toRefs } from 'vue';
+import { computed, toRefs } from 'vue';
 import {
     IonList,
     IonItem,
@@ -109,14 +109,15 @@ const { items, itemsName, paginationService } = toRefs(props);
 const { showItem, editItem, removeItem, label, subLabel, loadMoreItems } =
     props;
 
-const hasPagination = () =>
-    items.value.length < paginationService.value.totalResults;
+const hasPagination = computed(
+    () => items.value.length < paginationService.value.totalResults
+);
 
-const getPaginationMessage = () => {
+const paginationMessage = computed(() => {
     const lowerCaseName = itemsName.value.toLowerCase();
 
     return `Exibindo ${items.value.length} ${lowerCaseName} de ${paginationService.value.totalResults} ${lowerCaseName}`;
-};
+});
 
 const handleShow = async (ev: MouseEvent, item: any) => {
     ev.stopPropagation();
