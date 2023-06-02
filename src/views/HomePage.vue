@@ -15,18 +15,9 @@
         <ion-content :fullscreen="true">
             <ion-loading :is-open="loading"></ion-loading>
 
-            <ManageAccounts
-                itemName="Conta"
-                itemsName="Contas"
-                :label="(item) => item.name"
-                :items="accounts"
-                :addItem="addItem"
-                :showItem="showItem"
-                :editItem="editItem"
-                :removeItem="removeItem"
-                :loadMoreItems="loadMoreItems"
-                :paginationService="paginationService"
-            />
+            <ion-text class="ion-text-center">
+                <h6>There's nothing here</h6>
+            </ion-text>
         </ion-content>
     </ion-page>
 </template>
@@ -36,6 +27,7 @@
 <script setup lang="ts">
 import {
     IonPage,
+    IonText,
     IonTitle,
     IonHeader,
     IonContent,
@@ -45,52 +37,13 @@ import {
     IonMenuButton,
 } from '@ionic/vue';
 
-import { storeToRefs } from 'pinia';
-import { Ref, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
-import { presentToast } from '@/utils/toast';
-import { useAccountsStore } from '@/store/accounts';
-import PaginationService from '@/utils/pagination/paginationService';
-import ManageAccounts from '@/components/Management/MainComponent.vue';
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
-
-const store = useAccountsStore();
-
-const { loadPaginated } = store;
-
-const { accounts } = storeToRefs(store);
 
 const loading = ref(true);
 
-const paginationService: Ref<PaginationService<unknown>> = ref(
-    new PaginationService(loadPaginated, 13)
-);
-
-const addItem = () => {
-    console.log('add new item');
-};
-
-const showItem = (item: any) => {
-    console.log('Show: ', item);
-};
-
-const editItem = (item: any) => {
-    console.log('Edit: ', item);
-};
-
-const removeItem = (item: any) => {
-    console.log('Remove: ', item);
-};
-
-const loadMoreItems = () => paginationService.value.getNextPage();
-
 onMounted(async () => {
-    try {
-        await paginationService.value.getFirstPage();
-    } catch {
-        presentToast('Falha ao carregar contas', 'danger');
-    } finally {
-        loading.value = false;
-    }
+    loading.value = false;
 });
 </script>

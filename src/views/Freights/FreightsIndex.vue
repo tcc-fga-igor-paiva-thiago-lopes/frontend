@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
-import { Ref, onMounted, ref } from 'vue';
+import { Ref, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue';
 
 import {
     IonPage,
@@ -112,6 +112,10 @@ const freightSubLabel = (freight: Freight) => {
     return `${freight.originCity} --> ${freight.destinationCity}`;
 };
 
+const unwatch = watch([freights], (value) => {
+    paginationService.value = new PaginationService(loadPaginated);
+});
+
 onMounted(async () => {
     try {
         await paginationService.value.getFirstPage();
@@ -122,5 +126,9 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
+});
+
+onBeforeUnmount(() => {
+    unwatch();
 });
 </script>
