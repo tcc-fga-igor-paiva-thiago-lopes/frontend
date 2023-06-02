@@ -84,7 +84,7 @@ export const useFreightsStore = defineStore('freights', {
         async loadFreightsFromDatabase() {
             this._freights = await Freight.find();
         },
-        async loadPaginated(pageSize: number, pageNum: number) {
+        async loadPaginated(pageSize: number, pageNum: number, reset = false) {
             const paginationRet = await Freight.findPaginated(
                 pageSize,
                 pageNum
@@ -92,7 +92,8 @@ export const useFreightsStore = defineStore('freights', {
 
             const [results] = paginationRet;
 
-            this.mergeFreights(results);
+            if (reset) this._freights = results;
+            else this.mergeFreights(results);
 
             return paginationRet;
         },
@@ -147,8 +148,6 @@ export const useFreightsStore = defineStore('freights', {
                     findFunc: findFreightByAttrs,
                     actionFunc: (instance) => instance.remove(),
                 });
-
-                await this.loadFreightsFromDatabase();
             });
         },
         async updateFreight(id: IFreight['id']) {
@@ -170,8 +169,6 @@ export const useFreightsStore = defineStore('freights', {
                     errorMsg: 'Falha ao editar frete.',
                     actionFunc: () => Freight.update(id, attrs),
                 });
-
-                await this.loadFreightsFromDatabase();
             });
         },
     },

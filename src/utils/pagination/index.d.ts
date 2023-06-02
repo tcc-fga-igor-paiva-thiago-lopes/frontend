@@ -13,5 +13,6 @@ interface IPaginationService {
 
 type QueryFunc = (
     pageSize: number,
-    pageNum: number
+    pageNum: number,
+    reset?: boolean
 ) => Promise<[PaginationEntity[], number]>;

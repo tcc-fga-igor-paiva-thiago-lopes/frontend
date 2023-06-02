@@ -122,6 +122,6 @@ const handleFormSubmit = async ({
 
     await presentToast('Frete editado com sucesso!', 'success');
 
-    await router.replace({ name: 'FreightsIndex' });
+    await router.push({ name: 'FreightsIndex', query: { reset: 'true' } });
 };
 </script>

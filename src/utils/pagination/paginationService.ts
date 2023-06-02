@@ -38,8 +38,12 @@ class PaginationService<PaginationEntity> {
         return result;
     }
 
-    async queryPageResult(page: number) {
-        const [results, total] = await this.queryFunc(this.pageSize, page);
+    async queryPageResult(page: number, reset = false) {
+        const [results, total] = await this.queryFunc(
+            this.pageSize,
+            page,
+            reset
+        );
 
         this.totalResults = total;
 
@@ -47,6 +51,12 @@ class PaginationService<PaginationEntity> {
             results: this.options.saveResults ? results : undefined,
             total,
         });
+    }
+
+    async reset() {
+        this.currentPage = 0;
+
+        return this.queryPageResult(0, true);
     }
 }
 

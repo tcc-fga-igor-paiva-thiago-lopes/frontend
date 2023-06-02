@@ -44,7 +44,6 @@ export const routes: Array<RouteRecordRaw> = [
         component: SignIn,
         meta: { requiresAuth: false },
     },
-
     {
         path: '/freights',
         name: 'FreightsIndex',

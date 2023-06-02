@@ -24,8 +24,6 @@ export const inMemberOperation = async <Clazz, IAttrs>({
     try {
         const instance = await findFunc(findAttrs);
 
-        console.log('instance: ', instance);
-
         if (!instance) throw Error('Not found');
 
         await actionFunc(instance);

@@ -36,8 +36,8 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
-import { Ref, onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { onBeforeUnmount, onMounted, reactive, watch, ref } from 'vue';
 
 import {
     IonPage,
@@ -63,15 +63,14 @@ const loading = ref(false);
 
 const store = useFreightsStore();
 
+const route = useRoute();
 const router = useRouter();
 
 const { loadPaginated, removeFreight } = store;
 
 const { freights } = storeToRefs(store);
 
-const paginationService: Ref<PaginationService<unknown>> = ref(
-    new PaginationService(loadPaginated)
-);
+const paginationService = reactive(new PaginationService(loadPaginated));
 
 const createFreight = async () => {
     await router.push({ name: 'FreightCreate' });
@@ -93,9 +92,11 @@ const editFreight = async (freight: Freight) => {
 
 const deleteFreight = async (freight: Freight) => {
     await removeFreight(freight.id);
+
+    await paginationService.reset();
 };
 
-const loadMoreItems = () => paginationService.value.getNextPage();
+const loadMoreItems = () => paginationService.getNextPage();
 
 const freightLabel = (freight: Freight) => {
     const startDate = formatDateDynamicYear(freight.startDate);
@@ -112,13 +113,13 @@ const freightSubLabel = (freight: Freight) => {
     return `${freight.originCity} --> ${freight.destinationCity}`;
 };
 
-const unwatch = watch([freights], (value) => {
-    paginationService.value = new PaginationService(loadPaginated);
+const unwatch = watch([route], async (value) => {
+    if (value[0].query.reset === 'true') await paginationService.reset();
 });
 
 onMounted(async () => {
     try {
-        await paginationService.value.getFirstPage();
+        await paginationService.getFirstPage();
     } catch (e) {
         console.error(e);
 
