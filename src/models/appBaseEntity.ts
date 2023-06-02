@@ -1,8 +1,31 @@
-import { BaseEntity } from 'typeorm';
+import {
+    BaseEntity,
+    CreateDateColumn,
+    UpdateDateColumn,
+    PrimaryGeneratedColumn,
+} from 'typeorm';
 
 export type StaticThis<T> = { new (attrs?: Record<string, any>): T };
 
-export abstract class AppBaseEntity extends BaseEntity {
+export interface IAppBaseEntity extends Record<string, any> {
+    id: number;
+    createdAt: Date;
+    updatedAt?: Date;
+}
+
+export abstract class AppBaseEntity
+    extends BaseEntity
+    implements IAppBaseEntity
+{
+    @PrimaryGeneratedColumn()
+    id!: number;
+
+    @CreateDateColumn({ name: 'created_at', nullable: false })
+    createdAt!: Date;
+
+    @UpdateDateColumn({ name: 'updated_at', nullable: true })
+    updatedAt!: Date;
+
     // this is not working
     // constructor(attributes?: Record<string, any>) {
     //   // console.log(attributes);

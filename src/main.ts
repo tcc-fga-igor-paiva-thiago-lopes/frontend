@@ -101,9 +101,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         router.isReady().then(() => {
             app.mount('#app');
         });
-    } catch (err) {
-        console.log(`Error: ${err}`);
+    } catch (error) {
+        console.error(error);
 
-        throw new Error(`Error: ${err}`);
+        throw new Error(`Error: ${error}`);
     }
 });

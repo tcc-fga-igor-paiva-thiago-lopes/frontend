@@ -1,11 +1,5 @@
-import {
-    Entity,
-    Column,
-    CreateDateColumn,
-    UpdateDateColumn,
-    PrimaryGeneratedColumn,
-} from 'typeorm';
-import { AppBaseEntity } from './appBaseEntity';
+import { Entity, Column } from 'typeorm';
+import { AppBaseEntity, IAppBaseEntity } from './appBaseEntity';
 
 export enum FreightCargo {
     GENERAL = 'Geral',
@@ -23,7 +17,7 @@ export enum FreightCargo {
     DANGEROUS_SOLID_BULK = 'Perigosa Granel Sólido',
 }
 
-export interface IFreight extends Record<string, any> {
+export interface IFreight extends IAppBaseEntity {
     id: number;
     cargo: string;
     description: string;
@@ -50,9 +44,6 @@ export interface IFreight extends Record<string, any> {
 
 @Entity('FREIGHT')
 export class Freight extends AppBaseEntity implements IFreight {
-    @PrimaryGeneratedColumn()
-    id!: number;
-
     @Column({ nullable: false, enum: FreightCargo })
     cargo!: string;
 
@@ -109,12 +100,6 @@ export class Freight extends AppBaseEntity implements IFreight {
 
     @Column({ name: 'destination_longitude', nullable: true })
     destinationLongitude!: number;
-
-    @CreateDateColumn({ name: 'created_at', nullable: false })
-    createdAt!: Date;
-
-    @UpdateDateColumn({ name: 'updated_at', nullable: true })
-    updatedAt!: Date;
 
     static async findPaginated(pageSize: number, pageNum = 1) {
         return Freight.findAndCount({
