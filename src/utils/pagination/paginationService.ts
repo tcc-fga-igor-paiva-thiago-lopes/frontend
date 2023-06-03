@@ -54,9 +54,9 @@ class PaginationService<PaginationEntity> {
     }
 
     async reset() {
-        this.currentPage = 0;
+        this.currentPage = 1;
 
-        return this.queryPageResult(0, true);
+        return this.queryPageResult(1, true);
     }
 }
 

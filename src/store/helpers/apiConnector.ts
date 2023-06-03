@@ -1,21 +1,26 @@
-import { HttpOptions, HttpResponse } from '@capacitor/core';
+import { HttpResponse } from '@capacitor/core';
 import { useAppStore } from '../app';
 
-export const callOperation = (
-    operation: (options: HttpOptions) => Promise<HttpResponse>,
-    options: HttpOptions
-) => {
+export const callOperation = async (operation: () => Promise<HttpResponse>) => {
     const appStore = useAppStore();
 
     if (appStore.connectionStatus.connected) {
         try {
-            return operation(options);
+            operation()
+                .then((response) =>
+                    // TODO: sync record (set synced column to true)
+                    console.log('Requisição completada com sucesso: ', response)
+                )
+                .catch((error) => {
+                    // TODO: save error to be treated by user later
+                    console.log('Requisição falhou: ', error.response?.data);
+                });
 
-            // TODO: sync record (set synced column to true)
-        } catch (e) {
-            return null;
+            return true;
+        } catch {
+            return false;
         }
     }
 
-    return null;
+    return false;
 };

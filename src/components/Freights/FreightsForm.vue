@@ -262,28 +262,7 @@ const handleStepChange = (newStep: number) => {
 
 const handleSubmit = () => {
     if (edit.value || validateLocationInfo()) {
-        emit('onSubmit', {
-            generalDataValidationErrors,
-            locationInfoValidationErrors,
-            refs: {
-                cargo: cargoRef,
-                finished: finishedRef,
-                cargoWeight: cargoWeightRef,
-                contractor: contractorRef,
-                agreedPayment: agreedPaymentRef,
-                dueDate: dueDateRef,
-                startDate: startDateRef,
-                finishedDate: finishedDateRef,
-                description: descriptionRef,
-                distance: distanceRef,
-                originCity: originCityRef,
-                originState: originStateRef,
-                originCountry: originCountryRef,
-                destinationCity: destinationCityRef,
-                destinationState: destinationStateRef,
-                destinationCountry: destinationCountryRef,
-            },
-        });
+        emit('onSubmit');
     }
 };
 </script>

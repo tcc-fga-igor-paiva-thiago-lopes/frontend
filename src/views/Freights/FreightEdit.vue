@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { Ref, computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import {
@@ -54,12 +54,7 @@ import {
 } from '@ionic/vue';
 
 import { presentToast } from '@/utils/toast';
-import APIError from '@/services/api/apiError';
 import { useFreightsStore } from '@/store/freights';
-import {
-    ValidationErrors,
-    assignValidationErrorsFromResponse,
-} from '@/utils/errors';
 
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 import FreightsForm from '@/components/Freights/FreightsForm.vue';
@@ -95,33 +90,17 @@ const changeField = (field: string, value: unknown) => {
     setEditFreightAttr(field, value);
 };
 
-const handleFormSubmit = async ({
-    validationsErrors,
-    refs,
-}: {
-    validationsErrors: Ref<ValidationErrors>[];
-    refs: Record<string, Ref<any>>;
-}) => {
+const handleFormSubmit = async () => {
     try {
         await updateFreight(freightId.value);
+
+        await presentToast('Frete editado com sucesso!', 'success');
+
+        await router.push({ name: 'FreightsIndex', query: { reset: 'true' } });
     } catch (error) {
         console.error(error);
 
-        if (error instanceof APIError) {
-            validationsErrors.forEach((validationErrors) => {
-                assignValidationErrorsFromResponse(
-                    validationErrors.value,
-                    (error as APIError).response?.data,
-                    refs
-                );
-            });
-        }
-
         await presentToast('Falha ao editar frete', 'danger');
     }
-
-    await presentToast('Frete editado com sucesso!', 'success');
-
-    await router.push({ name: 'FreightsIndex', query: { reset: 'true' } });
 };
 </script>

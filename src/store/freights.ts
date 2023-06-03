@@ -132,7 +132,7 @@ export const useFreightsStore = defineStore('freights', {
 
             this._newFreight = emptyFreightFormData();
 
-            callOperation(apiAdapter.post, { url: '/', data: apiAttrs });
+            callOperation(() => apiAdapter.post({ url: '/', data: apiAttrs }));
         },
         async addFreightByAttrs(attributes: Partial<IFreight>) {
             return runDatabaseOperation(async () => {
@@ -157,7 +157,9 @@ export const useFreightsStore = defineStore('freights', {
 
             this._editFreight = emptyFreightFormData();
 
-            callOperation(apiAdapter.patch, { url: `/${id}`, data: apiAttrs });
+            callOperation(() =>
+                apiAdapter.patch({ url: `/${id}`, data: apiAttrs })
+            );
         },
         async updateFreightByAttrs(
             id: IFreight['id'],

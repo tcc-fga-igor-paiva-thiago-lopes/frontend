@@ -99,13 +99,12 @@ const deleteFreight = async (freight: Freight) => {
 const loadMoreItems = () => paginationService.getNextPage();
 
 const freightLabel = (freight: Freight) => {
-    const startDate = formatDateDynamicYear(freight.startDate);
+    const startDate = formatDateDynamicYear(new Date(freight.startDate));
     const finishedDate =
-        freight.finishedDate && formatDateDynamicYear(freight.finishedDate);
-    const cargoType =
-        freight.cargo.charAt(0).toUpperCase() + freight.cargo.slice(1);
+        freight.finishedDate &&
+        formatDateDynamicYear(new Date(freight.finishedDate));
 
-    return `${cargoType} (${startDate} - ${finishedDate || ''})`;
+    return `${freight.cargo} (${startDate} - ${finishedDate || ''})`;
 };
 
 const freightSubLabel = (freight: Freight) => {

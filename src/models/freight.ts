@@ -66,10 +66,10 @@ export class Freight extends AppBaseEntity implements IFreight {
     startDate!: Date;
 
     @Column({ name: 'due_date', nullable: true })
-    dueDate!: Date;
+    dueDate?: Date;
 
     @Column({ name: 'finished_date', nullable: true })
-    finishedDate!: Date;
+    finishedDate?: Date;
 
     @Column({ name: 'origin_city', nullable: false })
     originCity!: string;
@@ -78,13 +78,13 @@ export class Freight extends AppBaseEntity implements IFreight {
     originState!: string;
 
     @Column({ name: 'origin_country', nullable: true })
-    originCountry!: string;
+    originCountry?: string;
 
     @Column({ name: 'origin_latitude', nullable: true })
-    originLatitude!: number;
+    originLatitude?: number;
 
     @Column({ name: 'origin_longitude', nullable: true })
-    originLongitude!: number;
+    originLongitude?: number;
 
     @Column({ name: 'destination_city', nullable: false })
     destinationCity!: string;
@@ -93,13 +93,13 @@ export class Freight extends AppBaseEntity implements IFreight {
     destinationState!: string;
 
     @Column({ name: 'destination_country', nullable: true })
-    destinationCountry!: string;
+    destinationCountry?: string;
 
     @Column({ name: 'destination_latitude', nullable: true })
-    destinationLatitude!: number;
+    destinationLatitude?: number;
 
     @Column({ name: 'destination_longitude', nullable: true })
-    destinationLongitude!: number;
+    destinationLongitude?: number;
 
     static async findPaginated(pageSize: number, pageNum = 1) {
         return Freight.findAndCount({
