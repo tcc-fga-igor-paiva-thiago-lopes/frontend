@@ -37,13 +37,14 @@ import { CapacitorSQLite } from '@capacitor-community/sqlite';
 
 import sqliteConnection from '@/database';
 import dataSource from './database/dataSource';
+import DatabaseCrudPlugin from './store/plugins/databaseCrud';
 
 applyPolyfills().then(() => {
     jeepSqlite(window);
 });
 
 window.addEventListener('DOMContentLoaded', async () => {
-    const pinia = createPinia();
+    const pinia = createPinia().use(DatabaseCrudPlugin);
 
     const app = createApp(App).use(IonicVue).use(router).use(pinia);
 

@@ -26,9 +26,11 @@ export const runDatabaseOperation = async (
 
     const { sqlite, platform, connection } = dbInfo;
 
-    await callback(dbInfo);
+    const ret = await callback(dbInfo);
 
     if (platform === 'web' && process.env.JEST_WORKER_ID === undefined) {
         await sqlite.saveToStore(connection.options.database as string);
     }
+
+    return ret;
 };

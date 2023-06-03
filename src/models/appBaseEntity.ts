@@ -13,10 +13,7 @@ export interface IAppBaseEntity extends Record<string, any> {
     updatedAt?: Date;
 }
 
-export abstract class AppBaseEntity
-    extends BaseEntity
-    implements IAppBaseEntity
-{
+export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -52,7 +49,10 @@ export abstract class AppBaseEntity
     }
 
     async saveWithAttributes(attributes: Record<string, any>) {
-        Object.assign(this, attributes);
+        // If ID is different it will create a new record
+        delete attributes.id;
+
+        this.setAttributes(attributes);
 
         return this.save();
     }

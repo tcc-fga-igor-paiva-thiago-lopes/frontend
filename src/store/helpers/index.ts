@@ -26,9 +26,11 @@ export const inMemberOperation = async <Clazz, IAttrs>({
 
         if (!instance) throw Error('Not found');
 
-        await actionFunc(instance);
+        const ret = await actionFunc(instance);
 
         presentToast(successMsg, 'success');
+
+        return ret;
     } catch (e) {
         console.error(e);
 
@@ -36,6 +38,8 @@ export const inMemberOperation = async <Clazz, IAttrs>({
 
         presentToast(errorMsg, 'danger');
     }
+
+    return null;
 };
 
 export const generalOperation = async ({
@@ -44,12 +48,16 @@ export const generalOperation = async ({
     actionFunc,
 }: GeneralOperationParams) => {
     try {
-        await actionFunc();
+        const ret = await actionFunc();
 
         presentToast(successMsg, 'success');
+
+        return ret;
     } catch (e) {
         console.error(e);
 
         presentToast(errorMsg, 'danger');
     }
+
+    return null;
 };
