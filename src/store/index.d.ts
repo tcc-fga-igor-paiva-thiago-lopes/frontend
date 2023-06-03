@@ -1,32 +1,34 @@
 import 'pinia';
 import { AppBaseEntity } from '@/models/appBaseEntity';
 
-export interface IInMemberOperationParams {
+export interface IInMemberOperationParams<T> {
     id: any;
     errorMsg: string;
     successMsg: string;
-    model: typeof AppBaseEntity;
+    model: { new (): T } & typeof AppBaseEntity;
 }
 
-export interface IInMemberWithAttrsParams extends IInMemberOperationParams {
+export interface IInMemberWithAttrsParams<T>
+    extends IInMemberOperationParams<T> {
     attributes: Record<string, any>;
 }
 
 declare module 'pinia' {
     export interface PiniaCustomProperties {
-        loadAllPaginated: (
-            model: typeof AppBaseEntity,
+        loadAllPaginated: <T>(
+            model: { new (): T } & typeof AppBaseEntity,
             pageSize: number,
             pageNum: number
         ) => Promise<any[], number>;
-        createRecordByAttrs: (
-            params: Omit<IInMemberWithAttrsParams, 'id'>
+        createRecordByAttrs: <T>(
+            params: Omit<IInMemberWithAttrsParams<T>, 'id'>
         ) => Promise<any>;
-        removeRecord: (params: IInMemberOperationParams) => Promise<void>;
-        updateRecord: (params: IInMemberWithAttrsParams) => Promise<void>;
+        removeRecord: <T>(params: IInMemberOperationParams<T>) => Promise<void>;
+        updateRecord: <T>(params: IInMemberWithAttrsParams<T>) => Promise<void>;
     }
 
     export interface PiniaCustomStateProperties {
         _items: Ref<any[]>;
+        // _newItem: Record<string, any>;
     }
 }

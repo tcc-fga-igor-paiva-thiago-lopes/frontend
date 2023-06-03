@@ -8,8 +8,8 @@ export const DatabaseCrudPlugin = () => ({
     mergeItems(items: any[]) {
         this._items = [...this._items, ...items];
     },
-    async loadAllPaginated(
-        model: typeof AppBaseEntity,
+    async loadAllPaginated<T>(
+        model: { new (): T } & typeof AppBaseEntity,
         pageSize: number,
         pageNum: number
     ) {
@@ -25,18 +25,18 @@ export const DatabaseCrudPlugin = () => ({
 
         return paginationRet;
     },
-    async findRecordByAttrs(
-        model: typeof AppBaseEntity,
+    async findRecordByAttrs<T>(
+        model: { new (): T } & typeof AppBaseEntity,
         attrs: Record<string, any>
     ) {
-        return model.findOneBy(attrs);
+        return model.findOneBy(attrs) as T | null;
     },
-    async createRecordByAttrs({
+    async createRecordByAttrs<T>({
         model,
         errorMsg,
         successMsg,
         attributes,
-    }: Omit<IInMemberWithAttrsParams, 'id'>) {
+    }: Omit<IInMemberWithAttrsParams<T>, 'id'>) {
         return runDatabaseOperation(() =>
             generalOperation({
                 errorMsg,
@@ -51,12 +51,12 @@ export const DatabaseCrudPlugin = () => ({
             })
         );
     },
-    async removeRecord({
+    async removeRecord<T>({
         id,
         model,
         errorMsg,
         successMsg,
-    }: IInMemberOperationParams) {
+    }: IInMemberOperationParams<T>) {
         return runDatabaseOperation(async () => {
             await inMemberOperation<AppBaseEntity, Record<string, any>>({
                 errorMsg,
@@ -68,13 +68,13 @@ export const DatabaseCrudPlugin = () => ({
             });
         });
     },
-    async updateRecord({
+    async updateRecord<T>({
         id,
         model,
         errorMsg,
         successMsg,
         attributes,
-    }: IInMemberWithAttrsParams) {
+    }: IInMemberWithAttrsParams<T>) {
         return runDatabaseOperation(async () => {
             await inMemberOperation<AppBaseEntity, Record<string, any>>({
                 errorMsg,

@@ -74,7 +74,7 @@ export const useFreightsStore = defineStore('freights', {
             this._editFreight[field] = value;
         },
         async loadPaginated(pageSize: number, pageNum: number) {
-            return this.loadAllPaginated(Freight, pageSize, pageNum);
+            return this.loadAllPaginated<Freight>(Freight, pageSize, pageNum);
         },
         async findEditFreight(id: IFreight['id']) {
             const foundFreight = await this.findFreight(id, true);
@@ -102,7 +102,7 @@ export const useFreightsStore = defineStore('freights', {
         async createFreight() {
             const [attributes, apiAttrs] = convertAttrs(this._newFreight);
 
-            await this.createRecordByAttrs({
+            await this.createRecordByAttrs<Freight>({
                 attributes,
                 model: Freight,
                 errorMsg: 'Falha ao criar frete.',
@@ -114,7 +114,7 @@ export const useFreightsStore = defineStore('freights', {
             callOperation(() => apiAdapter.post({ url: '/', data: apiAttrs }));
         },
         async removeFreight(id: IFreight['id']) {
-            await this.removeRecord({
+            await this.removeRecord<Freight>({
                 id,
                 model: Freight,
                 errorMsg: 'Falha ao remover frete.',
@@ -126,7 +126,7 @@ export const useFreightsStore = defineStore('freights', {
         async updateFreight(id: IFreight['id']) {
             const [attributes, apiAttrs] = convertAttrs(this._editFreight);
 
-            await this.updateRecord({
+            await this.updateRecord<Freight>({
                 id,
                 attributes,
                 model: Freight,
