@@ -5,7 +5,7 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 
-export type StaticThis<T> = { new (attrs?: Record<string, any>): T };
+export type StaticThis<T> = { new (): T } & typeof BaseEntity;
 
 export interface IAppBaseEntity extends Record<string, any> {
     id: number;
@@ -36,12 +36,18 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
         this: StaticThis<T>,
         attributes: Record<string, any>
     ) {
-        const instance = new this(attributes);
+        const instance = new this();
 
         // using this since constructor does not work
         instance.setAttributes(attributes);
 
         return instance.save();
+    }
+
+    static requiredAttributes<T extends AppBaseEntity>(this: StaticThis<T>) {
+        return this.getRepository<T>()
+            .metadata.columns.filter((column) => !column.isNullable)
+            .map((column) => column.propertyName);
     }
 
     setAttributes(attributes: Record<string, any>) {

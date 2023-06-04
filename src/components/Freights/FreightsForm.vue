@@ -190,9 +190,7 @@ const locationInfoFields = computed<ILocationInfoFields>(() => ({
     },
 }));
 
-const freightRequiredFields = Freight.getRepository()
-    .metadata.columns.filter((column) => !column.isNullable)
-    .map((column) => column.propertyName);
+const freightRequiredFields = Freight.requiredAttributes();
 
 const validateGeneralData = () => {
     let validFields = true;
