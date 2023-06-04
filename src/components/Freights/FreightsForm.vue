@@ -55,12 +55,14 @@ import { Ref, computed, ref, toRefs } from 'vue';
 import { IonText, IonButton } from '@ionic/vue';
 import { menu, navigate } from 'ionicons/icons';
 
+import { parseISO } from '@/utils/date';
 import { Freight } from '@/models/freight';
 import GeneralData from './GeneralData.vue';
 import LocationInfo from './LocationInfo.vue';
 import StepperComponent from '@/components/StepperComponent.vue';
 import { IFormData, IGeneralDataFields, ILocationInfoFields } from '.';
 import {
+    addErrorToField,
     ValidationErrors,
     clearFieldsErrors,
     validateRequiredFields,
@@ -192,6 +194,58 @@ const locationInfoFields = computed<ILocationInfoFields>(() => ({
 
 const freightRequiredFields = Freight.requiredAttributes();
 
+const isDateBefore = (strDateA: string, strDateB: string) => {
+    const dateA = parseISO(strDateA);
+    const dateB = parseISO(strDateB);
+
+    return dateA < dateB;
+};
+
+const validateDueDate = (errors: ValidationErrors) => {
+    const { startDate, dueDate } = formData.value;
+
+    if (!dueDate) return true;
+
+    const errorMessage = 'A data limite não pode ser anterior a data de início';
+
+    if (isDateBefore(dueDate, startDate)) {
+        addErrorToField({
+            field: 'dueDate',
+            errorMessages: [errorMessage],
+            fieldRef: dueDateRef,
+            validationErrors: errors,
+            overwriteErrors: true,
+        });
+
+        return false;
+    }
+
+    return true;
+};
+
+const validateFinishedDate = (errors: ValidationErrors) => {
+    const { finished, finishedDate, startDate } = formData.value;
+
+    if (!finished || !finishedDate) return true;
+
+    const errorMessage =
+        'A data de conclusão não pode ser anterior a data de início';
+
+    if (isDateBefore(finishedDate, startDate)) {
+        addErrorToField({
+            field: 'finishedDate',
+            errorMessages: [errorMessage],
+            fieldRef: finishedDateRef,
+            validationErrors: errors,
+            overwriteErrors: true,
+        });
+
+        return false;
+    }
+
+    return true;
+};
+
 const validateGeneralData = () => {
     let validFields = true;
     const newValidationErrors = {} as ValidationErrors;
@@ -218,6 +272,10 @@ const validateGeneralData = () => {
 
     if (!validFields)
         errorMessage.value = 'Todos os campos com * são obrigatórios';
+
+    validFields = validFields && validateDueDate(newValidationErrors);
+
+    validFields = validFields && validateFinishedDate(newValidationErrors);
 
     generalDataValidationErrors.value = newValidationErrors;
 

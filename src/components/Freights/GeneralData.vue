@@ -125,6 +125,12 @@
             <ion-note v-if="!readonly" slot="helper"
                 >Data limite acordada para o frete</ion-note
             >
+
+            <InputErrorNote
+                field="dueDate"
+                defaultMsg="Data limite inválida"
+                :validationErrors="validationErrors"
+            />
         </ion-item>
 
         <ion-item class="form-item" :ref="fields.startDate.ref">
@@ -163,6 +169,12 @@
             <ion-note v-if="!readonly" slot="helper"
                 >Só pode ser alterado se o frete estiver finalizado</ion-note
             >
+
+            <InputErrorNote
+                field="finishedDate"
+                defaultMsg="Data de conclusão inválida"
+                :validationErrors="validationErrors"
+            />
         </ion-item>
 
         <ion-item class="form-item" :ref="fields.description.ref">
