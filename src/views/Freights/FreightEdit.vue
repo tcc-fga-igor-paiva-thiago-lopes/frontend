@@ -66,7 +66,7 @@ const router = useRouter();
 
 const store = useFreightsStore();
 
-const { findEditFreight, setEditFreightAttr, updateFreight } = store;
+const { findEditFreight, setEditFreightAttrs, updateFreight } = store;
 
 const { editFreight } = storeToRefs(store);
 
@@ -87,7 +87,7 @@ onMounted(async () => {
 });
 
 const changeField = (field: string, value: unknown) => {
-    setEditFreightAttr(field, value);
+    setEditFreightAttrs({ [field]: value });
 };
 
 const handleFormSubmit = async () => {

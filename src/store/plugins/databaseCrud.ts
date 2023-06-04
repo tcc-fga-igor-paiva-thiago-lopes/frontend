@@ -1,12 +1,13 @@
 import { AppBaseEntity } from '@/models/appBaseEntity';
-import { formDataToDatabaseAndApi } from '@/utils/conversion';
 import { generalOperation, inMemberOperation } from '../helpers';
 import { runDatabaseOperation } from '../helpers/databaseConnector';
 import { IInMemberOperationParams, IInMemberWithAttrsParams } from '..';
+import { formDataToDatabaseAndApi, instanceToObject } from '@/utils/conversion';
 
 export const DatabaseCrudPlugin = () => ({
     _items: [] as any[],
     _newItem: {} as Record<string, any>,
+    _editItem: {} as Record<string, any>,
     mergeItems(items: any[]) {
         this._items = [...this._items, ...items];
     },
@@ -15,7 +16,7 @@ export const DatabaseCrudPlugin = () => ({
         errorMsg,
         successMsg,
     }: Omit<IInMemberOperationParams<T>, 'id'>) {
-        const [attrs, apiAttrs] = formDataToDatabaseAndApi({
+        const [attrs, apiAttrs] = formDataToDatabaseAndApi<T>({
             attrs: this._newItem,
             repository: model.getRepository<T>(),
         });
@@ -25,6 +26,54 @@ export const DatabaseCrudPlugin = () => ({
             attributes: attrs,
             errorMsg,
             successMsg,
+        });
+
+        return [record, apiAttrs] as [any, Record<string, any>];
+    },
+    async findRecord<T extends AppBaseEntity>(
+        model: { new (): T } & typeof AppBaseEntity,
+        id: any,
+        asFormData = false
+    ) {
+        const record = await model.findOneBy<T>({ id });
+
+        if (!record) return null;
+
+        if (asFormData) {
+            return instanceToObject<T>(record, model.getRepository<T>());
+        }
+
+        return record;
+    },
+    async findEditRecord<T extends AppBaseEntity>(
+        model: { new (): T } & typeof AppBaseEntity,
+        id: any
+    ) {
+        const foundFreight = await this.findRecord<T>(model, id, true);
+
+        if (!foundFreight) return false;
+
+        this._editItem = foundFreight;
+
+        return true;
+    },
+    async updateRecordWithEditItem<T extends AppBaseEntity>({
+        id,
+        model,
+        errorMsg,
+        successMsg,
+    }: IInMemberOperationParams<T>) {
+        const [attributes, apiAttrs] = formDataToDatabaseAndApi<T>({
+            attrs: this._editItem,
+            repository: model.getRepository<T>(),
+        });
+
+        const record = await this.updateRecord<T>({
+            id,
+            model,
+            errorMsg,
+            successMsg,
+            attributes,
         });
 
         return [record, apiAttrs] as [any, Record<string, any>];
