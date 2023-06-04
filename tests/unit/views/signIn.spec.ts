@@ -10,7 +10,7 @@ import { DatabaseHelper } from '../../databaseHelper';
 
 const mockDataSource = DatabaseHelper.dataSource();
 
-jest.mock('@/database/databaseDataSource', () => {
+jest.mock('@/database/dataSource', () => {
     return jest.fn().mockImplementation(() => ({
         __esModule: true,
         default: mockDataSource,
