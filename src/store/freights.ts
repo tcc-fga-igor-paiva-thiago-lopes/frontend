@@ -4,28 +4,15 @@ import APIAdapter from '@/services/api';
 import { IFormData } from '@/components/Freights';
 import { Freight, IFreight } from '@/models/freight';
 import { callOperation } from './helpers/apiConnector';
-import {
-    stringToFloat,
-    instanceToObject,
-    convertAttributes,
-} from '@/utils/conversion';
+import { instanceToObject, formDataToDatabaseAndApi } from '@/utils/conversion';
 
 interface IFreightsStoreState extends PiniaCustomStateProperties {
-    _freights: Freight[];
-    _newFreight: IFormData;
     _editFreight: IFormData;
 }
 
-const fieldsConversion = {
-    distance: stringToFloat,
-    cargoWeight: stringToFloat,
-    agreedPayment: stringToFloat,
-};
-
 const convertAttrs = (attrs: IFormData) => {
-    return convertAttributes({
+    return formDataToDatabaseAndApi({
         attrs,
-        fieldsConversion,
         repository: Freight.getRepository(),
     });
 };
@@ -51,9 +38,8 @@ const emptyFreightFormData = (): IFormData => ({
 });
 
 export const initialState = (): IFreightsStoreState => ({
-    _newFreight: emptyFreightFormData(),
+    _newItem: emptyFreightFormData(),
     _editFreight: emptyFreightFormData(),
-    _freights: [] as Freight[],
     _items: [],
 });
 
@@ -63,12 +49,12 @@ export const useFreightsStore = defineStore('freights', {
     state: (): IFreightsStoreState => initialState(),
     getters: {
         freights: (state) => state._items,
-        newFreight: (state: IFreightsStoreState) => state._newFreight,
         editFreight: (state: IFreightsStoreState) => state._editFreight,
+        newFreight: (state: IFreightsStoreState) => state._newItem as IFormData,
     },
     actions: {
-        setNewFreightAttr(field: keyof IFormData, value: any) {
-            this._newFreight[field] = value;
+        setNewFreightAttrs(attrs: Record<keyof IFormData, any>) {
+            Object.assign(this._newItem, attrs);
         },
         setEditFreightAttr(field: keyof IFormData, value: any) {
             this._editFreight[field] = value;
@@ -100,16 +86,13 @@ export const useFreightsStore = defineStore('freights', {
             return freight;
         },
         async createFreight() {
-            const [attributes, apiAttrs] = convertAttrs(this._newFreight);
-
-            await this.createRecordByAttrs<Freight>({
-                attributes,
+            const [, apiAttrs] = await this.createRecordWithNewItem<Freight>({
                 model: Freight,
                 errorMsg: 'Falha ao criar frete.',
                 successMsg: 'Frete criado com sucesso!',
             });
 
-            this._newFreight = emptyFreightFormData();
+            this._newItem = emptyFreightFormData();
 
             callOperation(() => apiAdapter.post({ url: '/', data: apiAttrs }));
         },

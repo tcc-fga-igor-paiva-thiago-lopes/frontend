@@ -7,7 +7,6 @@ export type ConvertParams<Model extends AppBaseEntity> = {
     addOnlyTruthy?: boolean;
     attrs: Record<string, any>;
     repository: Repository<Model>;
-    fieldsConversion: FieldsConversion;
 };
 
 const getType = (value: any) => {
@@ -16,6 +15,22 @@ const getType = (value: any) => {
     if (value instanceof Date) return 'date';
 
     return typeof value;
+};
+
+const convertFormDataToType = (type: any, value: any) => {
+    const valueIsString = typeof value === 'string';
+
+    switch (type) {
+        case Date:
+        case 'datetime':
+            return valueIsString ? value : value.toISOString();
+        case Number:
+            return value.toString();
+        case String:
+        case Boolean:
+        default:
+            return value;
+    }
 };
 
 export type FormDataConversionMap = Partial<
@@ -32,30 +47,32 @@ const formDataTypeConversion: FormDataConversionMap = {
 
 export const stringToFloat = (value: string) => parseFloat(value);
 
-export const convertAttributes = <Model extends AppBaseEntity>({
+export const formDataToDatabaseAndApi = <Model extends AppBaseEntity>({
     attrs,
     repository,
-    fieldsConversion,
     addOnlyTruthy = true,
 }: ConvertParams<Model>) => {
     const newAttrs = {} as Record<string, any>;
     const apiAttrs = {} as Record<string, any>;
 
     const columnNamesMap = Object.fromEntries(
-        repository.metadata.columns.map((column) => [
-            column.propertyName,
-            column.databaseName,
-        ])
+        repository.metadata.columns.map(
+            ({ propertyName, databaseName, type }) => [
+                propertyName,
+                { databaseName, type },
+            ]
+        )
     );
 
     Object.entries(attrs).forEach(([field, value]) => {
         if (!addOnlyTruthy || (addOnlyTruthy && !!value)) {
-            const convertedValue = fieldsConversion[field]
-                ? fieldsConversion[field](value)
-                : value;
+            const convertedValue = convertFormDataToType(
+                columnNamesMap[field].type,
+                value
+            );
 
             newAttrs[field] = convertedValue;
-            apiAttrs[columnNamesMap[field]] = convertedValue;
+            apiAttrs[columnNamesMap[field].databaseName] = convertedValue;
         }
     });
 

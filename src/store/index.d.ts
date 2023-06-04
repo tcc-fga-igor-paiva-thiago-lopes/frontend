@@ -25,10 +25,13 @@ declare module 'pinia' {
         ) => Promise<any>;
         removeRecord: <T>(params: IInMemberOperationParams<T>) => Promise<void>;
         updateRecord: <T>(params: IInMemberWithAttrsParams<T>) => Promise<void>;
+        createRecordWithNewItem: <T>(
+            params: Omit<IInMemberOperationParams<T>, 'id'>
+        ) => Promise<[T, Record<string, any>]>;
     }
 
     export interface PiniaCustomStateProperties {
         _items: Ref<any[]>;
-        // _newItem: Record<string, any>;
+        _newItem: Record<string, any>;
     }
 }

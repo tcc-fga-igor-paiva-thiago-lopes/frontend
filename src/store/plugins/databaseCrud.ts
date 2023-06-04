@@ -1,12 +1,33 @@
-import { generalOperation, inMemberOperation } from '../helpers';
 import { AppBaseEntity } from '@/models/appBaseEntity';
+import { formDataToDatabaseAndApi } from '@/utils/conversion';
+import { generalOperation, inMemberOperation } from '../helpers';
 import { runDatabaseOperation } from '../helpers/databaseConnector';
 import { IInMemberOperationParams, IInMemberWithAttrsParams } from '..';
 
 export const DatabaseCrudPlugin = () => ({
     _items: [] as any[],
+    _newItem: {} as Record<string, any>,
     mergeItems(items: any[]) {
         this._items = [...this._items, ...items];
+    },
+    async createRecordWithNewItem<T extends AppBaseEntity>({
+        model,
+        errorMsg,
+        successMsg,
+    }: Omit<IInMemberOperationParams<T>, 'id'>) {
+        const [attrs, apiAttrs] = formDataToDatabaseAndApi({
+            attrs: this._newItem,
+            repository: model.getRepository<T>(),
+        });
+
+        const record = await this.createRecordByAttrs({
+            model,
+            attributes: attrs,
+            errorMsg,
+            successMsg,
+        });
+
+        return [record, apiAttrs] as [any, Record<string, any>];
     },
     async loadAllPaginated<T>(
         model: { new (): T } & typeof AppBaseEntity,

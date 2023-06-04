@@ -54,7 +54,7 @@ const router = useRouter();
 
 const store = useFreightsStore();
 
-const { createFreight, setNewFreightAttr } = store;
+const { createFreight, setNewFreightAttrs } = store;
 
 const { newFreight } = storeToRefs(store);
 
@@ -73,10 +73,14 @@ const handleFormSubmit = async () => {
 };
 
 const changeField = (field: string, value: unknown) => {
-    setNewFreightAttr(field, value);
+    setNewFreightAttrs({ [field]: value });
 };
 
 onMounted(() => {
-    setNewFreightAttr('startDate', new Date().toISOString());
+    setNewFreightAttrs({
+        originCountry: 'Brasil',
+        destinationCountry: 'Brasil',
+        startDate: new Date().toISOString(),
+    });
 });
 </script>
