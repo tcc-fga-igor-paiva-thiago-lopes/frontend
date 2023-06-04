@@ -3,7 +3,10 @@ import { Preferences } from '@capacitor/preferences';
 import { CapacitorHttp, HttpOptions, HttpResponse } from '@capacitor/core';
 
 import APIError from '@/services/api/apiError';
-import { environmentVariablesWrapper } from '../../helpers';
+import {
+    DEFAULT_API_OPTIONS,
+    environmentVariablesWrapper,
+} from '../../helpers';
 
 jest.mock('@/router', () => ({
     default: { push: jest.fn(), currentRoute: { value: { name: 'Home' } } },
@@ -21,16 +24,6 @@ jest.mock('@capacitor/core', () => ({
 }));
 
 let apiAdapter: APIAdapter;
-
-const DEFAULT_CONFIG: Partial<HttpOptions> = {
-    responseType: 'json',
-    readTimeout: 5000,
-    connectTimeout: 5000,
-    headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-    },
-};
 
 const truckDriverOne = {
     created_at: '2023-04-03 23:40:51.702511+00:00',
@@ -81,7 +74,7 @@ describe('apiService', () => {
 
         expect(response).toEqual(expectedResponse);
         expect(CapacitorHttp.request).toBeCalledWith({
-            ...DEFAULT_CONFIG,
+            ...DEFAULT_API_OPTIONS,
             method: 'POST',
             data: request_data,
             url: 'http://localhost:5000/truck-drivers/login',
@@ -201,10 +194,10 @@ describe('apiService', () => {
             expect(
                 CapacitorHttp[method as CapacitorHttpMethods]
             ).toBeCalledWith({
-                ...DEFAULT_CONFIG,
+                ...DEFAULT_API_OPTIONS,
                 ...requestOptions,
                 headers: {
-                    ...DEFAULT_CONFIG.headers,
+                    ...DEFAULT_API_OPTIONS.headers,
                     Authorization: 'Bearer 123',
                 },
                 url: `http://localhost:5000${path}`,
@@ -252,10 +245,10 @@ describe('apiService', () => {
             expect(
                 CapacitorHttp[method as CapacitorHttpMethods]
             ).toBeCalledWith({
-                ...DEFAULT_CONFIG,
+                ...DEFAULT_API_OPTIONS,
                 ...options,
                 headers: {
-                    ...DEFAULT_CONFIG.headers,
+                    ...DEFAULT_API_OPTIONS.headers,
                     Authorization: 'Bearer 123',
                 },
                 url: 'http://localhost:5000/truck-drivers',
