@@ -54,7 +54,7 @@ export const useFreightsStore = defineStore('freights', {
             return this.loadAllPaginated<Freight>(Freight, pageSize, pageNum);
         },
         async findEditFreight(id: IFreight['id']) {
-            return this.findEditRecord<Freight>(Freight, id);
+            return this.findEditRecord<Freight>({ model: Freight, id });
         },
         async findFreight(id: IFreight['id'], asFormData = false) {
             return this.findRecord<Freight>(Freight, id, asFormData);

@@ -1,7 +1,12 @@
 import { AppBaseEntity } from '@/models/appBaseEntity';
 import { generalOperation, inMemberOperation } from '../helpers';
 import { runDatabaseOperation } from '../helpers/databaseConnector';
-import { IInMemberOperationParams, IInMemberWithAttrsParams } from '..';
+import {
+    ModelClass,
+    IMemberActionParams,
+    IMemberActionWithAttrsParams,
+    IMemberActionWithMsgParams,
+} from '..';
 import { formDataToDatabaseAndApi, instanceToObject } from '@/utils/conversion';
 
 export const DatabaseCrudPlugin = () => ({
@@ -15,7 +20,7 @@ export const DatabaseCrudPlugin = () => ({
         model,
         errorMsg,
         successMsg,
-    }: Omit<IInMemberOperationParams<T>, 'id'>) {
+    }: Omit<IMemberActionWithMsgParams<T>, 'id'>) {
         const [attrs, apiAttrs] = formDataToDatabaseAndApi<T>({
             attrs: this._newItem,
             repository: model.getRepository<T>(),
@@ -31,7 +36,7 @@ export const DatabaseCrudPlugin = () => ({
         return [record, apiAttrs] as [any, Record<string, any>];
     },
     async findRecord<T extends AppBaseEntity>(
-        model: { new (): T } & typeof AppBaseEntity,
+        model: ModelClass<T>,
         id: any,
         asFormData = false
     ) {
@@ -45,10 +50,10 @@ export const DatabaseCrudPlugin = () => ({
 
         return record;
     },
-    async findEditRecord<T extends AppBaseEntity>(
-        model: { new (): T } & typeof AppBaseEntity,
-        id: any
-    ) {
+    async findEditRecord<T extends AppBaseEntity>({
+        id,
+        model,
+    }: IMemberActionParams<T>) {
         const foundFreight = await this.findRecord<T>(model, id, true);
 
         if (!foundFreight) return false;
@@ -62,7 +67,7 @@ export const DatabaseCrudPlugin = () => ({
         model,
         errorMsg,
         successMsg,
-    }: IInMemberOperationParams<T>) {
+    }: IMemberActionWithMsgParams<T>) {
         const [attributes, apiAttrs] = formDataToDatabaseAndApi<T>({
             attrs: this._editItem,
             repository: model.getRepository<T>(),
@@ -78,8 +83,8 @@ export const DatabaseCrudPlugin = () => ({
 
         return [record, apiAttrs] as [any, Record<string, any>];
     },
-    async loadAllPaginated<T>(
-        model: { new (): T } & typeof AppBaseEntity,
+    async loadAllPaginated<T extends AppBaseEntity>(
+        model: ModelClass<T>,
         pageSize: number,
         pageNum: number
     ) {
@@ -95,18 +100,18 @@ export const DatabaseCrudPlugin = () => ({
 
         return paginationRet;
     },
-    async findRecordByAttrs<T>(
-        model: { new (): T } & typeof AppBaseEntity,
+    async findRecordByAttrs<T extends AppBaseEntity>(
+        model: ModelClass<T>,
         attrs: Record<string, any>
     ) {
-        return model.findOneBy(attrs) as T | null;
+        return model.findOneBy<T>(attrs);
     },
-    async createRecordByAttrs<T>({
+    async createRecordByAttrs<T extends AppBaseEntity>({
         model,
         errorMsg,
         successMsg,
         attributes,
-    }: Omit<IInMemberWithAttrsParams<T>, 'id'>) {
+    }: Omit<IMemberActionWithAttrsParams<T>, 'id'>) {
         return runDatabaseOperation(() =>
             generalOperation({
                 errorMsg,
@@ -121,12 +126,12 @@ export const DatabaseCrudPlugin = () => ({
             })
         );
     },
-    async removeRecord<T>({
+    async removeRecord<T extends AppBaseEntity>({
         id,
         model,
         errorMsg,
         successMsg,
-    }: IInMemberOperationParams<T>) {
+    }: IMemberActionWithMsgParams<T>) {
         return runDatabaseOperation(async () => {
             await inMemberOperation<AppBaseEntity, Record<string, any>>({
                 errorMsg,
@@ -138,13 +143,13 @@ export const DatabaseCrudPlugin = () => ({
             });
         });
     },
-    async updateRecord<T>({
+    async updateRecord<T extends AppBaseEntity>({
         id,
         model,
         errorMsg,
         successMsg,
         attributes,
-    }: IInMemberWithAttrsParams<T>) {
+    }: IMemberActionWithAttrsParams<T>) {
         return runDatabaseOperation(async () => {
             await inMemberOperation<AppBaseEntity, Record<string, any>>({
                 errorMsg,
