@@ -1,13 +1,34 @@
 <template>
     <form class="form">
-        <ion-item lines="none">
-            <ion-checkbox
-                slot="start"
+        <ion-item class="form-item" :ref="fields.status.ref">
+            <ion-label position="stacked">Status *</ion-label>
+
+            <ion-select
+                ok-text="OK"
+                cancel-text="Fechar"
+                name="status"
+                interface="alert"
+                placeholder="Selecione o status deste frete"
                 :disabled="readonly"
-                :value="fields.finished.value"
-                @ionChange="(e) => setAttribute('finished', e.target.checked)"
-            ></ion-checkbox>
-            <ion-label>Finalizado?</ion-label>
+                :value="fields.status.value"
+                :interface-options="{ cssClass: 'alert-custom-class ' }"
+                @ionChange="(e) => setAttribute('status', e.target.value)"
+            >
+                <IonSelectOption
+                    v-for="freightStatus in freightStatuses"
+                    :value="freightStatus"
+                    :key="freightStatus"
+                    >{{ freightStatus }}</IonSelectOption
+                >
+
+                <IonSelectOption value="Xablau">Xablau</IonSelectOption>
+            </ion-select>
+
+            <InputErrorNote
+                field="status"
+                defaultMsg="Status inválido"
+                :validationErrors="validationErrors"
+            />
         </ion-item>
 
         <ion-item class="form-item" :ref="fields.cargo.ref">
@@ -160,7 +181,7 @@
             <DatetimeButton
                 identifier="finishedDate"
                 :value="fields.finishedDate.value"
-                :disabled="readonly || !fields.finished.value"
+                :disabled="readonly"
                 @valueChange="
                     (e) => setAttribute('finishedDate', e.target.value)
                 "
@@ -217,6 +238,10 @@
     margin: 8px 0;
 }
 
+.alert-custom-class .alert-wrapper {
+    width: 100%;
+}
+
 .action-sheet-custom-class .action-sheet-cancel {
     background: var(--ion-color-primary);
     color: var(--ion-color-primary-contrast);
@@ -233,14 +258,13 @@ import {
     IonNote,
     IonSelect,
     IonTextarea,
-    IonCheckbox,
     IonSelectOption,
 } from '@ionic/vue';
 
+import { FreightCargo, FreightStatus } from '@/models/freight';
 import DatetimeButton from '@/components/DatetimeButton.vue';
 import InputErrorNote from '../InputErrorNote.vue';
 import { ValidationErrors } from '@/utils/errors';
-import { FreightCargo } from '@/models/freight';
 import { IGeneralDataFields } from '.';
 
 interface IProps {
@@ -254,4 +278,6 @@ const props = defineProps<IProps>();
 const { fields, readonly, validationErrors, setAttribute } = toRefs(props);
 
 const cargoTypes = Object.values(FreightCargo);
+
+const freightStatuses = Object.values(FreightStatus);
 </script>

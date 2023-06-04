@@ -17,6 +17,14 @@ export enum FreightCargo {
     DANGEROUS_SOLID_BULK = 'Perigosa Granel Sólido',
 }
 
+export enum FreightStatus {
+    NOT_STARTED = 'Não iniciado',
+    STARTED = 'Em progresso',
+    WAITING_UNLOAD = 'Aguardando descarga',
+    // WAITING_PAYMENT = 'Aguardando pagamento',
+    FINISHED = 'Finalizado',
+}
+
 export interface IFreight extends IAppBaseEntity {
     id: number;
     cargo: string;
@@ -46,6 +54,9 @@ export interface IFreight extends IAppBaseEntity {
 export class Freight extends AppBaseEntity implements IFreight {
     @Column({ nullable: false, enum: FreightCargo })
     cargo!: string;
+
+    @Column({ nullable: false, enum: FreightStatus })
+    status!: string;
 
     @Column({ nullable: false })
     description!: string;

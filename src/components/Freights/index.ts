@@ -3,10 +3,10 @@ import { Ref } from 'vue';
 export * from './';
 
 export interface IFormData extends Record<string, unknown> {
-    finished: boolean;
     name: string;
     description: string;
     cargo: string;
+    status: string;
     cargoWeight: string;
     contractor: string;
     agreedPayment: string;
@@ -27,8 +27,8 @@ export interface IGeneralDataFields extends Record<string, any> {
         value: string;
         ref: Ref<any>;
     };
-    finished: {
-        value: boolean;
+    status: {
+        value: string;
         ref: Ref<any>;
     };
     description: {

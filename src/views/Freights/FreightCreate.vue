@@ -43,6 +43,7 @@ import {
 } from '@ionic/vue';
 
 import { presentToast } from '@/utils/toast';
+import { FreightStatus } from '@/models/freight';
 import { useFreightsStore } from '@/store/freights';
 
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
@@ -80,6 +81,7 @@ onMounted(() => {
     setNewFreightAttrs({
         originCountry: 'Brasil',
         destinationCountry: 'Brasil',
+        status: FreightStatus.NOT_STARTED,
         startDate: new Date().toISOString(),
     });
 });

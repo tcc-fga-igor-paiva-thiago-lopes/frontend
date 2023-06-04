@@ -8,10 +8,10 @@ import { callOperation } from './helpers/apiConnector';
 type FreightsStoreState = PiniaCustomStateProperties;
 
 const emptyFreightFormData = (): IFormData => ({
-    finished: false,
     name: '',
     description: '',
     cargo: '',
+    status: 'Não iniciado',
     cargoWeight: '',
     contractor: '',
     agreedPayment: '',

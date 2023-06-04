@@ -17,6 +17,14 @@ const cargoEnumValues = [
     'Perigosa Granel Sólido',
 ];
 
+const statusEnumValues = [
+    'Não iniciado',
+    'Em progresso',
+    'Aguardando descarga',
+    // 'Aguardando pagamento',
+    'Finalizado',
+];
+
 export class AddsFreightTable1685069028734 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
@@ -32,6 +40,12 @@ export class AddsFreightTable1685069028734 implements MigrationInterface {
                     },
                     {
                         name: 'cargo',
+                        type: 'varchar',
+                        length: '30',
+                        isNullable: false,
+                    },
+                    {
+                        name: 'status',
                         type: 'varchar',
                         length: '30',
                         isNullable: false,
@@ -151,6 +165,13 @@ export class AddsFreightTable1685069028734 implements MigrationInterface {
                         name: 'CHK_CARGO_ENUM_VALUES',
                         columnNames: ['cargo'],
                         expression: `cargo IN(${cargoEnumValues
+                            .map((item) => `'${item}'`)
+                            .join(',')})`,
+                    },
+                    {
+                        name: 'CHK_STATUS_ENUM_VALUES',
+                        columnNames: ['status'],
+                        expression: `status IN(${statusEnumValues
                             .map((item) => `'${item}'`)
                             .join(',')})`,
                     },

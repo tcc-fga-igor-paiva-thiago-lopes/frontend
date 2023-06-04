@@ -102,7 +102,7 @@ const step = ref(0);
 const errorMessage = ref('');
 
 const cargoRef = ref('');
-const finishedRef = ref('');
+const statusRef = ref('');
 const cargoWeightRef = ref('');
 const contractorRef = ref('');
 const agreedPaymentRef = ref('');
@@ -123,13 +123,13 @@ const generalDataValidationErrors = ref<ValidationErrors>({});
 const locationInfoValidationErrors = ref<ValidationErrors>({});
 
 const generalDataFields = computed<IGeneralDataFields>(() => ({
-    finished: {
-        value: formData.value.finished,
-        ref: finishedRef,
-    },
     cargo: {
         value: formData.value.cargo,
         ref: cargoRef,
+    },
+    status: {
+        value: formData.value.status,
+        ref: statusRef,
     },
     cargoWeight: {
         value: formData.value.cargoWeight,
@@ -224,9 +224,9 @@ const validateDueDate = (errors: ValidationErrors) => {
 };
 
 const validateFinishedDate = (errors: ValidationErrors) => {
-    const { finished, finishedDate, startDate } = formData.value;
+    const { finishedDate, startDate } = formData.value;
 
-    if (!finished || !finishedDate) return true;
+    if (!finishedDate) return true;
 
     const errorMessage =
         'A data de conclusão não pode ser anterior a data de início';
