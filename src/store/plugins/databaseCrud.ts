@@ -54,11 +54,11 @@ export const DatabaseCrudPlugin = () => ({
         id,
         model,
     }: IMemberActionParams<T>) {
-        const foundFreight = await this.findRecord<T>(model, id, true);
+        const foundRecord = await this.findRecord<T>(model, id, true);
 
-        if (!foundFreight) return false;
+        if (!foundRecord) return false;
 
-        this._editItem = foundFreight;
+        this._editItem = foundRecord;
 
         return true;
     },
