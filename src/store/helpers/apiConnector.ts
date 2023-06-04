@@ -1,5 +1,6 @@
 import { HttpResponse } from '@capacitor/core';
 import { useAppStore } from '../app';
+import APIError from '@/services/api/apiError';
 
 export const callOperation = async (operation: () => Promise<HttpResponse>) => {
     const appStore = useAppStore();
@@ -13,7 +14,10 @@ export const callOperation = async (operation: () => Promise<HttpResponse>) => {
                 )
                 .catch((error) => {
                     // TODO: save error to be treated by user later
-                    console.log('Requisição falhou: ', error.response?.data);
+                    console.log(
+                        'Requisição falhou: ',
+                        error instanceof APIError ? error.response?.data : error
+                    );
                 });
 
             return true;
