@@ -56,6 +56,9 @@ export const useFreightsStore = defineStore('freights', {
         async findEditFreight(id: IFreight['id']) {
             return this.findEditRecord<Freight>(Freight, id);
         },
+        async findFreight(id: IFreight['id'], asFormData = false) {
+            return this.findRecord<Freight>(Freight, id, asFormData);
+        },
         async createFreight() {
             const [, apiAttrs] = await this.createRecordWithNewItem<Freight>({
                 model: Freight,
