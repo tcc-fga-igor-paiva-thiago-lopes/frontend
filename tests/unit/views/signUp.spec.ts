@@ -1,10 +1,12 @@
+import { createTestingPinia } from '@pinia/testing';
+import { Preferences } from '@capacitor/preferences';
 import { mount, flushPromises, VueWrapper } from '@vue/test-utils';
 import { Router, createRouter, createWebHistory } from 'vue-router';
 
+const mockRequestWithoutAuth = jest.fn();
+
 import { routes } from '@/router';
 import { presentToast } from '@/utils/toast';
-import { createTestingPinia } from '@pinia/testing';
-import { Preferences } from '@capacitor/preferences';
 
 import SignUp from '@/views/SignUp.vue';
 import APIAdapter from '@/services/api';
@@ -28,15 +30,11 @@ jest.mock('@/database', () => {
 
 jest.mock('@/utils/toast');
 
-const mockRequestWithoutAuth = jest.fn();
-
-jest.mock('@/services/api', () => {
-    return jest.fn().mockImplementation(() => {
-        return {
-            requestWithoutAuth: mockRequestWithoutAuth,
-        };
-    });
-});
+jest.mock('@/services/api', () =>
+    jest.fn().mockImplementation(() => ({
+        requestWithoutAuth: mockRequestWithoutAuth,
+    }))
+);
 
 let router: Router;
 const presentToastMock = presentToast as jest.Mock<any, any>;
@@ -126,7 +124,7 @@ describe('SignUp.vue', () => {
         expect(getCSSProperty(passwordConfirmationNote, 'display')).toBeFalsy();
         expect(passwordConfirmationNote.text()).toBe('Campo obrigatório');
 
-        expect(APIAdapter).toHaveBeenCalledTimes(0);
+        expect(mockRequestWithoutAuth).toHaveBeenCalledTimes(0);
     });
 
     it('shows error message when password length is smaller than 8', async () => {
@@ -163,7 +161,7 @@ describe('SignUp.vue', () => {
             'Menor que o tamanho mínimo de 8 caracteres'
         );
 
-        expect(APIAdapter).toHaveBeenCalledTimes(0);
+        expect(mockRequestWithoutAuth).toHaveBeenCalledTimes(0);
     });
 
     it('shows error message when password and confirmation are different', async () => {
@@ -211,7 +209,7 @@ describe('SignUp.vue', () => {
             'A senha e confirmação de senha devem ser iguais'
         );
 
-        expect(APIAdapter).toHaveBeenCalledTimes(0);
+        expect(mockRequestWithoutAuth).toHaveBeenCalledTimes(0);
     });
 
     it('shows error message when email is invalid', async () => {
@@ -234,7 +232,7 @@ describe('SignUp.vue', () => {
         expect(getCSSProperty(emailNote, 'display')).toBeFalsy();
         expect(emailNote.text()).toBe('E-mail inválido');
 
-        expect(APIAdapter).toHaveBeenCalledTimes(0);
+        expect(mockRequestWithoutAuth).toHaveBeenCalledTimes(0);
     });
 
     it('sends request when all required data is filled properly', async () => {
