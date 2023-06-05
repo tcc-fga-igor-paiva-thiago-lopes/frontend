@@ -1,21 +1,20 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { AppBaseEntity } from './appBaseEntity';
+import { Entity, Column } from 'typeorm';
+import { AppBaseEntity, IAppBaseEntity } from './appBaseEntity';
 
-export interface ICategoryGroup extends Record<string, any> {
+export interface ICategoryGroup extends IAppBaseEntity {
     id: number;
     name: string;
     color: string;
+    createdAt: Date;
+    updatedAt?: Date;
 }
 
-@Entity('category_group')
+@Entity('CATEGORY_GROUP')
 export class CategoryGroup extends AppBaseEntity implements ICategoryGroup {
-    @PrimaryGeneratedColumn()
-    id!: number;
-
-    @Column('name')
+    @Column({ nullable: false })
     name!: string;
 
-    @Column('color')
+    @Column({ nullable: false })
     color!: string;
 
     static async findPaginated(pageSize: number, pageNum = 1) {
