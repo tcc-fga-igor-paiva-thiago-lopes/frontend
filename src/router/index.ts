@@ -11,7 +11,7 @@ import HomePage from '@/views/HomePage.vue';
 import NotFound from '@/views/NotFound.vue';
 import WelcomePage from '@/views/WelcomePage.vue';
 import FreightsIndex from '@/views/FreightsIndex.vue';
-import CategoriesGroups from '@/views/CategoriesGroups.vue';
+import CategoriesGroups from '@/views/CategoriesGroups/CategoriesGroups.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
