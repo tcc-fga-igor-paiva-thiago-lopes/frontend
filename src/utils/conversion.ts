@@ -19,13 +19,15 @@ const getType = (value: any) => {
 
 const convertFormDataToType = (type: any, value: any) => {
     const valueIsString = typeof value === 'string';
+    const valueIsNumber = typeof value === 'number';
 
     switch (type) {
         case Date:
         case 'datetime':
             return valueIsString ? value : value.toISOString();
+        case 'decimal':
         case Number:
-            return value.toString();
+            return valueIsNumber ? value : parseFloat(value);
         case String:
         case Boolean:
         default:

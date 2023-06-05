@@ -64,13 +64,13 @@ export class Freight extends AppBaseEntity implements IFreight {
     @Column({ nullable: false })
     contractor!: string;
 
-    @Column({ name: 'cargo_weight', nullable: false })
+    @Column({ name: 'cargo_weight', nullable: false, type: 'decimal' })
     cargoWeight!: number;
 
-    @Column({ name: 'agreed_payment', nullable: false })
+    @Column({ name: 'agreed_payment', nullable: false, type: 'decimal' })
     agreedPayment!: number;
 
-    @Column({ nullable: false })
+    @Column({ nullable: false, type: 'decimal' })
     distance!: number;
 
     @Column({ name: 'start_date', nullable: false })
@@ -91,10 +91,10 @@ export class Freight extends AppBaseEntity implements IFreight {
     @Column({ name: 'origin_country', nullable: true })
     originCountry?: string;
 
-    @Column({ name: 'origin_latitude', nullable: true })
+    @Column({ name: 'origin_latitude', nullable: true, type: 'decimal' })
     originLatitude?: number;
 
-    @Column({ name: 'origin_longitude', nullable: true })
+    @Column({ name: 'origin_longitude', nullable: true, type: 'decimal' })
     originLongitude?: number;
 
     @Column({ name: 'destination_city', nullable: false })
@@ -106,10 +106,10 @@ export class Freight extends AppBaseEntity implements IFreight {
     @Column({ name: 'destination_country', nullable: true })
     destinationCountry?: string;
 
-    @Column({ name: 'destination_latitude', nullable: true })
+    @Column({ name: 'destination_latitude', nullable: true, type: 'decimal' })
     destinationLatitude?: number;
 
-    @Column({ name: 'destination_longitude', nullable: true })
+    @Column({ name: 'destination_longitude', nullable: true, type: 'decimal' })
     destinationLongitude?: number;
 
     static async findPaginated(pageSize: number, pageNum = 1) {
