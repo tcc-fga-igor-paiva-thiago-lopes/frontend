@@ -1,21 +1,38 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 export class AddCategoriesGroupsTable1685921479153
     implements MigrationInterface
 {
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
-            CREATE TABLE IF NOT EXISTS "CATEGORY_GROUP" (
-                "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-                "name" varchar NOT NULL,
-                "color" varchar NOT NULL
-            );
-        `);
+        await queryRunner.createTable(
+            new Table({
+                name: 'CATEGORY_GROUP',
+                columns: [
+                    {
+                        name: 'id',
+                        type: 'integer',
+                        isPrimary: true,
+                        isGenerated: true,
+                        generationStrategy: 'increment',
+                    },
+                    {
+                        name: 'name',
+                        type: 'varchar',
+                        isNullable: false,
+                    },
+                    {
+                        name: 'color',
+                        type: 'varchar',
+                        isNullable: false,
+                        length: '7',
+                    },
+                ],
+            }),
+            true
+        );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
-            DROP TABLE "CATEGORY_GROUP";
-        `);
+        await queryRunner.dropTable('CATEGORY_GROUP');
     }
 }
