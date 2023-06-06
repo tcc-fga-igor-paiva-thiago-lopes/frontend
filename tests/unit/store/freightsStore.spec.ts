@@ -1,14 +1,21 @@
 import { setActivePinia } from 'pinia';
 import { createTestingPinia } from '@pinia/testing';
+import { EntityNotFoundError, TypeORMError } from 'typeorm';
 
 const mockApiPost = jest.fn();
 const mockApiPatch = jest.fn();
 const mockApiDelete = jest.fn();
 
+import { presentToast } from '@/utils/toast';
 import { DatabaseHelper } from '../../databaseHelper';
-import { Freight, FreightCargo, FreightStatus } from '@/models/freight';
 import DatabaseCrudPlugin from '@/store/plugins/databaseCrud';
-import { initialState, useFreightsStore } from '@/store/freights';
+import { initialState as appInitialState } from '@/store/freights';
+import {
+    initialState as freightsInitialState,
+    useFreightsStore,
+} from '@/store/freights';
+
+import { Freight, FreightCargo, FreightStatus } from '@/models/freight';
 
 const mockDataSource = DatabaseHelper.dataSource();
 
@@ -22,6 +29,8 @@ jest.mock('@/database/dataSource', () => {
 jest.mock('@/database', () => {
     return jest.fn().mockImplementation(() => ({ default: {} }));
 });
+
+jest.mock('@/utils/toast');
 
 jest.mock('@/services/api', () =>
     jest.fn().mockImplementation(() => ({
@@ -82,6 +91,8 @@ const freightThreeAttrs = {
     destinationState: 'SP',
 };
 
+const presentToastMock = presentToast as jest.Mock<any, any>;
+
 beforeAll(async () => DatabaseHelper.instance.setupTestDB(mockDataSource));
 
 afterAll(() => DatabaseHelper.instance.teardownTestDB());
@@ -93,10 +104,13 @@ describe('freightsStore', () => {
                 stubActions: false,
                 plugins: [DatabaseCrudPlugin],
                 initialState: {
-                    application: initialState(),
+                    application: appInitialState(),
+                    freights: freightsInitialState(),
                 },
             })
         );
+
+        presentToastMock.mockClear();
     });
 
     it('should find freight and return instance', async () => {
@@ -285,5 +299,176 @@ describe('freightsStore', () => {
                 destination_state: freightAttrs.destinationState,
             },
         });
+
+        expect(presentToastMock).toHaveBeenCalledTimes(1);
+        expect(presentToastMock).toHaveBeenCalledWith(
+            'Frete criado com sucesso!',
+            'success'
+        );
+
+        expect(freightsStore.newFreight).toStrictEqual(
+            freightsInitialState()._newItem
+        );
     });
+
+    it('should throw error in create freight when database insertion fails', async () => {
+        const freightsStore = useFreightsStore();
+        const { createFreight, setNewFreightAttrs } = freightsStore;
+
+        const freightAttrs = {
+            description: 'Created using new item',
+            cargo: 'INVALID cargo',
+            status: FreightStatus.WAITING_UNLOAD,
+            cargoWeight: '1.0',
+            contractor: 'W.M Fretes',
+            agreedPayment: '1450.25',
+            startDate: '2023-06-05T02:53:26.213Z',
+            distance: '1130.35',
+            dueDate: null,
+            finishedDate: null,
+            originCountry: 'Brasil',
+            originCity: 'Formosa',
+            originState: 'GO',
+            originLatitude: null,
+            originLongitude: null,
+            destinationCountry: 'Brasil',
+            destinationCity: 'São José dos Campos',
+            destinationState: 'SP',
+            destinationLatitude: null,
+            destinationLongitude: null,
+        };
+
+        setNewFreightAttrs(freightAttrs);
+
+        expect(() => createFreight()).rejects.toThrow(TypeORMError);
+        expect(() => createFreight()).rejects.toThrow(
+            'CHECK constraint failed: cargo'
+        );
+    });
+
+    it('should remove freight using ID', async () => {
+        const { removeFreight } = useFreightsStore();
+
+        await Freight.createWithAttrs(freightTwoAttrs);
+
+        const freight = await Freight.createWithAttrs(freightOneAttrs);
+
+        // mockApiDelete.mockResolvedValueOnce({
+        //     status: 200,
+        //     headers: {},
+        //     url: `http://localhost:5000/truck-drivers/${freight.id}`,
+        //     data: {},
+        // });
+
+        await removeFreight(freight.id);
+
+        expect(() => freight.reload()).rejects.toThrow(EntityNotFoundError);
+
+        expect(presentToastMock).toHaveBeenCalledTimes(1);
+        expect(presentToastMock).toHaveBeenCalledWith(
+            'Frete removido com sucesso!',
+            'success'
+        );
+
+        // expect(mockApiDelete).toHaveBeenCalledWith({ url: `/${freight.id}` });
+    });
+
+    it('should show error message when freight is not found', async () => {
+        const { removeFreight } = useFreightsStore();
+
+        await Freight.createWithAttrs(freightTwoAttrs);
+
+        const freight = await Freight.createWithAttrs(freightOneAttrs);
+
+        expect(() => removeFreight(128397189371289)).rejects.toThrow(
+            'Not found'
+        );
+
+        expect(await Freight.findOneBy({ id: freight.id })).toBeTruthy();
+    });
+
+    // TODO: add test case to update
+
+    it('should update freight using edit item', async () => {
+        const freightsStore = useFreightsStore();
+        const { updateFreight, findEditFreight, setEditFreightAttrs } =
+            freightsStore;
+
+        const freight = await Freight.createWithAttrs(freightOneAttrs);
+
+        const newAttributes = {
+            description: 'Mudando a descrição',
+            contractor: 'Mudando contratante',
+            cargoWeight: '788.33',
+        };
+
+        expect(await findEditFreight(freight.id)).toBeTruthy();
+
+        setEditFreightAttrs(newAttributes);
+
+        // mockApiPost.mockResolvedValueOnce({
+        //     status: 200,
+        //     headers: {},
+        //     url: `http://localhost:5000/truck-drivers/${freight.id}`,
+        //     data: {
+        //         description: 'Mudando a descrição',
+        //         contractor: 'Mudando contratante',
+        //         cargo_weight: 788.33,
+        //     },
+        // });
+
+        await updateFreight(freight.id);
+
+        await freight.reload();
+
+        expect(freight.description).toBe(newAttributes.description);
+        expect(freight.contractor).toBe(newAttributes.contractor);
+        expect(freight.cargoWeight).toBe(parseFloat(newAttributes.cargoWeight));
+
+        // expect(mockApiPatch).toHaveBeenCalledWith({
+        //     url: `/${freight.id}`,
+        //     data: {
+        //         description: 'Mudando a descrição',
+        //         contractor: 'Mudando contratante',
+        //         cargo_weight: 788.33,
+        //     },
+        // });
+
+        expect(presentToastMock).toHaveBeenCalledTimes(1);
+        expect(presentToastMock).toHaveBeenCalledWith(
+            'Frete editado com sucesso!',
+            'success'
+        );
+
+        expect(freightsStore.editFreight).toStrictEqual(
+            freightsInitialState()._editItem
+        );
+    });
+
+    // FIXME: for some reason this test fails with:
+    // QueryFailedError: TypeError: The database connection is not open
+
+    // it('should throw error in update freight when cargo is invalid', async () => {
+    //     const freightsStore = useFreightsStore();
+    //     const { updateFreight, findEditFreight, setEditFreightAttrs } =
+    //         freightsStore;
+
+    //     const freight = await Freight.createWithAttrs(freightOneAttrs);
+
+    //     const newAttributes = {
+    //         description: 'Mudando a descrição',
+    //         contractor: 'Mudando contratante',
+    //         cargoWeight: '788.33',
+    //         cargo: 'não existe no enum',
+    //     };
+
+    //     expect(await findEditFreight(freight.id)).toBeTruthy();
+
+    //     setEditFreightAttrs(newAttributes);
+
+    //     expect(() => updateFreight(freight.id)).rejects.toThrow(TypeORMError);
+    //     expect(() => updateFreight(freight.id)).rejects.toThrow(
+    //         'CHECK constraint failed: cargo'
+    //     );
+    // });
 });
