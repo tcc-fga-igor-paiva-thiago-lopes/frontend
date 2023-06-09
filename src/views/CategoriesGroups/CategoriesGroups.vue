@@ -15,7 +15,7 @@
         <ion-content :fullscreen="true">
             <ion-loading v-if="loading" />
 
-            <form class="form ion-padding">
+            <form class="form ion-padding" :formData="newCategoryGroup">
                 <ion-list class="ion-no-padding">
                     <ion-item class="form-item" ref="nameRef">
                         <ion-label position="stacked">Nome *</ion-label>
@@ -79,7 +79,8 @@
 </style>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { ref, toRefs, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { Compact } from '@ckpack/vue-color';
 import {
@@ -99,10 +100,13 @@ import {
     IonIcon,
 } from '@ionic/vue';
 import { arrowBack } from 'ionicons/icons';
+import { CategoryGroup } from '@/models/categoryGroup';
+import { useCategoriesGroupsStore } from '@/store/categoriesGroups';
 
 import APIAdapter from '@/services/api';
 import { presentToast } from '@/utils/toast';
 import InputErrorNote from '@/components/InputErrorNote.vue';
+import { IFormData } from './index';
 
 import {
     ValidationErrors,
@@ -123,10 +127,30 @@ const loading = ref(false);
 const errorMessage = ref('');
 const validationErrors = ref<ValidationErrors>({});
 
-const formFieldsRefs = () => ({
-    name: nameRef,
-    color: colorRef,
+interface IProps {
+    edit?: boolean;
+    readonly?: boolean;
+    formData: IFormData;
+    setAttribute: (field: string, value: unknown) => void;
+}
+
+const props = withDefaults(defineProps<IProps>(), {
+    edit: false,
+    readonly: false,
 });
+
+const { formData, setAttribute } = toRefs(props);
+
+const dataFields = computed<IFormData>(() => ({
+    name: {
+        value: formData.value.name,
+        ref: name,
+    },
+    color: {
+        value: formData.value.color,
+        ref: color,
+    },
+}));
 
 const updateColor = (selectedColor: any) => {
     console.log('selectedColor: ', selectedColor);
