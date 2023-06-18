@@ -134,9 +134,9 @@
             <ion-note
                 slot="helper"
                 v-if="agreedPayment && fields.cargoWeight.value"
-                >Valor {{ isPaymentPerTon ? 'total' : 'por tonelada' }}:
-                {{ paymentValue }}</ion-note
             >
+                {{ paymentHelperText }}
+            </ion-note>
 
             <InputErrorNote
                 field="agreedPayment"
@@ -306,13 +306,17 @@ const paymentType = computed(() =>
     isPaymentPerTon.value ? 'por tonelada' : 'total'
 );
 
-const paymentValue = computed(() => {
+const paymentHelperText = computed(() => {
     const inputPayment = parseFloat(agreedPayment.value);
     const weight = parseFloat(fields.value.cargoWeight.value);
 
-    return isPaymentPerTon.value
+    const displayValue = isPaymentPerTon.value
         ? Math.round(inputPayment * weight * 100) / 100
         : Math.round((inputPayment / weight) * 100) / 100;
+
+    return `Valor ${
+        isPaymentPerTon.value ? 'total' : 'por tonelada'
+    }: R$ ${displayValue}`;
 });
 
 const unwatch = watch([isPaymentPerTon, agreedPayment, fields], (values) => {
