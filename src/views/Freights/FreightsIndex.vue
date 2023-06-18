@@ -104,7 +104,7 @@ const freightLabel = (freight: Freight) => {
         freight.finishedDate &&
         formatDateDynamicYear(new Date(freight.finishedDate));
 
-    return `${freight.cargo} (${startDate} - ${finishedDate || ''})`;
+    return `${freight.cargo} (${startDate} - ${finishedDate || 'andamento'})`;
 };
 
 const freightSubLabel = (freight: Freight) => {
