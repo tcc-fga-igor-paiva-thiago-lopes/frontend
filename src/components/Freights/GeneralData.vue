@@ -60,27 +60,6 @@
             />
         </ion-item>
 
-        <ion-item class="form-item" :ref="fields.cargoWeight.ref">
-            <ion-label position="stacked">Peso carga (Toneladas) *</ion-label>
-            <ion-input
-                required
-                type="number"
-                name="cargoWeight"
-                inputmode="decimal"
-                :readonly="readonly"
-                :value="fields.cargoWeight.value"
-                placeholder="Digite o peso da carga deste frete"
-                @ionChange="(e) => setAttribute('cargoWeight', e.target.value)"
-            >
-            </ion-input>
-
-            <InputErrorNote
-                field="cargoWeight"
-                defaultMsg="Peso carga inválido"
-                :validationErrors="validationErrors"
-            />
-        </ion-item>
-
         <ion-item class="form-item" :ref="fields.contractor.ref">
             <ion-label position="stacked">Contratante *</ion-label>
             <ion-input
@@ -106,21 +85,58 @@
             />
         </ion-item>
 
+        <ion-item class="form-item" :ref="fields.cargoWeight.ref">
+            <ion-label position="stacked">Peso carga (Toneladas) *</ion-label>
+            <ion-input
+                required
+                type="number"
+                name="cargoWeight"
+                inputmode="decimal"
+                :readonly="readonly"
+                :value="fields.cargoWeight.value"
+                placeholder="Digite o peso da carga deste frete"
+                @ionChange="(e) => setAttribute('cargoWeight', e.target.value)"
+            >
+            </ion-input>
+
+            <InputErrorNote
+                field="cargoWeight"
+                defaultMsg="Peso carga inválido"
+                :validationErrors="validationErrors"
+            />
+        </ion-item>
+
+        <ion-item class="form-item" v-if="!readonly">
+            <ion-checkbox slot="start" v-model="isPaymentPerTon"></ion-checkbox>
+
+            <ion-label>Valor por tonelada?</ion-label>
+
+            <ion-note slot="helper">Marque se o valor é por tonelada</ion-note>
+        </ion-item>
+
         <ion-item class="form-item" :ref="fields.agreedPayment.ref">
-            <ion-label position="stacked">Pagamento acordado (R$) *</ion-label>
+            <ion-label position="stacked">
+                Pagamento {{ paymentType }} (R$) *
+            </ion-label>
+
             <ion-input
                 required
                 type="number"
                 inputmode="decimal"
                 name="agreedPayment"
+                v-model="agreedPayment"
                 :readonly="readonly"
                 :value="fields.agreedPayment.value"
-                placeholder="Digite o pagamento acordado"
-                @ionChange="
-                    (e) => setAttribute('agreedPayment', e.target.value)
-                "
+                :placeholder="`Digite o pagamento ${paymentType}`"
             >
             </ion-input>
+
+            <ion-note
+                slot="helper"
+                v-if="agreedPayment && fields.cargoWeight.value"
+                >Valor {{ isPaymentPerTon ? 'total' : 'por tonelada' }}:
+                {{ paymentValue }}</ion-note
+            >
 
             <InputErrorNote
                 field="agreedPayment"
@@ -249,7 +265,7 @@
 </style>
 
 <script setup lang="ts">
-import { toRefs } from 'vue';
+import { computed, onBeforeUnmount, ref, toRefs, watch } from 'vue';
 
 import {
     IonItem,
@@ -257,6 +273,7 @@ import {
     IonInput,
     IonNote,
     IonSelect,
+    IonCheckbox,
     IonTextarea,
     IonSelectOption,
 } from '@ionic/vue';
@@ -277,7 +294,45 @@ const props = defineProps<IProps>();
 
 const { fields, readonly, validationErrors, setAttribute } = toRefs(props);
 
+const isPaymentPerTon = ref(false);
+
+const agreedPayment = ref(fields.value.agreedPayment.value);
+
 const cargoTypes = Object.values(FreightCargo);
 
 const freightStatuses = Object.values(FreightStatus);
+
+const paymentType = computed(() =>
+    isPaymentPerTon.value ? 'por tonelada' : 'total'
+);
+
+const paymentValue = computed(() => {
+    const inputPayment = parseFloat(agreedPayment.value);
+    const weight = parseFloat(fields.value.cargoWeight.value);
+
+    return isPaymentPerTon.value
+        ? Math.round(inputPayment * weight * 100) / 100
+        : Math.round((inputPayment / weight) * 100) / 100;
+});
+
+const unwatch = watch([isPaymentPerTon, agreedPayment, fields], (values) => {
+    const [isPaymentPerTon, inputPayment, fields] = values;
+
+    if (inputPayment && fields.cargoWeight.value) {
+        const payment = parseFloat(inputPayment);
+        const weight = parseFloat(fields.cargoWeight.value);
+
+        const totalPayment = isPaymentPerTon
+            ? Math.round(payment * weight * 100) / 100
+            : inputPayment;
+
+        setAttribute.value('agreedPayment', `${totalPayment}`);
+
+        console.log('totalPayment: ', totalPayment);
+    }
+});
+
+onBeforeUnmount(() => {
+    unwatch();
+});
 </script>
