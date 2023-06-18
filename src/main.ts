@@ -31,18 +31,20 @@ import {
     defineCustomElements as jeepSqlite,
     applyPolyfills,
 } from 'jeep-sqlite/loader';
+import { createPinia } from 'pinia';
 import { Capacitor } from '@capacitor/core';
 import { CapacitorSQLite } from '@capacitor-community/sqlite';
-import AccountsDataSource from './database/databaseDataSource';
+
 import sqliteConnection from '@/database';
-import { createPinia } from 'pinia';
+import dataSource from './database/dataSource';
+import DatabaseCrudPlugin from './store/plugins/databaseCrud';
 
 applyPolyfills().then(() => {
     jeepSqlite(window);
 });
 
 window.addEventListener('DOMContentLoaded', async () => {
-    const pinia = createPinia();
+    const pinia = createPinia().use(DatabaseCrudPlugin);
 
     const app = createApp(App).use(IonicVue).use(router).use(pinia);
 
@@ -82,7 +84,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             return {};
         });
 
-        for (const connection of [AccountsDataSource]) {
+        for (const connection of [dataSource]) {
             if (!connection.isInitialized) {
                 await connection.initialize();
             }
@@ -100,9 +102,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         router.isReady().then(() => {
             app.mount('#app');
         });
-    } catch (err) {
-        console.log(`Error: ${err}`);
+    } catch (error) {
+        console.error(error);
 
-        throw new Error(`Error: ${err}`);
+        throw new Error(`Error: ${error}`);
     }
 });

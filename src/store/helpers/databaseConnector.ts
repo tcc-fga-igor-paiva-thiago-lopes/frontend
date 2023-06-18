@@ -1,6 +1,4 @@
-import accountsDataSource, {
-    DataSourceType,
-} from '@/database/databaseDataSource';
+import dataSource, { DataSourceType } from '@/database/dataSource';
 
 import sqliteConnection, { SQLiteConnectionType } from '@/database';
 import { Capacitor } from '@capacitor/core';
@@ -17,7 +15,7 @@ const getDatabaseInfo = (): DatabaseInfo => {
     return {
         sqlite: sqliteConnection,
         platform,
-        connection: accountsDataSource,
+        connection: dataSource,
     };
 };
 
@@ -28,9 +26,11 @@ export const runDatabaseOperation = async (
 
     const { sqlite, platform, connection } = dbInfo;
 
-    await callback(dbInfo);
+    const ret = await callback(dbInfo);
 
     if (platform === 'web' && process.env.JEST_WORKER_ID === undefined) {
         await sqlite.saveToStore(connection.options.database as string);
     }
+
+    return ret;
 };

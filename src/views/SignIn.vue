@@ -15,7 +15,7 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
-            <ion-loading v-if="loading" />
+            <ion-loading :is-open="loading" />
 
             <form class="form ion-padding" @submit="submit">
                 <ion-list class="ion-no-padding">
@@ -46,10 +46,7 @@
                     </ion-item>
                 </ion-list>
 
-                <ion-text
-                    color="danger on-align-self-center"
-                    v-if="!loading && !!errorMessage"
-                >
+                <ion-text color="danger" v-if="!loading && !!errorMessage">
                     <h6>{{ errorMessage }}</h6>
                 </ion-text>
 

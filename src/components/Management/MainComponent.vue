@@ -10,11 +10,7 @@
 
                 <ion-text>
                     <h6 class="results-text">
-                        {{
-                            `${
-                                paginationService.totalResults
-                            } ${itemsName.toLowerCase()} encontrados(as)`
-                        }}
+                        {{ resultsText }}
                     </h6>
                 </ion-text>
             </div>
@@ -28,9 +24,10 @@
         <ion-card-content class="content">
             <ItemsIndex
                 :items="items"
-                :labelField="labelField"
                 :itemName="itemName"
                 :itemsName="itemsName"
+                :label="label"
+                :subLabel="subLabel"
                 :showItem="showItem"
                 :editItem="editItem"
                 :removeItem="handleRemoval"
@@ -58,7 +55,7 @@
 </style>
 
 <script setup lang="ts">
-import { toRefs } from 'vue';
+import { computed, toRefs } from 'vue';
 import {
     IonButton,
     IonIcon,
@@ -77,21 +74,28 @@ interface IProps {
     items: any[];
     itemName: string;
     itemsName: string;
-    labelField: string;
     paginationService: PaginationService<unknown>;
+    label: (item: any) => string;
+    subLabel?: (item: any) => string;
     addItem: () => void;
-    editItem: (item: any) => void;
-    showItem: (item: any) => void;
-    removeItem: (item: any) => void;
+    editItem: (item: any) => Promise<void>;
+    showItem: (item: any) => Promise<void>;
+    removeItem: (item: any) => Promise<void>;
     loadMoreItems: () => Promise<unknown>;
 }
 
 const props = defineProps<IProps>();
 
 // eslint-disable-next-line vue/no-setup-props-destructure
-const { addItem, removeItem, loadMoreItems } = props;
+const { addItem, removeItem, label, subLabel, loadMoreItems } = props;
 
-const { items, itemName, itemsName } = toRefs(props);
+const { items, itemName, itemsName, paginationService } = toRefs(props);
+
+const resultsText = computed(() => {
+    const totalResults = paginationService.value.totalResults;
+
+    return `${totalResults} ${itemsName.value.toLowerCase()} encontrados(as)`;
+});
 
 const handleRemoval = async (item: any) => {
     await presentConfirmationAlert({

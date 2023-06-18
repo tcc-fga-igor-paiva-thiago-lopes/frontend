@@ -2,15 +2,18 @@ import { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 
 import AuthService from '@/services/auth';
-import { useAppStore } from '@/store/app';
 import { presentToast } from '@/utils/toast';
+import { isRouteOfflinePermitted } from '@/utils/offline';
 
 import SignUp from '../views/SignUp.vue';
 import SignIn from '../views/SignIn.vue';
 import HomePage from '@/views/HomePage.vue';
 import NotFound from '@/views/NotFound.vue';
 import WelcomePage from '@/views/WelcomePage.vue';
-import FreightsIndex from '@/views/FreightsIndex.vue';
+import FreightShow from '@/views/Freights/FreightShow.vue';
+import FreightEdit from '@/views/Freights/FreightEdit.vue';
+import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
+import FreightCreate from '@/views/Freights/FreightCreate.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -48,6 +51,24 @@ export const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true },
     },
     {
+        path: '/freights/create',
+        name: 'FreightCreate',
+        component: FreightCreate,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/:freightId(\\d+)',
+        name: 'FreightShow',
+        component: FreightShow,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/:freightId(\\d+)/edit',
+        name: 'FreightEdit',
+        component: FreightEdit,
+        meta: { requiresAuth: true },
+    },
+    {
         // Always leave this as last one
         path: '/:pathMatch(.*)',
         name: 'NotFound',
@@ -63,10 +84,6 @@ const router = createRouter({
 export const offlinePermittedRoutes = ['Home', 'Welcome', 'NotFound'];
 
 router.beforeEach(async (to, from) => {
-    const { readNetworkStatus } = useAppStore();
-
-    const connectionStatus = await readNetworkStatus();
-
     if (to.meta.requiresAuth && !(await AuthService.hasToken())) {
         return {
             name: 'SignIn',
@@ -74,10 +91,7 @@ router.beforeEach(async (to, from) => {
         };
     }
 
-    if (
-        !connectionStatus.connected &&
-        !offlinePermittedRoutes.includes(to.name as string)
-    ) {
+    if (await isRouteOfflinePermitted(to.name as string)) {
         presentToast(
             'Esta página não é permitida sem conexão com a Internet',
             'danger'
