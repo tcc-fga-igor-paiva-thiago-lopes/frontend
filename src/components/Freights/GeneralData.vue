@@ -20,8 +20,6 @@
                     :key="freightStatus"
                     >{{ freightStatus }}</IonSelectOption
                 >
-
-                <IonSelectOption value="Xablau">Xablau</IonSelectOption>
             </ion-select>
 
             <InputErrorNote
@@ -181,7 +179,9 @@
             <DatetimeButton
                 identifier="finishedDate"
                 :value="fields.finishedDate.value"
-                :disabled="readonly"
+                :disabled="
+                    readonly || fields.status.value !== FreightStatus.FINISHED
+                "
                 @valueChange="
                     (e) => setAttribute('finishedDate', e.target.value)
                 "
