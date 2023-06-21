@@ -281,6 +281,7 @@ import {
 import { FreightCargo, FreightStatus } from '@/models/freight';
 import DatetimeButton from '@/components/DatetimeButton.vue';
 import InputErrorNote from '../InputErrorNote.vue';
+import { brazilFormatter } from '@/utils/currency';
 import { ValidationErrors } from '@/utils/errors';
 import { IGeneralDataFields } from '.';
 
@@ -316,7 +317,7 @@ const paymentHelperText = computed(() => {
 
     return `Valor ${
         isPaymentPerTon.value ? 'total' : 'por tonelada'
-    }: R$ ${displayValue}`;
+    }: ${brazilFormatter.format(displayValue)}`;
 });
 
 const unwatch = watch([isPaymentPerTon, agreedPayment, fields], (values) => {
@@ -331,8 +332,6 @@ const unwatch = watch([isPaymentPerTon, agreedPayment, fields], (values) => {
             : inputPayment;
 
         setAttribute.value('agreedPayment', `${totalPayment}`);
-
-        console.log('totalPayment: ', totalPayment);
     }
 });
 
