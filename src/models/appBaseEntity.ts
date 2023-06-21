@@ -23,15 +23,6 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
     @UpdateDateColumn({ name: 'updated_at', nullable: true })
     updatedAt!: Date;
 
-    // this is not working
-    // constructor(attributes?: Record<string, any>) {
-    //   // console.log(attributes);
-
-    //   super();
-
-    //   if (attributes) this.setAttributes(attributes);
-    // }
-
     static async createWithAttrs<T extends AppBaseEntity>(
         this: StaticThis<T>,
         attributes: Record<string, any>
@@ -48,6 +39,17 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
         return this.getRepository<T>()
             .metadata.columns.filter((column) => !column.isNullable)
             .map((column) => column.propertyName);
+    }
+
+    static findPaginated<T extends AppBaseEntity>(
+        this: StaticThis<T>,
+        pageSize: number,
+        pageNum = 1
+    ) {
+        return this.findAndCount<T>({
+            take: pageSize,
+            skip: (pageNum - 1) * pageSize,
+        });
     }
 
     setAttributes(attributes: Record<string, any>) {
