@@ -4,6 +4,7 @@ import APIAdapter from '@/services/api';
 import { IFormData } from '@/components/Freights';
 import { Freight, IFreight } from '@/models/freight';
 import { callOperation } from './helpers/apiConnector';
+import { multipleDatabaseToApi } from '@/utils/conversion';
 
 type FreightsStoreState = PiniaCustomStateProperties;
 
@@ -92,6 +93,42 @@ export const useFreightsStore = defineStore('freights', {
             callOperation(() =>
                 apiAdapter.patch({ url: `/${id}`, data: apiAttrs })
             );
+        },
+        async syncFreights() {
+            const [toSync, toDelete] = await Freight.notSynced();
+
+            const upsertPromise = apiAdapter
+                .patch({
+                    url: '/',
+                    data: multipleDatabaseToApi(
+                        toSync,
+                        Freight.getRepository()
+                    ),
+                })
+                .then((response) =>
+                    Freight.updateByIdentifiers(response.data, {
+                        synced: true,
+                    })
+                )
+                .catch((response) => {
+                    console.error(response);
+                });
+
+            const deletePromise = apiAdapter
+                .delete({
+                    url: '/',
+                    params: {
+                        identifiers: toDelete.map(
+                            (freight) => freight.identifier
+                        ),
+                    },
+                })
+                .then((response) => Freight.deleteByIdentifiers(response.data))
+                .catch((response) => {
+                    console.error(response);
+                });
+
+            return Promise.all([upsertPromise, deletePromise]);
         },
     },
 });
