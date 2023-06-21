@@ -1,5 +1,5 @@
 import { Entity, Column } from 'typeorm';
-import { AppBaseEntity, IAppBaseEntity } from './appBaseEntity';
+import { SyncableEntity, ISyncableEntity } from './syncableEntity';
 
 export enum FreightCargo {
     GENERAL = 'Geral',
@@ -25,7 +25,7 @@ export enum FreightStatus {
     FINISHED = 'Finalizado',
 }
 
-export interface IFreight extends IAppBaseEntity {
+export interface IFreight extends ISyncableEntity {
     id: number;
     cargo: string;
     description: string;
@@ -51,7 +51,7 @@ export interface IFreight extends IAppBaseEntity {
 }
 
 @Entity('FREIGHT')
-export class Freight extends AppBaseEntity implements IFreight {
+export class Freight extends SyncableEntity implements IFreight {
     @Column({ nullable: false, enum: FreightCargo })
     cargo!: string;
 
