@@ -4,6 +4,8 @@ import {
     Index,
     Column,
     Generated,
+    BeforeUpdate,
+    BeforeRecover,
     DeleteDateColumn,
 } from 'typeorm';
 import { AppBaseEntity, IAppBaseEntity } from './appBaseEntity';
@@ -31,6 +33,16 @@ export abstract class SyncableEntity
 
     @DeleteDateColumn({ name: 'deleted_at', nullable: true })
     deletedAt?: Date;
+
+    @BeforeUpdate()
+    updateSyncedOnUpdate() {
+        this.synced = false;
+    }
+
+    @BeforeRecover()
+    updateSyncedAfterRecovery() {
+        this.synced = false;
+    }
 
     static async notSynced<T extends SyncableEntity>(
         this: StaticThis<T>,
