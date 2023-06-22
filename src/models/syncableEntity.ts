@@ -1,6 +1,5 @@
 import {
     In,
-    Not,
     IsNull,
     Index,
     Column,
@@ -45,12 +44,13 @@ export abstract class SyncableEntity
 
         const deleted = await this.createQueryBuilder<T>()
             .select('identifier')
-            .where({ deletedAt: Not(IsNull()) })
+            .andWhere('deleted_at IS NOT NULL')
             .orderBy('deleted_at', 'ASC')
             .take(maxRecords)
-            .getMany();
+            .withDeleted()
+            .getRawMany();
 
-        return [createdOrModified, deleted];
+        return [createdOrModified, Object.values(deleted)] as [T[], string[]];
     }
 
     static async updateByIdentifiers<T extends SyncableEntity>(

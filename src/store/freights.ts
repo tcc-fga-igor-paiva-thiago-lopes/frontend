@@ -117,11 +117,7 @@ export const useFreightsStore = defineStore('freights', {
             const deletePromise = apiAdapter
                 .delete({
                     url: '/',
-                    params: {
-                        identifiers: toDelete.map(
-                            (freight) => freight.identifier
-                        ),
-                    },
+                    params: { identifiers: toDelete },
                 })
                 .then((response) => Freight.deleteByIdentifiers(response.data))
                 .catch((response) => {
