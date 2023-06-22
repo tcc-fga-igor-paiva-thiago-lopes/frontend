@@ -3,7 +3,6 @@ import { defineStore, PiniaCustomStateProperties } from 'pinia';
 import APIAdapter from '@/services/api';
 import { IFormData } from '@/components/Freights';
 import { Freight, IFreight } from '@/models/freight';
-import { callOperation } from './helpers/apiConnector';
 import { multipleDatabaseToApi } from '@/utils/conversion';
 
 type FreightsStoreState = PiniaCustomStateProperties;
@@ -60,15 +59,13 @@ export const useFreightsStore = defineStore('freights', {
             return this.findRecord<Freight>(Freight, id, asFormData);
         },
         async createFreight() {
-            const [, apiAttrs] = await this.createRecordWithNewItem<Freight>({
+            await this.createRecordWithNewItem<Freight>({
                 model: Freight,
                 errorMsg: 'Falha ao criar frete.',
                 successMsg: 'Frete criado com sucesso!',
             });
 
             this._newItem = emptyFreightFormData();
-
-            callOperation(() => apiAdapter.post({ url: '/', data: apiAttrs }));
         },
         async removeFreight(id: IFreight['id']) {
             await this.softRemoveRecord<Freight>({
@@ -77,11 +74,9 @@ export const useFreightsStore = defineStore('freights', {
                 errorMsg: 'Falha ao remover frete.',
                 successMsg: 'Frete removido com sucesso!',
             });
-
-            callOperation(() => apiAdapter.delete({ url: `/${id}` }));
         },
         async updateFreight(id: IFreight['id']) {
-            const [, apiAttrs] = await this.updateRecordWithEditItem<Freight>({
+            await this.updateRecordWithEditItem<Freight>({
                 id,
                 model: Freight,
                 errorMsg: 'Falha ao editar frete.',
@@ -89,10 +84,6 @@ export const useFreightsStore = defineStore('freights', {
             });
 
             this._editItem = emptyFreightFormData();
-
-            callOperation(() =>
-                apiAdapter.patch({ url: `/${id}`, data: apiAttrs })
-            );
         },
         async syncFreights() {
             const [toSync, toDelete] = await Freight.notSynced();
