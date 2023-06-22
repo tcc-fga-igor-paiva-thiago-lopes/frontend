@@ -1,4 +1,4 @@
-import { AppBaseEntity } from '@/models/appBaseEntity';
+import { SyncableEntity } from '@/models/syncableEntity';
 import { generalOperation, inMemberOperation } from '../helpers';
 import { runDatabaseOperation } from '../helpers/databaseConnector';
 import {
@@ -16,7 +16,7 @@ export const DatabaseCrudPlugin = () => ({
     mergeItems(items: any[]) {
         this._items = [...this._items, ...items];
     },
-    async createRecordWithNewItem<T extends AppBaseEntity>({
+    async createRecordWithNewItem<T extends SyncableEntity>({
         model,
         errorMsg,
         successMsg,
@@ -35,7 +35,7 @@ export const DatabaseCrudPlugin = () => ({
 
         return [record, apiAttrs] as [any, Record<string, any>];
     },
-    async findRecord<T extends AppBaseEntity>(
+    async findRecord<T extends SyncableEntity>(
         model: ModelClass<T>,
         id: any,
         asFormData = false
@@ -50,7 +50,7 @@ export const DatabaseCrudPlugin = () => ({
 
         return record;
     },
-    async findEditRecord<T extends AppBaseEntity>({
+    async findEditRecord<T extends SyncableEntity>({
         id,
         model,
     }: IMemberActionParams<T>) {
@@ -62,7 +62,7 @@ export const DatabaseCrudPlugin = () => ({
 
         return true;
     },
-    async updateRecordWithEditItem<T extends AppBaseEntity>({
+    async updateRecordWithEditItem<T extends SyncableEntity>({
         id,
         model,
         errorMsg,
@@ -83,7 +83,7 @@ export const DatabaseCrudPlugin = () => ({
 
         return [record, apiAttrs] as [any, Record<string, any>];
     },
-    async loadAllPaginated<T extends AppBaseEntity>(
+    async loadAllPaginated<T extends SyncableEntity>(
         model: ModelClass<T>,
         pageSize: number,
         pageNum: number
@@ -100,13 +100,13 @@ export const DatabaseCrudPlugin = () => ({
 
         return paginationRet;
     },
-    async findRecordByAttrs<T extends AppBaseEntity>(
+    async findRecordByAttrs<T extends SyncableEntity>(
         model: ModelClass<T>,
         attrs: Record<string, any>
     ) {
         return model.findOneBy<T>(attrs);
     },
-    async createRecordByAttrs<T extends AppBaseEntity>({
+    async createRecordByAttrs<T extends SyncableEntity>({
         model,
         errorMsg,
         successMsg,
@@ -126,14 +126,14 @@ export const DatabaseCrudPlugin = () => ({
             })
         );
     },
-    async removeRecord<T extends AppBaseEntity>({
+    async removeRecord<T extends SyncableEntity>({
         id,
         model,
         errorMsg,
         successMsg,
     }: IMemberActionWithMsgParams<T>) {
         return runDatabaseOperation(async () => {
-            await inMemberOperation<AppBaseEntity, Record<string, any>>({
+            await inMemberOperation<SyncableEntity, Record<string, any>>({
                 errorMsg,
                 successMsg,
                 findAttrs: { id },
@@ -143,7 +143,24 @@ export const DatabaseCrudPlugin = () => ({
             });
         });
     },
-    async updateRecord<T extends AppBaseEntity>({
+    async softRemoveRecord<T extends SyncableEntity>({
+        id,
+        model,
+        errorMsg,
+        successMsg,
+    }: IMemberActionWithMsgParams<T>) {
+        return runDatabaseOperation(async () => {
+            await inMemberOperation<SyncableEntity, Record<string, any>>({
+                errorMsg,
+                successMsg,
+                findAttrs: { id },
+                actionFunc: (instance) => instance.softRemove(),
+                findFunc: (attrs: Record<string, any>) =>
+                    this.findRecordByAttrs(model, attrs),
+            });
+        });
+    },
+    async updateRecord<T extends SyncableEntity>({
         id,
         model,
         errorMsg,
@@ -151,7 +168,7 @@ export const DatabaseCrudPlugin = () => ({
         attributes,
     }: IMemberActionWithAttrsParams<T>) {
         return runDatabaseOperation(async () => {
-            await inMemberOperation<AppBaseEntity, Record<string, any>>({
+            await inMemberOperation<SyncableEntity, Record<string, any>>({
                 errorMsg,
                 successMsg,
                 findAttrs: { id },

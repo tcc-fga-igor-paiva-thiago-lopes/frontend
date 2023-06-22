@@ -71,7 +71,7 @@ export const useFreightsStore = defineStore('freights', {
             callOperation(() => apiAdapter.post({ url: '/', data: apiAttrs }));
         },
         async removeFreight(id: IFreight['id']) {
-            await this.removeRecord<Freight>({
+            await this.softRemoveRecord<Freight>({
                 id,
                 model: Freight,
                 errorMsg: 'Falha ao remover frete.',
