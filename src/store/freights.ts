@@ -86,36 +86,50 @@ export const useFreightsStore = defineStore('freights', {
             this._editItem = emptyFreightFormData();
         },
         async syncFreights() {
+            const promises = [];
             const [toSync, toDelete] = await Freight.notSynced();
 
-            const upsertPromise = apiAdapter
-                .patch({
-                    url: '/',
-                    data: multipleDatabaseToApi(
-                        toSync,
-                        Freight.getRepository()
-                    ),
-                })
-                .then((response) =>
-                    Freight.updateByIdentifiers(response.data, {
-                        synced: true,
-                    })
-                )
-                .catch((response) => {
-                    console.error(response);
-                });
+            if (toSync.length) {
+                promises.push(
+                    apiAdapter
+                        .patch({
+                            url: '/',
+                            data: multipleDatabaseToApi(
+                                toSync,
+                                Freight.getRepository()
+                            ),
+                        })
+                        .then((response) =>
+                            Freight.updateByIdentifiers(response.data, {
+                                synced: true,
+                            })
+                        )
+                        .catch((response) => {
+                            console.error(response);
+                        })
+                );
+            }
 
-            const deletePromise = apiAdapter
-                .delete({
-                    url: '/',
-                    params: { identifiers: toDelete },
-                })
-                .then((response) => Freight.deleteByIdentifiers(response.data))
-                .catch((response) => {
-                    console.error(response);
-                });
+            if (toSync.length) {
+                promises.push(
+                    apiAdapter
+                        .delete({
+                            url: '/',
+                            params: { identifiers: toDelete },
+                        })
+                        .then((response) =>
+                            Freight.deleteByIdentifiers([
+                                ...response.data.deleted,
+                                ...response.data.not_exists,
+                            ])
+                        )
+                        .catch((response) => {
+                            console.error(response);
+                        })
+                );
+            }
 
-            return Promise.all([upsertPromise, deletePromise]);
+            return Promise.all(promises);
         },
     },
 });
