@@ -7,9 +7,16 @@ import {
     IMemberActionWithAttrsParams,
     IMemberActionWithMsgParams,
 } from '..';
-import { formDataToDatabaseAndApi, instanceToObject } from '@/utils/conversion';
+import {
+    instanceToObject,
+    multipleDatabaseToApi,
+    formDataToDatabaseAndApi,
+} from '@/utils/conversion';
+import APIAdapter from '@/services/api';
+import { SyncStatus } from '@/services/sync';
 
 export const DatabaseCrudPlugin = () => ({
+    _syncing: false,
     _items: [] as any[],
     _newItem: {} as Record<string, any>,
     _editItem: {} as Record<string, any>,
@@ -178,6 +185,79 @@ export const DatabaseCrudPlugin = () => ({
                     this.findRecordByAttrs(model, attrs),
             });
         });
+    },
+    async syncRecords<T extends SyncableEntity>(
+        model: ModelClass<T>,
+        apiAdapter: APIAdapter
+    ) {
+        if (this._syncing) return [];
+
+        try {
+            this._syncing = true;
+
+            const promises = [];
+            const [toSync, toDelete] = await model.notSynced<T>();
+
+            if (toSync.length) {
+                promises.push(
+                    apiAdapter
+                        .patch({
+                            url: '/',
+                            data: multipleDatabaseToApi(
+                                toSync,
+                                model.getRepository()
+                            ),
+                        })
+                        .then((response) =>
+                            runDatabaseOperation(() =>
+                                model.updateByIdentifiers(response.data, {
+                                    synced: true,
+                                })
+                            )
+                        )
+                );
+            } else {
+                promises.push(Promise.resolve('ignored'));
+            }
+
+            if (toDelete.length) {
+                promises.push(
+                    apiAdapter
+                        .delete({
+                            url: '/',
+                            params: { identifiers: toDelete },
+                        })
+                        .then((response) =>
+                            runDatabaseOperation(() =>
+                                model.deleteByIdentifiers([
+                                    ...response.data.deleted,
+                                    ...response.data.not_exists,
+                                ])
+                            )
+                        )
+                );
+            } else {
+                promises.push(Promise.resolve('ignored'));
+            }
+
+            const settledResults = await Promise.allSettled(promises);
+
+            return settledResults.map((result) => {
+                if (result.status !== 'fulfilled') return 'error';
+
+                return (
+                    result.value && typeof result.value === 'string'
+                        ? result.value
+                        : 'success'
+                ) as SyncStatus;
+            });
+        } catch (error) {
+            console.error(error);
+
+            return ['error', 'error'] as SyncStatus[];
+        } finally {
+            this._syncing = false;
+        }
     },
 });
 

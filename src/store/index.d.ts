@@ -1,4 +1,7 @@
 import 'pinia';
+
+import APIAdapter from '@/services/api';
+import { SyncStatus } from '@/services/sync';
 import { SyncableEntity } from '@/models/syncableEntity';
 
 export type ModelClass<T> = { new (): T } & typeof SyncableEntity;
@@ -52,9 +55,14 @@ declare module 'pinia' {
         updateRecordWithEditItem: <T extends SyncableEntity>(
             params: IMemberActionWithMsgParams<T>
         ) => Promise<[T, Record<string, any>]>;
+        syncRecords: <T extends SyncableEntity>(
+            model: ModelClass<T>,
+            apiAdapter: APIAdapter
+        ) => Promise<SyncStatus[]>;
     }
 
     export interface PiniaCustomStateProperties {
+        _syncing: boolean;
         _items: Ref<any[]>;
         _newItem: Record<string, any>;
         _editItem: Record<string, any>;

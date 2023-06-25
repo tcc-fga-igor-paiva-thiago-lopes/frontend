@@ -4,7 +4,6 @@ import APIAdapter from '@/services/api';
 import { SyncStatus } from '@/services/sync';
 import { IFormData } from '@/components/Freights';
 import { Freight, IFreight } from '@/models/freight';
-import { multipleDatabaseToApi } from '@/utils/conversion';
 
 interface IFreightsStoreState extends PiniaCustomStateProperties {
     _syncing: boolean;
@@ -91,76 +90,7 @@ export const useFreightsStore = defineStore('freights', {
             this._editItem = emptyFreightFormData();
         },
         async syncFreights(): Promise<SyncStatus[]> {
-            if (this._syncing) return [];
-
-            // TODO: run this inside change database operation
-
-            try {
-                this._syncing = true;
-
-                const promises = [];
-                const [toSync, toDelete] = await Freight.notSynced();
-
-                if (toSync.length) {
-                    promises.push(
-                        apiAdapter
-                            .patch({
-                                url: '/',
-                                data: multipleDatabaseToApi(
-                                    toSync,
-                                    Freight.getRepository()
-                                ),
-                            })
-                            .then((response) =>
-                                Freight.updateByIdentifiers(response.data, {
-                                    synced: true,
-                                })
-                            )
-                            .catch((response) => {
-                                console.error(response);
-                            })
-                    );
-                } else {
-                    promises.push(Promise.resolve('ignored'));
-                }
-
-                if (toSync.length) {
-                    promises.push(
-                        apiAdapter
-                            .delete({
-                                url: '/',
-                                params: { identifiers: toDelete },
-                            })
-                            .then((response) =>
-                                Freight.deleteByIdentifiers([
-                                    ...response.data.deleted,
-                                    ...response.data.not_exists,
-                                ])
-                            )
-                            .catch((response) => {
-                                console.error(response);
-                            })
-                    );
-                } else {
-                    promises.push(Promise.resolve('ignored'));
-                }
-
-                const settledResults = await Promise.allSettled(promises);
-
-                return settledResults.map((result) => {
-                    if (result.status !== 'fulfilled') return 'error';
-
-                    return result.value && typeof result.value === 'string'
-                        ? (result.value as SyncStatus)
-                        : 'success';
-                });
-            } catch (error) {
-                console.error(error);
-
-                return ['error', 'error'];
-            } finally {
-                this._syncing = false;
-            }
+            return this.syncRecords<Freight>(Freight, apiAdapter);
         },
     },
 });
