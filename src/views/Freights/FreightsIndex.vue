@@ -122,7 +122,7 @@ onMounted(async () => {
     } catch (e) {
         console.error(e);
 
-        presentToast('Falha ao carregar contas', 'danger');
+        presentToast('Falha ao carregar fretes', 'danger');
     } finally {
         loading.value = false;
     }

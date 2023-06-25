@@ -11,7 +11,7 @@
                 placeholder="Selecione o status deste frete"
                 :disabled="readonly"
                 :value="fields.status.value"
-                :interface-options="{ cssClass: 'alert-custom-class ' }"
+                :interface-options="{ cssClass: 'alert-custom-class' }"
                 @ionChange="(e) => setAttribute('status', e.target.value)"
             >
                 <IonSelectOption

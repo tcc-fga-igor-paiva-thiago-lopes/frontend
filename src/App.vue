@@ -103,6 +103,7 @@ import {
     personCircleSharp,
 } from 'ionicons/icons';
 
+import { syncAll } from './services/sync';
 import { useAppStore } from './store/app';
 import AuthService from './services/auth';
 import { presentToast } from './utils/toast';
@@ -127,6 +128,7 @@ const {
     loadUsername,
     openLoading,
     closeLoading,
+    readNetworkStatus,
     addNetworkChangeListener,
     removeNetworkListeners,
 } = appStore;
@@ -185,6 +187,10 @@ const handleLogout = async () => {
 
 onBeforeMount(async () => {
     openLoading();
+
+    const connected = (await readNetworkStatus()).connected;
+
+    if (connected) syncAll();
 
     try {
         await loadUsername();

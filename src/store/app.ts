@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia';
+import { Capacitor } from '@capacitor/core';
 import { IonicSafeString } from '@ionic/vue';
 import { Preferences } from '@capacitor/preferences';
 import { ConnectionStatus, Network } from '@capacitor/network';
-import { Capacitor } from '@capacitor/core';
+
+import { syncAll } from '@/services/sync';
 
 type Platform = 'android' | 'ios' | 'web';
 
@@ -15,6 +17,8 @@ interface IApplicationState {
     };
     _connectionStatus: ConnectionStatus;
 }
+
+const USERNAME_KEY = 'username';
 
 export const initialState = (): IApplicationState => ({
     _username: '',
@@ -45,22 +49,26 @@ export const useAppStore = defineStore('application', {
             this._loading = { open: false };
         },
         async loadUsername() {
-            this._username = (await Preferences.get({ key: 'username' }))
+            this._username = (await Preferences.get({ key: USERNAME_KEY }))
                 .value as string;
         },
         async setUsername(username: string) {
             this._username = username;
 
-            await Preferences.set({ key: 'username', value: username });
+            await Preferences.set({ key: USERNAME_KEY, value: username });
         },
         async readNetworkStatus() {
-            return Network.getStatus();
+            const status = await Network.getStatus();
+
+            this._connectionStatus = status;
+
+            return status;
         },
         async addNetworkChangeListener() {
-            this._connectionStatus = await this.readNetworkStatus();
-
             return Network.addListener('networkStatusChange', (status) => {
                 this._connectionStatus = status;
+
+                if (status.connected) syncAll();
             });
         },
         async removeNetworkListeners() {
