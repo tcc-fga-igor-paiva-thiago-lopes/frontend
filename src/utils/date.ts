@@ -4,7 +4,16 @@ export * from 'date-fns';
 
 const DEFAULT_DATE_FORMAT = 'dd/MM/yyyy';
 
+const DEFAULT_DATETIME_FORMAT = 'dd/MM/yyyy HH:mm';
+
 export const formatDate = (date: Date, formatString = DEFAULT_DATE_FORMAT) => {
+    return format(date, formatString);
+};
+
+export const formatDatetime = (
+    date: Date,
+    formatString = DEFAULT_DATETIME_FORMAT
+) => {
     return format(date, formatString);
 };
 

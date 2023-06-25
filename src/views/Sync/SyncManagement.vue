@@ -16,7 +16,7 @@
                     <div>
                         <ion-text>
                             <h4>
-                                <strong>Sincronizáveis</strong>
+                                <strong>Sincronizações</strong>
                             </h4>
                         </ion-text>
                     </div>
@@ -32,12 +32,15 @@
                         <ion-item
                             button
                             lines="full"
-                            v-for="entity in syncableEntities"
-                            :key="entity.name"
+                            v-for="entityData in syncableEntitiesData"
+                            :key="entityData.entity.name"
                         >
                             <ion-label text-wrap>
-                                <h2>{{ entity.FRIENDLY_NAME_PLURAL }}</h2>
-                                <!-- TODO: <p>{{ lastSyncedDate }}</p> -->
+                                <h2>
+                                    {{ entityData.entity.FRIENDLY_NAME_PLURAL }}
+                                </h2>
+
+                                <p v-html="entityData.lastSyncMessage"></p>
                             </ion-label>
 
                             <div
@@ -50,7 +53,10 @@
                                     color="primary"
                                     title="Sicronizar registros"
                                     style="margin-right: 16px"
-                                    @click="(ev) => handleSync(ev, entity)"
+                                    @click="
+                                        (ev) =>
+                                            handleSync(ev, entityData.entity)
+                                    "
                                 ></ion-icon>
                             </div>
                         </ion-item>
@@ -101,6 +107,7 @@ import {
     IonCardContent,
     IonicSafeString,
 } from '@ionic/vue';
+
 import {
     sync,
     checkmarkCircle,
@@ -108,25 +115,68 @@ import {
     alertCircle,
 } from 'ionicons/icons';
 
-import { presentAlert, presentConfirmationAlert } from '@/utils/alert';
-import { SyncableEntity } from '@/models/syncableEntity';
 import {
     syncAll,
     isStatusSuccess,
     isStatusIgnored,
+    readLastSyncData,
     getSyncableEntities,
     NAME_TO_SYNC_FUNCTION,
 } from '@/services/sync';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { presentToast } from '@/utils/toast';
 import { NAME_TO_CLASS } from '@/services/sync';
+import { parseISO, formatDatetime } from '@/utils/date';
+import { SyncableEntity } from '@/models/syncableEntity';
+import { presentAlert, presentConfirmationAlert } from '@/utils/alert';
 
 type SyncableModel = typeof SyncableEntity;
 
 const loading = ref(false);
 
-const syncableEntities: SyncableModel[] =
-    getSyncableEntities() as SyncableModel[];
+const syncableEntitiesData = ref<any[]>([]);
+
+const ignoredIconStr = `<ion-icon icon="${alertCircle}" color="warning" style="margin: 0 0 0 4px"></ion-icon>`;
+const successIconStr = `<ion-icon icon="${checkmarkCircle}" color="success" style="margin: 0 0 0 4px"></ion-icon>`;
+const errorIconStr = `<ion-icon icon="${closeCircle}" color="danger" style="margin: 0 0 0 4px"></ion-icon>`;
+
+const lastSyncInfoMessage = async (model: SyncableModel) => {
+    const data = await readLastSyncData(model.name);
+
+    if (!data) return new IonicSafeString('Nenhuma sincronização...');
+
+    const { syncedAt, statuses } = data;
+
+    const iconStr = isStatusIgnored(statuses)
+        ? ignoredIconStr
+        : isStatusSuccess(statuses)
+        ? successIconStr
+        : errorIconStr;
+
+    return new IonicSafeString(
+        `Atualizado: ${formatDatetime(parseISO(syncedAt))} ${iconStr}`
+    );
+};
+
+const updateEntitiesData = async () => {
+    try {
+        loading.value = true;
+
+        const syncableEntities: SyncableModel[] =
+            getSyncableEntities() as SyncableModel[];
+
+        syncableEntitiesData.value = await Promise.all(
+            syncableEntities.map(async (entity) => {
+                const lastSyncMessage = (await lastSyncInfoMessage(entity))
+                    .value;
+
+                return { entity, lastSyncMessage };
+            })
+        );
+    } finally {
+        loading.value = false;
+    }
+};
 
 const handleSync = async (ev: MouseEvent, model: SyncableModel) => {
     ev.stopPropagation();
@@ -155,6 +205,8 @@ const handleSync = async (ev: MouseEvent, model: SyncableModel) => {
             }
         } finally {
             loading.value = false;
+
+            updateEntitiesData();
         }
     };
 
@@ -179,16 +231,10 @@ const handleFullSync = async () => {
                 const model = NAME_TO_CLASS[entity];
 
                 if (isStatusIgnored(statuses)) {
-                    const alertIconStr = `<ion-icon icon="${alertCircle}" color="warning" style="margin: 0 0 0 16px"></ion-icon>`;
-
-                    resultMessage += `${model.FRIENDLY_NAME_PLURAL}: nada a sincronizar ${alertIconStr} <br />`;
+                    resultMessage += `${model.FRIENDLY_NAME_PLURAL}: nada a sincronizar ${ignoredIconStr} <br />`;
                 } else if (isStatusSuccess(statuses)) {
-                    const statusIconStr = `<ion-icon icon="${checkmarkCircle}" color="success" style="margin: 0 0 0 16px"></ion-icon>`;
-
-                    resultMessage += `${model.FRIENDLY_NAME_PLURAL}: sincronizado com sucesso! ${statusIconStr} <br />`;
+                    resultMessage += `${model.FRIENDLY_NAME_PLURAL}: sincronizado com sucesso! ${successIconStr} <br />`;
                 } else {
-                    const errorIconStr = `<ion-icon icon="${closeCircle}" color="danger" style="margin: 0 0 0 16px"></ion-icon>`;
-
                     resultMessage += `${model.FRIENDLY_NAME_PLURAL}: falha ao sincronizar... Tente novamente ${errorIconStr} <br />`;
                 }
             });
@@ -201,14 +247,20 @@ const handleFullSync = async () => {
             });
         } finally {
             loading.value = false;
+
+            updateEntitiesData();
         }
     };
 
     await presentConfirmationAlert({
-        title: 'Sincronização total',
+        title: 'Sincronizar tudo',
         message: 'Deseja sincronizar todos os dados?',
         confirmClass: 'alert-button-confirm',
         confirmAction,
     });
 };
+
+onMounted(async () => {
+    await updateEntitiesData();
+});
 </script>
