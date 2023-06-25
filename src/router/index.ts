@@ -88,7 +88,16 @@ const router = createRouter({
     routes,
 });
 
-export const offlinePermittedRoutes = ['Home', 'Welcome', 'NotFound'];
+export const offlinePermittedRoutes = [
+    'Home',
+    'Welcome',
+    'NotFound',
+    'SyncManagement',
+    'FreightsIndex',
+    'FreightCreate',
+    'FreightShow',
+    'FreightEdit',
+];
 
 router.beforeEach(async (to, from) => {
     if (to.meta.requiresAuth && !(await AuthService.hasToken())) {
