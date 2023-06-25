@@ -23,7 +23,7 @@
                     size="large"
                     color="primary"
                     title="Editar item"
-                    style="margin-right: 16px"
+                    class="ion-margin-end"
                     @click="(ev) => handleEdit(ev, item)"
                 ></ion-icon>
 

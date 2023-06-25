@@ -7,6 +7,8 @@
                 </ion-buttons>
 
                 <ion-title>Sincronização</ion-title>
+
+                <ConnectionStatus slot="primary" />
             </ion-toolbar>
         </ion-header>
 
@@ -19,9 +21,19 @@
                                 <strong>Sincronizações</strong>
                             </h4>
                         </ion-text>
+
+                        <ion-text v-if="!connectionStatus.connected">
+                            <h6 style="font-size: 14px">
+                                Para sincronizar é necessário conexão com a
+                                Internet
+                            </h6>
+                        </ion-text>
                     </div>
 
-                    <ion-button @click="handleFullSync">
+                    <ion-button
+                        :disabled="!connectionStatus.connected"
+                        @click="handleFullSync"
+                    >
                         <ion-icon slot="start" :icon="sync"></ion-icon>
                         Sincronizar
                     </ion-button>
@@ -52,7 +64,7 @@
                                     size="large"
                                     color="primary"
                                     title="Sicronizar registros"
-                                    style="margin-right: 16px"
+                                    v-if="connectionStatus.connected"
                                     @click="
                                         (ev) =>
                                             handleSync(ev, entityData.entity)
@@ -88,6 +100,9 @@
 </style>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { onMounted, ref } from 'vue';
+
 import {
     IonIcon,
     IonButton,
@@ -123,18 +138,22 @@ import {
     getSyncableEntities,
     NAME_TO_SYNC_FUNCTION,
 } from '@/services/sync';
-import { onMounted, ref } from 'vue';
+import { useAppStore } from '@/store/app';
 import { presentToast } from '@/utils/toast';
 import { NAME_TO_CLASS } from '@/services/sync';
 import { parseISO, formatDatetime } from '@/utils/date';
 import { SyncableEntity } from '@/models/syncableEntity';
 import { presentAlert, presentConfirmationAlert } from '@/utils/alert';
 
+import ConnectionStatus from '@/components/ConnectionStatus.vue';
+
 type SyncableModel = typeof SyncableEntity;
 
 const loading = ref(false);
 
 const syncableEntitiesData = ref<any[]>([]);
+
+const { connectionStatus } = storeToRefs(useAppStore());
 
 const ignoredIconStr = `<ion-icon icon="${alertCircle}" color="warning" style="margin: 0 0 0 4px"></ion-icon>`;
 const successIconStr = `<ion-icon icon="${checkmarkCircle}" color="success" style="margin: 0 0 0 4px"></ion-icon>`;
@@ -154,7 +173,7 @@ const lastSyncInfoMessage = async (model: SyncableModel) => {
         : errorIconStr;
 
     return new IonicSafeString(
-        `Atualizado: ${formatDatetime(parseISO(syncedAt))} ${iconStr}`
+        `Atualizado em: ${formatDatetime(parseISO(syncedAt))} ${iconStr}`
     );
 };
 
