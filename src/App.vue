@@ -95,7 +95,13 @@ import {
     IonRouterOutlet,
     IonicSafeString,
 } from '@ionic/vue';
-import { home, navigate, logOut, personCircleSharp } from 'ionicons/icons';
+import {
+    home,
+    sync,
+    logOut,
+    navigate,
+    personCircleSharp,
+} from 'ionicons/icons';
 
 import { useAppStore } from './store/app';
 import AuthService from './services/auth';
@@ -140,6 +146,11 @@ const allMenuOptions: IMenuOption[] = [
         route: 'FreightsIndex',
         icon: navigate,
         name: 'Fretes',
+    },
+    {
+        route: 'SyncManagement',
+        icon: sync,
+        name: 'Sincronização',
     },
 ];
 

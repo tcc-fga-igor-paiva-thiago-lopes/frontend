@@ -1,11 +1,14 @@
 import { defineStore, PiniaCustomStateProperties } from 'pinia';
 
 import APIAdapter from '@/services/api';
+import { SyncStatus } from '@/services/sync';
 import { IFormData } from '@/components/Freights';
 import { Freight, IFreight } from '@/models/freight';
 import { multipleDatabaseToApi } from '@/utils/conversion';
 
-type FreightsStoreState = PiniaCustomStateProperties;
+interface IFreightsStoreState extends PiniaCustomStateProperties {
+    _syncing: boolean;
+}
 
 const emptyFreightFormData = (): IFormData => ({
     description: '',
@@ -26,8 +29,9 @@ const emptyFreightFormData = (): IFormData => ({
     destinationState: '',
 });
 
-export const initialState = (): FreightsStoreState => ({
+export const initialState = (): IFreightsStoreState => ({
     _items: [],
+    _syncing: false,
     _newItem: emptyFreightFormData(),
     _editItem: emptyFreightFormData(),
 });
@@ -35,11 +39,12 @@ export const initialState = (): FreightsStoreState => ({
 const apiAdapter = new APIAdapter('/freights');
 
 export const useFreightsStore = defineStore('freights', {
-    state: (): FreightsStoreState => initialState(),
+    state: (): IFreightsStoreState => initialState(),
     getters: {
         freights: (state) => state._items,
-        newFreight: (state: FreightsStoreState) => state._newItem as IFormData,
-        editFreight: (state: FreightsStoreState) =>
+        syncing: (state) => state._syncing,
+        newFreight: (state: IFreightsStoreState) => state._newItem as IFormData,
+        editFreight: (state: IFreightsStoreState) =>
             state._editItem as IFormData,
     },
     actions: {
@@ -85,51 +90,77 @@ export const useFreightsStore = defineStore('freights', {
 
             this._editItem = emptyFreightFormData();
         },
-        async syncFreights() {
-            const promises = [];
-            const [toSync, toDelete] = await Freight.notSynced();
+        async syncFreights(): Promise<SyncStatus[]> {
+            if (this._syncing) return [];
 
-            if (toSync.length) {
-                promises.push(
-                    apiAdapter
-                        .patch({
-                            url: '/',
-                            data: multipleDatabaseToApi(
-                                toSync,
-                                Freight.getRepository()
-                            ),
-                        })
-                        .then((response) =>
-                            Freight.updateByIdentifiers(response.data, {
-                                synced: true,
+            // TODO: run this inside change database operation
+
+            try {
+                this._syncing = true;
+
+                const promises = [];
+                const [toSync, toDelete] = await Freight.notSynced();
+
+                if (toSync.length) {
+                    promises.push(
+                        apiAdapter
+                            .patch({
+                                url: '/',
+                                data: multipleDatabaseToApi(
+                                    toSync,
+                                    Freight.getRepository()
+                                ),
                             })
-                        )
-                        .catch((response) => {
-                            console.error(response);
-                        })
-                );
-            }
+                            .then((response) =>
+                                Freight.updateByIdentifiers(response.data, {
+                                    synced: true,
+                                })
+                            )
+                            .catch((response) => {
+                                console.error(response);
+                            })
+                    );
+                } else {
+                    promises.push(Promise.resolve('ignored'));
+                }
 
-            if (toSync.length) {
-                promises.push(
-                    apiAdapter
-                        .delete({
-                            url: '/',
-                            params: { identifiers: toDelete },
-                        })
-                        .then((response) =>
-                            Freight.deleteByIdentifiers([
-                                ...response.data.deleted,
-                                ...response.data.not_exists,
-                            ])
-                        )
-                        .catch((response) => {
-                            console.error(response);
-                        })
-                );
-            }
+                if (toSync.length) {
+                    promises.push(
+                        apiAdapter
+                            .delete({
+                                url: '/',
+                                params: { identifiers: toDelete },
+                            })
+                            .then((response) =>
+                                Freight.deleteByIdentifiers([
+                                    ...response.data.deleted,
+                                    ...response.data.not_exists,
+                                ])
+                            )
+                            .catch((response) => {
+                                console.error(response);
+                            })
+                    );
+                } else {
+                    promises.push(Promise.resolve('ignored'));
+                }
 
-            return Promise.all(promises);
+                const settledResults = await Promise.allSettled(promises);
+
+                return settledResults.map((result) => {
+                    if (result.status !== 'fulfilled') return 'error';
+
+                    return result.value && typeof result.value === 'string'
+                        ? (result.value as SyncStatus)
+                        : 'success';
+                });
+            } catch (error) {
+                console.error(error);
+
+                return ['error', 'error'];
+            } finally {
+                this._syncing = false;
+            }
         },
     },
 });

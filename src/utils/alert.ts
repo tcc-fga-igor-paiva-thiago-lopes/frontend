@@ -1,4 +1,4 @@
-import { IonicSafeString, alertController } from '@ionic/vue';
+import { IonicSafeString, alertController, AlertOptions } from '@ionic/vue';
 
 interface IAlertOptions {
     title: string;
@@ -43,6 +43,14 @@ export const presentConfirmationAlert = async ({
             },
         ],
     });
+
+    await alert.present();
+
+    return alert;
+};
+
+export const presentAlert = async (options: AlertOptions) => {
+    const alert = await alertController.create(options);
 
     await alert.present();
 

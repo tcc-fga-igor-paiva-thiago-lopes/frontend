@@ -10,6 +10,7 @@ import SignIn from '../views/SignIn.vue';
 import HomePage from '@/views/HomePage.vue';
 import NotFound from '@/views/NotFound.vue';
 import WelcomePage from '@/views/WelcomePage.vue';
+import SyncManagement from '@/views/Sync/SyncManagement.vue';
 import FreightShow from '@/views/Freights/FreightShow.vue';
 import FreightEdit from '@/views/Freights/FreightEdit.vue';
 import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
@@ -43,6 +44,12 @@ export const routes: Array<RouteRecordRaw> = [
         name: 'SignIn',
         component: SignIn,
         meta: { requiresAuth: false },
+    },
+    {
+        path: '/sync',
+        name: 'SyncManagement',
+        component: SyncManagement,
+        meta: { requiresAuth: true },
     },
     {
         path: '/freights',

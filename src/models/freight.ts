@@ -124,4 +124,7 @@ export class Freight extends SyncableEntity implements IFreight {
 
     @Column({ name: 'destination_longitude', nullable: true, type: 'decimal' })
     destinationLongitude?: number;
+
+    public static readonly FRIENDLY_NAME_SINGULAR: string = 'Frete';
+    public static readonly FRIENDLY_NAME_PLURAL: string = 'Fretes';
 }

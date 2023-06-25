@@ -23,6 +23,9 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
     @UpdateDateColumn({ name: 'updated_at', nullable: true })
     updatedAt!: Date;
 
+    public static readonly FRIENDLY_NAME_SINGULAR: string = '';
+    public static readonly FRIENDLY_NAME_PLURAL: string = '';
+
     static async createWithAttrs<T extends AppBaseEntity>(
         this: StaticThis<T>,
         attributes: Record<string, any>

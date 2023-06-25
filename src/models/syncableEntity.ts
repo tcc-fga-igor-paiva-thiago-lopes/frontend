@@ -62,7 +62,9 @@ export abstract class SyncableEntity
             .withDeleted()
             .getRawMany();
 
-        return [createdOrModified, Object.values(deleted)] as [T[], string[]];
+        const deletedIdentifiers = deleted.map((item) => item.identifier);
+
+        return [createdOrModified, deletedIdentifiers] as [T[], string[]];
     }
 
     static async updateByIdentifiers<T extends SyncableEntity>(
