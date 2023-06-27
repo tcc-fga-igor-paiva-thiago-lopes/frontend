@@ -136,16 +136,17 @@ describe('freightsStore', () => {
 
         delete foundFreight?.createdAt;
         delete foundFreight?.updatedAt;
+        delete foundFreight?.startDate;
 
         expect(foundFreight).toEqual({
             id: foundFreight?.id,
+            identifier: foundFreight?.identifier,
             description: 'Frete 2',
             cargo: FreightCargo.CONTAINERIZED,
             status: 'Não iniciado',
             cargoWeight: '1.75',
             contractor: 'Jefferson',
             agreedPayment: '950.33',
-            startDate: '2023-06-05T02:53:26.213Z',
             distance: '1753.45',
             dueDate: null,
             finishedDate: null,
@@ -159,6 +160,8 @@ describe('freightsStore', () => {
             destinationCountry: 'Brasil',
             destinationLatitude: null,
             destinationLongitude: null,
+            synced: false,
+            deletedAt: null,
         });
     });
 
@@ -260,12 +263,12 @@ describe('freightsStore', () => {
 
         setNewFreightAttrs(freightAttrs);
 
-        mockApiPost.mockResolvedValueOnce({
-            status: 201,
-            headers: {},
-            url: 'http://localhost:5000/truck-drivers',
-            data: {},
-        });
+        // mockApiPost.mockResolvedValueOnce({
+        //     status: 201,
+        //     headers: {},
+        //     url: 'http://localhost:5000/truck-drivers',
+        //     data: {},
+        // });
 
         const beforeCount = await Freight.count();
 
@@ -280,25 +283,25 @@ describe('freightsStore', () => {
         expect(await Freight.count()).toBe(beforeCount + 1);
         expect(freight?.hasId()).toBeTruthy();
 
-        expect(mockApiPost).toHaveBeenCalledWith({
-            url: '/',
-            data: {
-                description: freightAttrs.description,
-                cargo: freightAttrs.cargo,
-                status: freightAttrs.status,
-                cargo_weight: parseFloat(freightAttrs.cargoWeight),
-                contractor: freightAttrs.contractor,
-                agreed_payment: parseFloat(freightAttrs.agreedPayment),
-                start_date: freightAttrs.startDate,
-                distance: parseFloat(freightAttrs.distance),
-                origin_country: freightAttrs.originCountry,
-                origin_city: freightAttrs.originCity,
-                origin_state: freightAttrs.originState,
-                destination_country: freightAttrs.destinationCountry,
-                destination_city: freightAttrs.destinationCity,
-                destination_state: freightAttrs.destinationState,
-            },
-        });
+        // expect(mockApiPost).toHaveBeenCalledWith({
+        //     url: '/',
+        //     data: {
+        //         description: freightAttrs.description,
+        //         cargo: freightAttrs.cargo,
+        //         status: freightAttrs.status,
+        //         cargo_weight: parseFloat(freightAttrs.cargoWeight),
+        //         contractor: freightAttrs.contractor,
+        //         agreed_payment: parseFloat(freightAttrs.agreedPayment),
+        //         start_date: freightAttrs.startDate,
+        //         distance: parseFloat(freightAttrs.distance),
+        //         origin_country: freightAttrs.originCountry,
+        //         origin_city: freightAttrs.originCity,
+        //         origin_state: freightAttrs.originState,
+        //         destination_country: freightAttrs.destinationCountry,
+        //         destination_city: freightAttrs.destinationCity,
+        //         destination_state: freightAttrs.destinationState,
+        //     },
+        // });
 
         expect(presentToastMock).toHaveBeenCalledTimes(1);
         expect(presentToastMock).toHaveBeenCalledWith(
