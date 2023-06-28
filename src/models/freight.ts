@@ -127,4 +127,5 @@ export class Freight extends SyncableEntity implements IFreight {
 
     public static readonly FRIENDLY_NAME_SINGULAR: string = 'Frete';
     public static readonly FRIENDLY_NAME_PLURAL: string = 'Fretes';
+    public static readonly API_ENDPOINT_NAME: string = 'freights';
 }

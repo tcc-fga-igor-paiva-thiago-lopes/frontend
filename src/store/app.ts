@@ -4,7 +4,12 @@ import { IonicSafeString } from '@ionic/vue';
 import { Preferences } from '@capacitor/preferences';
 import { ConnectionStatus, Network } from '@capacitor/network';
 
-import { syncAll } from '@/services/sync';
+import {
+    SyncStatus,
+    saveSyncData,
+    SyncableModel,
+    getSyncableEntities,
+} from '@/services/sync';
 
 type Platform = 'android' | 'ios' | 'web';
 
@@ -68,7 +73,7 @@ export const useAppStore = defineStore('application', {
             return Network.addListener('networkStatusChange', (status) => {
                 this._connectionStatus = status;
 
-                if (status.connected) syncAll();
+                if (status.connected) this.syncAll();
             });
         },
         async removeNetworkListeners() {
@@ -78,6 +83,32 @@ export const useAppStore = defineStore('application', {
                 connected: false,
                 connectionType: 'none',
             };
+        },
+        async syncEntity(entity: SyncableModel) {
+            const statuses = await this.syncRecords(entity);
+
+            await saveSyncData(entity.name, statuses);
+
+            return [entity.name, statuses] as [string, SyncStatus[]];
+        },
+        async syncAll() {
+            const syncableEntities: SyncableModel[] =
+                getSyncableEntities() as SyncableModel[];
+
+            const promises = syncableEntities.map((entity) =>
+                this.syncEntity(entity)
+            );
+
+            const settledResults = await Promise.allSettled(promises);
+
+            return Object.fromEntries(
+                settledResults.map(
+                    (result) =>
+                        (result.status === 'fulfilled'
+                            ? result.value
+                            : result.reason) as SyncStatus[]
+                )
+            ) as Record<string, SyncStatus[]>;
         },
     },
 });

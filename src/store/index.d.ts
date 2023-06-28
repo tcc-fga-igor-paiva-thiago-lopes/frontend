@@ -27,7 +27,7 @@ declare module 'pinia' {
             model: ModelClass<T>,
             pageSize: number,
             pageNum: number
-        ) => Promise<any[], number>;
+        ) => Promise<[T[], number]>;
         createRecordByAttrs: <T extends SyncableEntity>(
             params: Omit<IMemberActionWithAttrsParams<T>, 'id'>
         ) => Promise<any>;
@@ -56,8 +56,7 @@ declare module 'pinia' {
             params: IMemberActionWithMsgParams<T>
         ) => Promise<[T, Record<string, any>]>;
         syncRecords: <T extends SyncableEntity>(
-            model: ModelClass<T>,
-            apiAdapter: APIAdapter
+            model: ModelClass<T>
         ) => Promise<SyncStatus[]>;
     }
 

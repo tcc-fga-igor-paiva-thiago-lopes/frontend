@@ -1,6 +1,5 @@
 import { defineStore, PiniaCustomStateProperties } from 'pinia';
 
-import APIAdapter from '@/services/api';
 import { SyncStatus } from '@/services/sync';
 import { IFormData } from '@/components/Freights';
 import { Freight, IFreight } from '@/models/freight';
@@ -34,8 +33,6 @@ export const initialState = (): IFreightsStoreState => ({
     _newItem: emptyFreightFormData(),
     _editItem: emptyFreightFormData(),
 });
-
-const apiAdapter = new APIAdapter('/freights');
 
 export const useFreightsStore = defineStore('freights', {
     state: (): IFreightsStoreState => initialState(),
@@ -90,7 +87,7 @@ export const useFreightsStore = defineStore('freights', {
             this._editItem = emptyFreightFormData();
         },
         async syncFreights(): Promise<SyncStatus[]> {
-            return this.syncRecords<Freight>(Freight, apiAdapter);
+            return this.syncRecords<Freight>(Freight);
         },
     },
 });

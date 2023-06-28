@@ -95,7 +95,7 @@ export const DatabaseCrudPlugin = () => ({
         pageSize: number,
         pageNum: number
     ) {
-        const paginationRet = await model.findAndCount({
+        const paginationRet = await model.findAndCount<T>({
             take: pageSize,
             skip: (pageNum - 1) * pageSize,
         });
@@ -124,7 +124,7 @@ export const DatabaseCrudPlugin = () => ({
                 errorMsg,
                 successMsg,
                 actionFunc: async () => {
-                    const record = await model.createWithAttrs(attributes);
+                    const record = await model.createWithAttrs<T>(attributes);
 
                     this._items.push(record);
 
@@ -186,14 +186,13 @@ export const DatabaseCrudPlugin = () => ({
             });
         });
     },
-    async syncRecords<T extends SyncableEntity>(
-        model: ModelClass<T>,
-        apiAdapter: APIAdapter
-    ) {
+    async syncRecords<T extends SyncableEntity>(model: ModelClass<T>) {
         if (this._syncing) return [];
 
         try {
             this._syncing = true;
+
+            const apiAdapter = new APIAdapter(`/${model.API_ENDPOINT_NAME}`);
 
             const promises = [];
             const [toSync, toDelete] = await model.notSynced<T>();
@@ -205,12 +204,12 @@ export const DatabaseCrudPlugin = () => ({
                             url: '/',
                             data: multipleDatabaseToApi(
                                 toSync,
-                                model.getRepository()
+                                model.getRepository<T>()
                             ),
                         })
                         .then((response) =>
                             runDatabaseOperation(() =>
-                                model.updateByIdentifiers(response.data, {
+                                model.updateByIdentifiers<T>(response.data, {
                                     synced: true,
                                 })
                             )
@@ -229,7 +228,7 @@ export const DatabaseCrudPlugin = () => ({
                         })
                         .then((response) =>
                             runDatabaseOperation(() =>
-                                model.deleteByIdentifiers([
+                                model.deleteByIdentifiers<T>([
                                     ...response.data.deleted,
                                     ...response.data.not_exists,
                                 ])

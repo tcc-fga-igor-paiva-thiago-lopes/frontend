@@ -131,12 +131,10 @@ import {
 } from 'ionicons/icons';
 
 import {
-    syncAll,
     isStatusSuccess,
     isStatusIgnored,
     readLastSyncData,
     getSyncableEntities,
-    NAME_TO_SYNC_FUNCTION,
 } from '@/services/sync';
 import { useAppStore } from '@/store/app';
 import { presentToast } from '@/utils/toast';
@@ -153,7 +151,11 @@ const loading = ref(false);
 
 const syncableEntitiesData = ref<any[]>([]);
 
-const { connectionStatus } = storeToRefs(useAppStore());
+const appStore = useAppStore();
+
+const { syncAll, syncEntity } = appStore;
+
+const { connectionStatus } = storeToRefs(appStore);
 
 const ignoredIconStr = `<ion-icon icon="${alertCircle}" color="warning" style="margin: 0 0 0 4px"></ion-icon>`;
 const successIconStr = `<ion-icon icon="${checkmarkCircle}" color="success" style="margin: 0 0 0 4px"></ion-icon>`;
@@ -204,7 +206,7 @@ const handleSync = async (ev: MouseEvent, model: SyncableModel) => {
         try {
             loading.value = true;
 
-            const [, statuses] = await NAME_TO_SYNC_FUNCTION[model.name](true);
+            const [, statuses] = await syncEntity(model);
 
             if (isStatusIgnored(statuses)) {
                 await presentToast(

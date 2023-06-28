@@ -18,10 +18,7 @@ export interface ISyncableEntity extends IAppBaseEntity {
     deletedAt?: Date;
 }
 
-export abstract class SyncableEntity
-    extends AppBaseEntity
-    implements ISyncableEntity
-{
+export class SyncableEntity extends AppBaseEntity implements ISyncableEntity {
     @Index()
     @Column({ nullable: true, type: 'uuid' })
     @Generated('uuid')

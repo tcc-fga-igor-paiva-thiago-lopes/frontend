@@ -25,6 +25,7 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
 
     public static readonly FRIENDLY_NAME_SINGULAR: string = '';
     public static readonly FRIENDLY_NAME_PLURAL: string = '';
+    public static readonly API_ENDPOINT_NAME: string = '';
 
     static async createWithAttrs<T extends AppBaseEntity>(
         this: StaticThis<T>,

@@ -103,7 +103,6 @@ import {
     personCircleSharp,
 } from 'ionicons/icons';
 
-import { syncAll } from './services/sync';
 import { useAppStore } from './store/app';
 import AuthService from './services/auth';
 import { presentToast } from './utils/toast';
@@ -125,6 +124,7 @@ const router = useRouter();
 const appStore = useAppStore();
 
 const {
+    syncAll,
     loadUsername,
     openLoading,
     closeLoading,
