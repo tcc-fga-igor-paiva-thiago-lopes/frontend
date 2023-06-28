@@ -1,7 +1,5 @@
 import { Preferences } from '@capacitor/preferences';
 
-import dataSource from '@/database/dataSource';
-
 import { Freight } from '@/models/freight';
 import { SyncableEntity } from '@/models/syncableEntity';
 
@@ -17,6 +15,8 @@ export type LastSyncData = {
 export const NAME_TO_CLASS: Record<string, typeof SyncableEntity> = {
     [Freight.name]: Freight,
 };
+
+export const SYNCABLE_ENTITIES = [Freight];
 
 export const lastSyncDataKey = (entity: string) => `${entity}_last_sync`;
 
@@ -59,11 +59,3 @@ export const isStatusError = (statuses: SyncStatus[]) =>
 
 export const isStatusIgnored = (statuses: SyncStatus[]) =>
     statuses.every((status) => status === 'ignored');
-
-export const getSyncableEntities = () => {
-    return dataSource.entityMetadatas
-        .filter((entityMetadata) =>
-            entityMetadata.inheritanceTree.includes(SyncableEntity)
-        )
-        .map((entityMetadata) => entityMetadata.inheritanceTree[0]);
-};

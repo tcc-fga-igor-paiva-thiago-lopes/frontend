@@ -8,7 +8,7 @@ import {
     SyncStatus,
     saveSyncData,
     SyncableModel,
-    getSyncableEntities,
+    SYNCABLE_ENTITIES,
 } from '@/services/sync';
 
 type Platform = 'android' | 'ios' | 'web';
@@ -92,10 +92,7 @@ export const useAppStore = defineStore('application', {
             return [entity.name, statuses] as [string, SyncStatus[]];
         },
         async syncAll() {
-            const syncableEntities: SyncableModel[] =
-                getSyncableEntities() as SyncableModel[];
-
-            const promises = syncableEntities.map((entity) =>
+            const promises = SYNCABLE_ENTITIES.map((entity) =>
                 this.syncEntity(entity)
             );
 

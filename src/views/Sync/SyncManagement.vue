@@ -134,7 +134,7 @@ import {
     isStatusSuccess,
     isStatusIgnored,
     readLastSyncData,
-    getSyncableEntities,
+    SYNCABLE_ENTITIES,
 } from '@/services/sync';
 import { useAppStore } from '@/store/app';
 import { presentToast } from '@/utils/toast';
@@ -183,11 +183,8 @@ const updateEntitiesData = async () => {
     try {
         loading.value = true;
 
-        const syncableEntities: SyncableModel[] =
-            getSyncableEntities() as SyncableModel[];
-
         syncableEntitiesData.value = await Promise.all(
-            syncableEntities.map(async (entity) => {
+            SYNCABLE_ENTITIES.map(async (entity) => {
                 const lastSyncMessage = (await lastSyncInfoMessage(entity))
                     .value;
 
