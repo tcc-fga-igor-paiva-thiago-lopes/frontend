@@ -31,9 +31,9 @@
         </template>
 
         <template v-if="edit && step === 0" v-slot:backBtn>
-            <ion-button color="danger" @click="handleSubmit">{{
-                edit ? 'Editar frete' : 'Criar frete'
-            }}</ion-button>
+            <ion-button color="danger" @click="handleSubmit">
+                Editar frete
+            </ion-button>
         </template>
     </StepperComponent>
 </template>
