@@ -6,7 +6,7 @@ import { routes } from '@/router';
 import { presentToast } from '@/utils/toast';
 import { Preferences } from '@capacitor/preferences';
 
-import CategoriesGroups from '@/views/CategoriesGroups.vue';
+import Categories from '@/views/Categories.vue';
 import { getCSSProperty } from '../../helpers';
 import APIAdapter from '@/services/api';
 import APIError from '@/services/api/apiError';
@@ -43,7 +43,7 @@ beforeEach(async () => {
     await router.isReady();
 });
 
-describe('CategoriesGroups.vue', () => {
+describe('Categories.vue', () => {
     const fieldsOrderMap: Record<string, number> = {
         name: 1,
         email: 2,
@@ -60,7 +60,7 @@ describe('CategoriesGroups.vue', () => {
         `ion-item:nth-child(${fieldsOrderMap[field]})>ion-input`;
 
     it('renders signup vue', () => {
-        const wrapper = mount(CategoriesGroups);
+        const wrapper = mount(Categories);
 
         const button = wrapper.find('form>ion-button');
 

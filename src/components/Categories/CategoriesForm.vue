@@ -15,16 +15,21 @@
         <ion-content :fullscreen="true">
             <ion-loading v-if="loading" />
 
-            <form class="form ion-padding" :formData="newCategoryGroup">
+            <form class="form ion-padding" :formData="formData">
                 <ion-list class="ion-no-padding">
-                    <ion-item class="form-item" ref="nameRef">
+                    <ion-item
+                        class="form-item"
+                        ref="nameRef"
+                        :disabled="readonly"
+                    >
                         <ion-label position="stacked">Nome *</ion-label>
                         <ion-input
                             required
                             name="name"
-                            v-model="name"
+                            v-model="dataFields.name.value"
                             autocomplete="name"
-                            placeholder="Digite o nome do grupo"
+                            placeholder="Digite o nome da categoria"
+                            ref="nameRef"
                         >
                         </ion-input>
 
@@ -40,10 +45,11 @@
                             >Cor *</ion-label
                         >
                         <Compact
-                            v-model="color"
-                            @input="updateColor"
+                            v-model="dataFields.color.value"
                             @update:modelValue="updateColor"
-                            :value="color"
+                            @ionChange="
+                                (e) => setAttribute('color', e.target.value)
+                            "
                         />
                     </ion-item>
                 </ion-list>
@@ -57,10 +63,9 @@
 
                 <ion-button
                     shape="round"
-                    @click="submit"
+                    @click="handleSubmit"
                     class="ion-margin-top"
-                >
-                    Criar grupo
+                    >{{ edit ? 'Editar categoria' : 'Criar categoria' }}
                 </ion-button>
             </form>
         </ion-content>
@@ -79,9 +84,8 @@
 </style>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
-import { ref, toRefs, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { Ref, ref, toRefs, computed } from 'vue';
+import validateHTMLColorHex from 'validate-color';
 import { Compact } from '@ckpack/vue-color';
 import {
     IonContent,
@@ -100,32 +104,17 @@ import {
     IonIcon,
 } from '@ionic/vue';
 import { arrowBack } from 'ionicons/icons';
-import { CategoryGroup } from '@/models/categoryGroup';
-import { useCategoriesGroupsStore } from '@/store/categoriesGroups';
+import { Category } from '@/models/category';
 
-import APIAdapter from '@/services/api';
-import { presentToast } from '@/utils/toast';
 import InputErrorNote from '@/components/InputErrorNote.vue';
-import { IFormData } from './index';
+import { IDataFields, IFormData } from './index';
 
 import {
     ValidationErrors,
     clearFieldsErrors,
     validateRequiredFields,
-    assignValidationErrorsFromResponse,
+    addErrorToField,
 } from '@/utils/errors';
-import APIError from '@/services/api/apiError';
-
-const router = useRouter();
-
-const nameRef = ref('');
-const colorRef = ref('#FFFFFF');
-
-const name = ref('');
-const color = ref('#FFFFFF');
-const loading = ref(false);
-const errorMessage = ref('');
-const validationErrors = ref<ValidationErrors>({});
 
 interface IProps {
     edit?: boolean;
@@ -139,90 +128,103 @@ const props = withDefaults(defineProps<IProps>(), {
     readonly: false,
 });
 
-const { formData, setAttribute } = toRefs(props);
+const { edit, readonly, formData, setAttribute } = toRefs(props);
 
-const dataFields = computed<IFormData>(() => ({
+const emit = defineEmits(['onSubmit']);
+
+const errorMessage = ref('');
+
+const nameRef = ref('');
+const colorRef = ref('');
+
+const dataFields = computed<IDataFields>(() => ({
     name: {
         value: formData.value.name,
-        ref: name,
+        ref: nameRef,
     },
     color: {
         value: formData.value.color,
-        ref: color,
+        ref: colorRef,
     },
 }));
 
-const updateColor = (selectedColor: any) => {
-    console.log('selectedColor: ', selectedColor);
-    color.value = selectedColor.hex;
-    console.log('color: ', color.value);
+const color = dataFields.value.color.value;
+
+const loading = ref(false);
+
+const categoryRequiredFields = Category.requiredAttributes();
+
+const validateColorInput = (errors: ValidationErrors) => {
+    console.log('color: ', color);
+
+    if (validateHTMLColorHex(color)) return true;
+
+    const errorMessage = 'Cor inválida';
+    addErrorToField({
+        field: 'color',
+        errorMessages: [errorMessage],
+        fieldRef: colorRef,
+        validationErrors: errors,
+        overwriteErrors: true,
+    });
+
+    return false;
 };
 
-const validateForm = () => {
+const validationErrors = ref<ValidationErrors>({});
+
+const updateColor = (selectedColor: any) => {
+    dataFields.value.color.value = selectedColor.hex;
+};
+
+const validateData = () => {
     let validFields = true;
-    const fieldsRefs = formFieldsRefs();
+    const fields = Object.keys(dataFields.value);
+
+    console.log(fields);
+
     const newValidationErrors = {} as ValidationErrors;
+
+    const requiredFields: Record<string, any> = {};
+    const fieldsRefs: Record<string, Ref<any>> = {};
+
+    fields
+        .filter((field) => categoryRequiredFields.includes(field))
+        .forEach((field) => {
+            requiredFields[field] = dataFields.value[field].value;
+            fieldsRefs[field] = dataFields.value[field].ref;
+        });
+
+    console.log(fields);
+
+    console.log(categoryRequiredFields);
+
+    console.log(requiredFields);
 
     errorMessage.value = '';
     clearFieldsErrors(fieldsRefs);
 
     validFields = validateRequiredFields(
         newValidationErrors,
-        {
-            name: name.value,
-            color: color.value,
-        },
+        requiredFields,
         fieldsRefs
     );
 
-    if (!validFields)
-        errorMessage.value = 'Todos os campos com * são obrigatórios';
+    console.log(newValidationErrors);
+
+    validFields = validFields && validateColorInput(newValidationErrors);
+
+    console.log(validFields);
+    console.log(validateColorInput(newValidationErrors));
 
     validationErrors.value = newValidationErrors;
 
     return validFields;
 };
 
-const submit = async () => {
-    if (!validateForm()) return;
-
-    loading.value = true;
-
-    const apiAdapter = new APIAdapter();
-
-    try {
-        await apiAdapter.post({
-            url: '/categories-groups/',
-            data: {
-                name: name.value,
-                color: color.value.replace('#', ''),
-            },
-        });
-
-        errorMessage.value = '';
-        presentToast('Grupo criado com sucesso!', 'success');
-
-        router.push({ name: 'Home' });
-    } catch (error) {
-        console.error(error);
-
-        if (error instanceof APIError) {
-            assignValidationErrorsFromResponse(
-                validationErrors.value,
-                error.response?.data,
-                formFieldsRefs()
-            );
-
-            errorMessage.value = error.response.data.message;
-
-            presentToast(errorMessage.value, 'danger');
-        } else {
-            errorMessage.value =
-                'Erro de conexão com o servidor. Tente novamente.';
-            presentToast(errorMessage.value, 'danger');
-        }
-    } finally {
-        loading.value = false;
+const handleSubmit = () => {
+    if (edit.value || validateData()) {
+        emit('onSubmit');
     }
 };
 </script>

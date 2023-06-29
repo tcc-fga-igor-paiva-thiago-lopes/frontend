@@ -10,8 +10,8 @@ import SignIn from '../views/SignIn.vue';
 import HomePage from '@/views/HomePage.vue';
 import NotFound from '@/views/NotFound.vue';
 import WelcomePage from '@/views/WelcomePage.vue';
-import FreightsIndex from '@/views/FreightsIndex.vue';
-import CategoriesGroups from '@/views/CategoriesGroups/CategoriesGroups.vue';
+import CategoryCreate from '@/views/Categories/CategoryCreate.vue';
+import Categories from '@/views/Categories/Categories.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -43,15 +43,9 @@ export const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: false },
     },
     {
-        path: '/freights',
-        name: 'FreightsIndex',
-        component: FreightsIndex,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: '/categories-groups',
-        name: 'CategoriesGroups',
-        component: CategoriesGroups,
+        path: '/categories',
+        name: 'CategoriesCreate',
+        component: CategoryCreate,
         meta: { requiresAuth: true },
     },
     {

@@ -32,6 +32,7 @@
         "reflect-metadata": "^0.1.13",
         "sqlite3": "^5.1.6",
         "typeorm": "^0.3.12",
+        "validate-color": "^2.2.4",
         "vue": "^3.2.21",
         "vue-router": "^4.0.12"
     },

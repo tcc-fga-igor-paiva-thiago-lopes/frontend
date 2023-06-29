@@ -1,6 +1,6 @@
 import { Ref } from 'vue';
 
-export * from './';
+export * from '.';
 
 export interface IFormData extends Record<string, unknown> {
     name: string;

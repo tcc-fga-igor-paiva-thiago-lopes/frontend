@@ -125,9 +125,9 @@ const allMenuOptions: IMenuOption[] = [
         name: 'Fretes',
     },
     {
-        route: 'CategoriesGroups',
+        route: 'CategoriesCreate',
         icon: pricetags,
-        name: 'Grupos de categorias',
+        name: 'Categorias',
     },
 ];
 

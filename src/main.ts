@@ -33,7 +33,7 @@ import {
 } from 'jeep-sqlite/loader';
 import { Capacitor } from '@capacitor/core';
 import { CapacitorSQLite } from '@capacitor-community/sqlite';
-import AccountsDataSource from './database/databaseDataSource';
+import AccountsDataSource from './database/dataSource';
 import sqliteConnection from '@/database';
 import { createPinia } from 'pinia';
 
