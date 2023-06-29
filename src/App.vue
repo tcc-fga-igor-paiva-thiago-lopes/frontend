@@ -148,11 +148,13 @@ const allMenuOptions: IMenuOption[] = [
         route: 'FreightsIndex',
         icon: navigate,
         name: 'Fretes',
+        offlinePermitted: true,
     },
     {
         route: 'SyncManagement',
         icon: sync,
         name: 'Sincronização',
+        offlinePermitted: true,
     },
 ];
 
