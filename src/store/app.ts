@@ -10,6 +10,7 @@ import {
     SyncableModel,
     SYNCABLE_ENTITIES,
 } from '@/services/sync';
+import AuthService from '@/services/auth';
 
 type Platform = 'android' | 'ios' | 'web';
 
@@ -70,11 +71,15 @@ export const useAppStore = defineStore('application', {
             return status;
         },
         async addNetworkChangeListener() {
-            return Network.addListener('networkStatusChange', (status) => {
-                this._connectionStatus = status;
+            return Network.addListener(
+                'networkStatusChange',
+                async (status) => {
+                    this._connectionStatus = status;
+                    const isLogged = await AuthService.hasToken();
 
-                if (status.connected) this.syncAll();
-            });
+                    if (status.connected && isLogged) this.syncAll();
+                }
+            );
         },
         async removeNetworkListeners() {
             await Network.removeAllListeners();
@@ -92,6 +97,10 @@ export const useAppStore = defineStore('application', {
             return [entity.name, statuses] as [string, SyncStatus[]];
         },
         async syncAll() {
+            const isLogged = await AuthService.hasToken();
+
+            if (!isLogged) return;
+
             const promises = SYNCABLE_ENTITIES.map((entity) =>
                 this.syncEntity(entity)
             );
