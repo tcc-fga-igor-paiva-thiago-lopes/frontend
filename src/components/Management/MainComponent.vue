@@ -43,7 +43,7 @@
                 class="custom-item display-flex ion-justify-content-between ion-align-items-center"
             >
                 <ion-item class="sort-item">
-                    <ion-label position="stacked">Campo ordenação</ion-label>
+                    <ion-label position="stacked">Ordenar por</ion-label>
 
                     <ion-select
                         interface="popover"
@@ -67,7 +67,12 @@
                     title="Ordenação crescente"
                     @click="emit('onOrderChange', { order: 'DESC' })"
                 >
-                    <ion-icon slot="icon-only" :icon="arrowDown"></ion-icon>
+                    <ion-icon slot="start" :icon="arrowDown"></ion-icon>
+
+                    <div style="display: flex; flex-direction: column">
+                        <span>A</span>
+                        <span>Z</span>
+                    </div>
                 </ion-button>
 
                 <ion-button
@@ -75,7 +80,12 @@
                     title="Ordenação decrescente"
                     @click="emit('onOrderChange', { order: 'ASC' })"
                 >
-                    <ion-icon slot="icon-only" :icon="arrowUp"></ion-icon>
+                    <ion-icon slot="start" :icon="arrowUp"></ion-icon>
+
+                    <div style="display: flex; flex-direction: column">
+                        <span>Z</span>
+                        <span>A</span>
+                    </div>
                 </ion-button>
             </div>
         </ion-card-header>
