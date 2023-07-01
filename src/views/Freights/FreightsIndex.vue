@@ -18,6 +18,8 @@
             <ManageFreights
                 itemName="Frete"
                 itemsName="Fretes"
+                :model="Freight"
+                :filterData="filterData"
                 :label="freightLabel"
                 :subLabel="freightSubLabel"
                 :items="freights"
@@ -27,6 +29,8 @@
                 :removeItem="deleteFreight"
                 :loadMoreItems="loadMoreItems"
                 :paginationService="paginationService"
+                :filterExcludeColumns="FILTER_EXCLUDE_COLUMNS"
+                @onFilterConfirm="handleFilterConfirmation"
             />
         </ion-content>
     </ion-page>
@@ -53,11 +57,19 @@ import {
 import { Freight } from '@/models/freight';
 import { presentToast } from '@/utils/toast';
 import { useFreightsStore } from '@/store/freights';
+import { FilterData } from '@/models/appBaseEntity';
 import { formatDateDynamicYear } from '@/utils/date';
 import PaginationService from '@/utils/pagination/paginationService';
 
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 import ManageFreights from '@/components/Management/MainComponent.vue';
+
+const FILTER_EXCLUDE_COLUMNS = [
+    'originLatitude',
+    'originLongitude',
+    'destinationLatitude',
+    'destinationLongitude',
+];
 
 const loading = ref(false);
 
@@ -66,9 +78,9 @@ const store = useFreightsStore();
 const route = useRoute();
 const router = useRouter();
 
-const { loadPaginated, removeFreight } = store;
+const { loadPaginated, removeFreight, setFilter } = store;
 
-const { freights } = storeToRefs(store);
+const { freights, filterData } = storeToRefs(store);
 
 const paginationService = reactive(new PaginationService(loadPaginated));
 
@@ -110,6 +122,12 @@ const freightLabel = (freight: Freight) => {
 const freightSubLabel = (freight: Freight) => {
     // return `${freight.originCity} (${freight.originState}) --> ${freight.destinationCity} (${freight.destinationState})`;
     return `${freight.originCity} --> ${freight.destinationCity}`;
+};
+
+const handleFilterConfirmation = async (filterData: FilterData) => {
+    setFilter(filterData);
+
+    await paginationService.reset();
 };
 
 const unwatch = watch([route], async (value) => {

@@ -58,6 +58,7 @@ declare module 'pinia' {
         syncRecords: <T extends SyncableEntity>(
             model: ModelClass<T>
         ) => Promise<SyncStatus[]>;
+        setFilterData: (value: FilterData) => void;
     }
 
     export interface PiniaCustomStateProperties {
@@ -65,5 +66,6 @@ declare module 'pinia' {
         _items: Ref<any[]>;
         _newItem: Record<string, any>;
         _editItem: Record<string, any>;
+        _filterData: FilterData;
     }
 }

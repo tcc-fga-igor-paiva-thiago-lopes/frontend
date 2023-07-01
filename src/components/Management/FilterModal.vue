@@ -42,6 +42,7 @@
                         <ion-checkbox
                             slot="start"
                             class="ion-margin-end"
+                            :checked="data[columnMetadata.propertyName]?.active"
                             @ionChange="
                                 (e) =>
                                     changeFilterData(
@@ -64,7 +65,7 @@
 
                             <ion-select
                                 interface="popover"
-                                value="includes"
+                                :value="data[columnMetadata.propertyName]?.type"
                                 @ionChange="
                                     (e) =>
                                         changeFilterData(
@@ -109,6 +110,9 @@
                                 :interface-options="{
                                     cssClass: 'action-sheet-custom-class',
                                 }"
+                                :value="
+                                    data[columnMetadata.propertyName]?.value
+                                "
                                 @ionChange="
                                     (e) =>
                                         changeFilterData(
@@ -131,6 +135,9 @@
                         <ion-item>
                             <ion-checkbox
                                 slot="start"
+                                :checked="
+                                    data[columnMetadata.propertyName]?.value
+                                "
                                 @ionChange="
                                     (e) =>
                                         changeFilterData(
@@ -152,7 +159,7 @@
 
                             <ion-select
                                 interface="popover"
-                                value="equals_to"
+                                :value="data[columnMetadata.propertyName]?.type"
                                 @ionChange="
                                     (e) =>
                                         changeFilterData(
@@ -178,6 +185,9 @@
                             <ion-input
                                 type="number"
                                 placeholder="Valor para filtrar"
+                                :value="
+                                    data[columnMetadata.propertyName]?.value
+                                "
                                 @ionChange="
                                     (e) =>
                                         changeFilterData(
@@ -197,7 +207,7 @@
 
                             <ion-select
                                 interface="popover"
-                                value="equals_to"
+                                :value="data[columnMetadata.propertyName]?.type"
                                 @ionChange="
                                     (e) =>
                                         changeFilterData(
@@ -277,7 +287,7 @@
 
 <script setup lang="ts">
 import { ColumnType } from 'typeorm';
-import { ref, toRefs, onMounted } from 'vue';
+import { ref, toRefs, onBeforeMount } from 'vue';
 
 import {
     IonButton,
@@ -358,13 +368,13 @@ const { setOpen } = props;
 
 const { opened, model, toExcludeColumns } = toRefs(props);
 
-const emit = defineEmits(['confirm']);
+const emit = defineEmits(['onConfirm']);
 
 const data = ref<FilterData>({});
 const columnsMetadata = ref<IColumnMetadata[]>([]);
 
 const applyFilters = () => {
-    emit('confirm', data.value);
+    emit('onConfirm', data.value);
 
     setOpen(false);
 };
@@ -398,8 +408,8 @@ const parseColumnType = (type: ColumnType): ColumnType => {
     }
 };
 
-onMounted(() => {
-    const newFilterData = { ...data.value };
+onBeforeMount(() => {
+    const newFilterData = {} as FilterData;
     const columns = model.value.getRepository().metadata.columns;
 
     columnsMetadata.value = columns

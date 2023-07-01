@@ -2,11 +2,10 @@ import { defineStore, PiniaCustomStateProperties } from 'pinia';
 
 import { SyncStatus } from '@/services/sync';
 import { IFormData } from '@/components/Freights';
+import { FilterData } from '@/models/appBaseEntity';
 import { Freight, IFreight } from '@/models/freight';
 
-interface IFreightsStoreState extends PiniaCustomStateProperties {
-    _syncing: boolean;
-}
+type IFreightsStoreState = PiniaCustomStateProperties;
 
 const emptyFreightFormData = (): IFormData => ({
     description: '',
@@ -30,6 +29,7 @@ const emptyFreightFormData = (): IFormData => ({
 export const initialState = (): IFreightsStoreState => ({
     _items: [],
     _syncing: false,
+    _filterData: {} as FilterData,
     _newItem: emptyFreightFormData(),
     _editItem: emptyFreightFormData(),
 });
@@ -39,6 +39,7 @@ export const useFreightsStore = defineStore('freights', {
     getters: {
         freights: (state) => state._items,
         syncing: (state) => state._syncing,
+        filterData: (state) => state._filterData,
         newFreight: (state: IFreightsStoreState) => state._newItem as IFormData,
         editFreight: (state: IFreightsStoreState) =>
             state._editItem as IFormData,
@@ -88,6 +89,9 @@ export const useFreightsStore = defineStore('freights', {
         },
         async syncFreights(): Promise<SyncStatus[]> {
             return this.syncRecords<Freight>(Freight);
+        },
+        setFilter(value: FilterData) {
+            this.setFilterData(value);
         },
     },
 });
