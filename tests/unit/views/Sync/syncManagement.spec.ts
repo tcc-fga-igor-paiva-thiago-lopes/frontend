@@ -1,9 +1,10 @@
 import { mount } from '@vue/test-utils';
+import { createTestingPinia } from '@pinia/testing';
+import { Preferences } from '@capacitor/preferences';
 
 import { initialState } from '@/store/app';
-import HomePage from '@/views/HomePage.vue';
-import { createTestingPinia } from '@pinia/testing';
-import { DatabaseHelper } from '../../databaseHelper';
+import SyncManagement from '@/views/Sync/SyncManagement.vue';
+import { DatabaseHelper } from '../../../databaseHelper';
 
 const mockDataSource = DatabaseHelper.dataSource();
 
@@ -24,9 +25,11 @@ beforeAll(async () => {
 
 afterAll(() => DatabaseHelper.instance.teardownTestDB());
 
-describe('HomePage.vue', () => {
-    it('renders home vue', async () => {
-        const wrapper = mount(HomePage, {
+describe('SyncManagement.vue', () => {
+    it('renders sync management vue', async () => {
+        jest.spyOn(Preferences, 'get').mockResolvedValue({ value: null });
+
+        const wrapper = mount(SyncManagement, {
             global: {
                 plugins: [
                     createTestingPinia({
@@ -39,6 +42,6 @@ describe('HomePage.vue', () => {
         const message = wrapper.find('ion-toolbar>ion-title');
 
         expect(message.exists()).toBe(true);
-        expect(message.text()).toBe('Página inicial');
+        expect(message.text()).toBe('Sincronização');
     });
 });

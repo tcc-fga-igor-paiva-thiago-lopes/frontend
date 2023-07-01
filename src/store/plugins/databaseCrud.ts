@@ -1,4 +1,4 @@
-import { AppBaseEntity } from '@/models/appBaseEntity';
+import { SyncableEntity } from '@/models/syncableEntity';
 import { generalOperation, inMemberOperation } from '../helpers';
 import { runDatabaseOperation } from '../helpers/databaseConnector';
 import {
@@ -7,16 +7,23 @@ import {
     IMemberActionWithAttrsParams,
     IMemberActionWithMsgParams,
 } from '..';
-import { formDataToDatabaseAndApi, instanceToObject } from '@/utils/conversion';
+import {
+    instanceToObject,
+    multipleDatabaseToApi,
+    formDataToDatabaseAndApi,
+} from '@/utils/conversion';
+import APIAdapter from '@/services/api';
+import { SyncStatus } from '@/services/sync';
 
 export const DatabaseCrudPlugin = () => ({
+    _syncing: false,
     _items: [] as any[],
     _newItem: {} as Record<string, any>,
     _editItem: {} as Record<string, any>,
     mergeItems(items: any[]) {
         this._items = [...this._items, ...items];
     },
-    async createRecordWithNewItem<T extends AppBaseEntity>({
+    async createRecordWithNewItem<T extends SyncableEntity>({
         model,
         errorMsg,
         successMsg,
@@ -35,7 +42,7 @@ export const DatabaseCrudPlugin = () => ({
 
         return [record, apiAttrs] as [any, Record<string, any>];
     },
-    async findRecord<T extends AppBaseEntity>(
+    async findRecord<T extends SyncableEntity>(
         model: ModelClass<T>,
         id: any,
         asFormData = false
@@ -50,7 +57,7 @@ export const DatabaseCrudPlugin = () => ({
 
         return record;
     },
-    async findEditRecord<T extends AppBaseEntity>({
+    async findEditRecord<T extends SyncableEntity>({
         id,
         model,
     }: IMemberActionParams<T>) {
@@ -62,7 +69,7 @@ export const DatabaseCrudPlugin = () => ({
 
         return true;
     },
-    async updateRecordWithEditItem<T extends AppBaseEntity>({
+    async updateRecordWithEditItem<T extends SyncableEntity>({
         id,
         model,
         errorMsg,
@@ -83,12 +90,12 @@ export const DatabaseCrudPlugin = () => ({
 
         return [record, apiAttrs] as [any, Record<string, any>];
     },
-    async loadAllPaginated<T extends AppBaseEntity>(
+    async loadAllPaginated<T extends SyncableEntity>(
         model: ModelClass<T>,
         pageSize: number,
         pageNum: number
     ) {
-        const paginationRet = await model.findAndCount({
+        const paginationRet = await model.findAndCount<T>({
             take: pageSize,
             skip: (pageNum - 1) * pageSize,
         });
@@ -100,13 +107,13 @@ export const DatabaseCrudPlugin = () => ({
 
         return paginationRet;
     },
-    async findRecordByAttrs<T extends AppBaseEntity>(
+    async findRecordByAttrs<T extends SyncableEntity>(
         model: ModelClass<T>,
         attrs: Record<string, any>
     ) {
         return model.findOneBy<T>(attrs);
     },
-    async createRecordByAttrs<T extends AppBaseEntity>({
+    async createRecordByAttrs<T extends SyncableEntity>({
         model,
         errorMsg,
         successMsg,
@@ -117,7 +124,7 @@ export const DatabaseCrudPlugin = () => ({
                 errorMsg,
                 successMsg,
                 actionFunc: async () => {
-                    const record = await model.createWithAttrs(attributes);
+                    const record = await model.createWithAttrs<T>(attributes);
 
                     this._items.push(record);
 
@@ -126,14 +133,14 @@ export const DatabaseCrudPlugin = () => ({
             })
         );
     },
-    async removeRecord<T extends AppBaseEntity>({
+    async removeRecord<T extends SyncableEntity>({
         id,
         model,
         errorMsg,
         successMsg,
     }: IMemberActionWithMsgParams<T>) {
         return runDatabaseOperation(async () => {
-            await inMemberOperation<AppBaseEntity, Record<string, any>>({
+            await inMemberOperation<SyncableEntity, Record<string, any>>({
                 errorMsg,
                 successMsg,
                 findAttrs: { id },
@@ -143,7 +150,24 @@ export const DatabaseCrudPlugin = () => ({
             });
         });
     },
-    async updateRecord<T extends AppBaseEntity>({
+    async softRemoveRecord<T extends SyncableEntity>({
+        id,
+        model,
+        errorMsg,
+        successMsg,
+    }: IMemberActionWithMsgParams<T>) {
+        return runDatabaseOperation(async () => {
+            await inMemberOperation<SyncableEntity, Record<string, any>>({
+                errorMsg,
+                successMsg,
+                findAttrs: { id },
+                actionFunc: (instance) => instance.softRemove(),
+                findFunc: (attrs: Record<string, any>) =>
+                    this.findRecordByAttrs(model, attrs),
+            });
+        });
+    },
+    async updateRecord<T extends SyncableEntity>({
         id,
         model,
         errorMsg,
@@ -151,7 +175,7 @@ export const DatabaseCrudPlugin = () => ({
         attributes,
     }: IMemberActionWithAttrsParams<T>) {
         return runDatabaseOperation(async () => {
-            await inMemberOperation<AppBaseEntity, Record<string, any>>({
+            await inMemberOperation<SyncableEntity, Record<string, any>>({
                 errorMsg,
                 successMsg,
                 findAttrs: { id },
@@ -161,6 +185,78 @@ export const DatabaseCrudPlugin = () => ({
                     this.findRecordByAttrs(model, attrs),
             });
         });
+    },
+    async syncRecords<T extends SyncableEntity>(model: ModelClass<T>) {
+        if (this._syncing) return [];
+
+        try {
+            this._syncing = true;
+
+            const apiAdapter = new APIAdapter(`/${model.API_ENDPOINT_NAME}`);
+
+            const promises = [];
+            const [toSync, toDelete] = await model.notSynced<T>();
+
+            if (toSync.length) {
+                promises.push(
+                    apiAdapter
+                        .patch({
+                            url: '/',
+                            data: multipleDatabaseToApi(
+                                toSync,
+                                model.getRepository<T>()
+                            ),
+                        })
+                        .then((response) =>
+                            runDatabaseOperation(() =>
+                                model.updateByIdentifiers<T>(response.data, {
+                                    synced: true,
+                                })
+                            )
+                        )
+                );
+            } else {
+                promises.push(Promise.resolve('ignored'));
+            }
+
+            if (toDelete.length) {
+                promises.push(
+                    apiAdapter
+                        .delete({
+                            url: '/',
+                            params: { identifiers: toDelete },
+                        })
+                        .then((response) =>
+                            runDatabaseOperation(() =>
+                                model.deleteByIdentifiers<T>([
+                                    ...response.data.deleted,
+                                    ...response.data.not_exists,
+                                ])
+                            )
+                        )
+                );
+            } else {
+                promises.push(Promise.resolve('ignored'));
+            }
+
+            const settledResults = await Promise.allSettled(promises);
+
+            return settledResults.map((result) => {
+                if (result.status !== 'fulfilled') return 'error';
+
+                return (
+                    result.value && typeof result.value === 'string'
+                        ? result.value
+                        : 'success'
+                ) as SyncStatus;
+            });
+        } catch (error) {
+            console.error(error);
+
+            return ['error', 'error'] as SyncStatus[];
+        } finally {
+            this._syncing = false;
+        }
     },
 });
 

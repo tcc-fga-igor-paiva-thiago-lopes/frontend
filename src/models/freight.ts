@@ -1,5 +1,6 @@
 import { Entity, Column } from 'typeorm';
-import { AppBaseEntity, IAppBaseEntity } from './appBaseEntity';
+import { SyncableEntity, ISyncableEntity } from './syncableEntity';
+import { datetimeTransformer } from './helpers/datetimeTransformer';
 
 export enum FreightCargo {
     GENERAL = 'Geral',
@@ -25,7 +26,7 @@ export enum FreightStatus {
     FINISHED = 'Finalizado',
 }
 
-export interface IFreight extends IAppBaseEntity {
+export interface IFreight extends ISyncableEntity {
     id: number;
     cargo: string;
     description: string;
@@ -51,7 +52,7 @@ export interface IFreight extends IAppBaseEntity {
 }
 
 @Entity('FREIGHT')
-export class Freight extends AppBaseEntity implements IFreight {
+export class Freight extends SyncableEntity implements IFreight {
     @Column({ nullable: false, enum: FreightCargo })
     cargo!: string;
 
@@ -73,13 +74,25 @@ export class Freight extends AppBaseEntity implements IFreight {
     @Column({ nullable: false, type: 'decimal' })
     distance!: number;
 
-    @Column({ name: 'start_date', nullable: false })
+    @Column({
+        name: 'start_date',
+        nullable: false,
+        transformer: datetimeTransformer,
+    })
     startDate!: Date;
 
-    @Column({ name: 'due_date', nullable: true })
+    @Column({
+        name: 'due_date',
+        nullable: true,
+        transformer: datetimeTransformer,
+    })
     dueDate?: Date;
 
-    @Column({ name: 'finished_date', nullable: true })
+    @Column({
+        name: 'finished_date',
+        nullable: true,
+        transformer: datetimeTransformer,
+    })
     finishedDate?: Date;
 
     @Column({ name: 'origin_city', nullable: false })
@@ -112,10 +125,7 @@ export class Freight extends AppBaseEntity implements IFreight {
     @Column({ name: 'destination_longitude', nullable: true, type: 'decimal' })
     destinationLongitude?: number;
 
-    static async findPaginated(pageSize: number, pageNum = 1) {
-        return Freight.findAndCount({
-            take: pageSize,
-            skip: (pageNum - 1) * pageSize,
-        });
-    }
+    public static readonly FRIENDLY_NAME_SINGULAR: string = 'Frete';
+    public static readonly FRIENDLY_NAME_PLURAL: string = 'Fretes';
+    public static readonly API_ENDPOINT_NAME: string = 'freights';
 }

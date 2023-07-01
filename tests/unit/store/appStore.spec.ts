@@ -68,21 +68,12 @@ describe('applicationStore', () => {
         const appStore = useAppStore();
         const { addNetworkChangeListener } = appStore;
 
-        jest.spyOn(Network, 'getStatus').mockResolvedValueOnce({
-            connected: true,
-            connectionType: 'cellular',
-        });
-
         jest.spyOn(Network, 'addListener').mockResolvedValueOnce({
             remove: () => Promise.resolve(),
         });
 
         await addNetworkChangeListener();
 
-        expect(appStore.connectionStatus).toEqual({
-            connected: true,
-            connectionType: 'cellular',
-        });
         expect(Network.addListener).toHaveBeenCalled();
     });
 

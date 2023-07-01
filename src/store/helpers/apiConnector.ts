@@ -2,6 +2,7 @@ import { HttpResponse } from '@capacitor/core';
 import { useAppStore } from '../app';
 import APIError from '@/services/api/apiError';
 
+// TODO: check if this will be necessary, if not delete it
 export const callOperation = async (operation: () => Promise<HttpResponse>) => {
     const appStore = useAppStore();
 

@@ -1,11 +1,12 @@
 import { defineStore, PiniaCustomStateProperties } from 'pinia';
 
-import APIAdapter from '@/services/api';
+import { SyncStatus } from '@/services/sync';
 import { IFormData } from '@/components/Freights';
 import { Freight, IFreight } from '@/models/freight';
-import { callOperation } from './helpers/apiConnector';
 
-type FreightsStoreState = PiniaCustomStateProperties;
+interface IFreightsStoreState extends PiniaCustomStateProperties {
+    _syncing: boolean;
+}
 
 const emptyFreightFormData = (): IFormData => ({
     description: '',
@@ -26,20 +27,20 @@ const emptyFreightFormData = (): IFormData => ({
     destinationState: '',
 });
 
-export const initialState = (): FreightsStoreState => ({
+export const initialState = (): IFreightsStoreState => ({
     _items: [],
+    _syncing: false,
     _newItem: emptyFreightFormData(),
     _editItem: emptyFreightFormData(),
 });
 
-const apiAdapter = new APIAdapter('/freights');
-
 export const useFreightsStore = defineStore('freights', {
-    state: (): FreightsStoreState => initialState(),
+    state: (): IFreightsStoreState => initialState(),
     getters: {
         freights: (state) => state._items,
-        newFreight: (state: FreightsStoreState) => state._newItem as IFormData,
-        editFreight: (state: FreightsStoreState) =>
+        syncing: (state) => state._syncing,
+        newFreight: (state: IFreightsStoreState) => state._newItem as IFormData,
+        editFreight: (state: IFreightsStoreState) =>
             state._editItem as IFormData,
     },
     actions: {
@@ -59,28 +60,24 @@ export const useFreightsStore = defineStore('freights', {
             return this.findRecord<Freight>(Freight, id, asFormData);
         },
         async createFreight() {
-            const [, apiAttrs] = await this.createRecordWithNewItem<Freight>({
+            await this.createRecordWithNewItem<Freight>({
                 model: Freight,
                 errorMsg: 'Falha ao criar frete.',
                 successMsg: 'Frete criado com sucesso!',
             });
 
             this._newItem = emptyFreightFormData();
-
-            callOperation(() => apiAdapter.post({ url: '/', data: apiAttrs }));
         },
         async removeFreight(id: IFreight['id']) {
-            await this.removeRecord<Freight>({
+            await this.softRemoveRecord<Freight>({
                 id,
                 model: Freight,
                 errorMsg: 'Falha ao remover frete.',
                 successMsg: 'Frete removido com sucesso!',
             });
-
-            callOperation(() => apiAdapter.delete({ url: `/${id}` }));
         },
         async updateFreight(id: IFreight['id']) {
-            const [, apiAttrs] = await this.updateRecordWithEditItem<Freight>({
+            await this.updateRecordWithEditItem<Freight>({
                 id,
                 model: Freight,
                 errorMsg: 'Falha ao editar frete.',
@@ -88,10 +85,9 @@ export const useFreightsStore = defineStore('freights', {
             });
 
             this._editItem = emptyFreightFormData();
-
-            callOperation(() =>
-                apiAdapter.patch({ url: `/${id}`, data: apiAttrs })
-            );
+        },
+        async syncFreights(): Promise<SyncStatus[]> {
+            return this.syncRecords<Freight>(Freight);
         },
     },
 });

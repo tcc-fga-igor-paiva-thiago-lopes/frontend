@@ -95,7 +95,13 @@ import {
     IonRouterOutlet,
     IonicSafeString,
 } from '@ionic/vue';
-import { home, navigate, logOut, personCircleSharp } from 'ionicons/icons';
+import {
+    home,
+    sync,
+    logOut,
+    navigate,
+    personCircleSharp,
+} from 'ionicons/icons';
 
 import { useAppStore } from './store/app';
 import AuthService from './services/auth';
@@ -118,9 +124,11 @@ const router = useRouter();
 const appStore = useAppStore();
 
 const {
+    syncAll,
     loadUsername,
     openLoading,
     closeLoading,
+    readNetworkStatus,
     addNetworkChangeListener,
     removeNetworkListeners,
 } = appStore;
@@ -140,6 +148,13 @@ const allMenuOptions: IMenuOption[] = [
         route: 'FreightsIndex',
         icon: navigate,
         name: 'Fretes',
+        offlinePermitted: true,
+    },
+    {
+        route: 'SyncManagement',
+        icon: sync,
+        name: 'Sincronização',
+        offlinePermitted: true,
     },
 ];
 
@@ -174,6 +189,10 @@ const handleLogout = async () => {
 
 onBeforeMount(async () => {
     openLoading();
+
+    const connected = (await readNetworkStatus()).connected;
+
+    if (connected) syncAll();
 
     try {
         await loadUsername();

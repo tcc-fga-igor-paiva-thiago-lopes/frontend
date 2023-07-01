@@ -1,8 +1,16 @@
 import { defineStore } from 'pinia';
+import { Capacitor } from '@capacitor/core';
 import { IonicSafeString } from '@ionic/vue';
 import { Preferences } from '@capacitor/preferences';
 import { ConnectionStatus, Network } from '@capacitor/network';
-import { Capacitor } from '@capacitor/core';
+
+import {
+    SyncStatus,
+    saveSyncData,
+    SyncableModel,
+    SYNCABLE_ENTITIES,
+} from '@/services/sync';
+import AuthService from '@/services/auth';
 
 type Platform = 'android' | 'ios' | 'web';
 
@@ -15,6 +23,8 @@ interface IApplicationState {
     };
     _connectionStatus: ConnectionStatus;
 }
+
+const USERNAME_KEY = 'username';
 
 export const initialState = (): IApplicationState => ({
     _username: '',
@@ -45,23 +55,31 @@ export const useAppStore = defineStore('application', {
             this._loading = { open: false };
         },
         async loadUsername() {
-            this._username = (await Preferences.get({ key: 'username' }))
+            this._username = (await Preferences.get({ key: USERNAME_KEY }))
                 .value as string;
         },
         async setUsername(username: string) {
             this._username = username;
 
-            await Preferences.set({ key: 'username', value: username });
+            await Preferences.set({ key: USERNAME_KEY, value: username });
         },
         async readNetworkStatus() {
-            return Network.getStatus();
+            const status = await Network.getStatus();
+
+            this._connectionStatus = status;
+
+            return status;
         },
         async addNetworkChangeListener() {
-            this._connectionStatus = await this.readNetworkStatus();
+            return Network.addListener(
+                'networkStatusChange',
+                async (status) => {
+                    this._connectionStatus = status;
+                    const isLogged = await AuthService.hasToken();
 
-            return Network.addListener('networkStatusChange', (status) => {
-                this._connectionStatus = status;
-            });
+                    if (status.connected && isLogged) this.syncAll();
+                }
+            );
         },
         async removeNetworkListeners() {
             await Network.removeAllListeners();
@@ -70,6 +88,33 @@ export const useAppStore = defineStore('application', {
                 connected: false,
                 connectionType: 'none',
             };
+        },
+        async syncEntity(entity: SyncableModel) {
+            const statuses = await this.syncRecords(entity);
+
+            await saveSyncData(entity.name, statuses);
+
+            return [entity.name, statuses] as [string, SyncStatus[]];
+        },
+        async syncAll() {
+            const isLogged = await AuthService.hasToken();
+
+            if (!isLogged) return;
+
+            const promises = SYNCABLE_ENTITIES.map((entity) =>
+                this.syncEntity(entity)
+            );
+
+            const settledResults = await Promise.allSettled(promises);
+
+            return Object.fromEntries(
+                settledResults.map(
+                    (result) =>
+                        (result.status === 'fulfilled'
+                            ? result.value
+                            : result.reason) as SyncStatus[]
+                )
+            ) as Record<string, SyncStatus[]>;
         },
     },
 });

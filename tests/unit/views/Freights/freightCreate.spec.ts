@@ -41,7 +41,7 @@ beforeAll(async () => {
     await DatabaseHelper.instance.setupTestDB(mockDataSource);
 });
 
-afterAll(() => DatabaseHelper.instance.teardownTestDB);
+afterAll(() => DatabaseHelper.instance.teardownTestDB());
 
 describe('FreightCreate.vue', () => {
     beforeEach(() => {
