@@ -35,7 +35,47 @@
 
                 <ion-button @click="setFilterModalOpened(true)">
                     <ion-icon slot="start" :icon="funnel"></ion-icon>
-                    Filtrar
+                    Filtros
+                </ion-button>
+            </div>
+
+            <div
+                class="custom-item display-flex ion-justify-content-between ion-align-items-center"
+            >
+                <ion-item class="sort-item">
+                    <ion-label position="stacked">Campo ordenação</ion-label>
+
+                    <ion-select
+                        interface="popover"
+                        :value="orderData.field"
+                        @ionChange="
+                            (e) =>
+                                emit('onOrderChange', { field: e.target.value })
+                        "
+                    >
+                        <IonSelectOption
+                            v-for="[attr, attrName] in modelOrderAttrs"
+                            :value="attr"
+                            :key="attr"
+                            >{{ attrName }}</IonSelectOption
+                        >
+                    </ion-select>
+                </ion-item>
+
+                <ion-button
+                    v-if="orderData.order === 'ASC'"
+                    title="Ordenação crescente"
+                    @click="emit('onOrderChange', { order: 'DESC' })"
+                >
+                    <ion-icon slot="icon-only" :icon="arrowDown"></ion-icon>
+                </ion-button>
+
+                <ion-button
+                    v-else
+                    title="Ordenação decrescente"
+                    @click="emit('onOrderChange', { order: 'ASC' })"
+                >
+                    <ion-icon slot="icon-only" :icon="arrowUp"></ion-icon>
                 </ion-button>
             </div>
         </ion-card-header>
@@ -73,22 +113,35 @@
 .content {
     padding: 8px;
 }
+
+.custom-item ion-item {
+    --padding-start: 0;
+}
+
+.sort-item {
+    flex-grow: 1;
+    margin-right: 16px;
+}
 </style>
 
 <script setup lang="ts">
 import { computed, ref, toRefs } from 'vue';
 import {
-    IonButton,
     IonIcon,
     IonText,
     IonCard,
+    IonItem,
+    IonLabel,
+    IonButton,
+    IonSelect,
     IonCardHeader,
     IonCardContent,
+    IonSelectOption,
 } from '@ionic/vue';
-import { add, funnel } from 'ionicons/icons';
+import { add, funnel, arrowDown, arrowUp } from 'ionicons/icons';
 import { presentConfirmationAlert } from '@/utils/alert';
 
-import { AppBaseEntity, FilterData } from '@/models/appBaseEntity';
+import { AppBaseEntity, FilterData, IOrderData } from '@/models/appBaseEntity';
 import PaginationService from '@/utils/pagination/paginationService';
 
 import FilterModal from './FilterModal.vue';
@@ -98,8 +151,10 @@ interface IProps {
     items: any[];
     itemName: string;
     itemsName: string;
+    orderData: IOrderData;
     filterData: FilterData;
     model: typeof AppBaseEntity;
+    orderExcludeColumns?: string[];
     filterExcludeColumns: string[];
     paginationService: PaginationService<unknown>;
     label: (item: any) => string;
@@ -111,6 +166,13 @@ interface IProps {
     loadMoreItems: () => Promise<unknown>;
 }
 
+const DEFAULT_ORDER_EXCLUDE_FIELDS = [
+    'id',
+    'synced',
+    'deletedAt',
+    'identifier',
+];
+
 const props = defineProps<IProps>();
 
 // eslint-disable-next-line vue/no-setup-props-destructure
@@ -121,12 +183,14 @@ const {
     items,
     itemName,
     itemsName,
+    orderData,
     filterData,
     paginationService,
+    orderExcludeColumns,
     filterExcludeColumns,
 } = toRefs(props);
 
-const emit = defineEmits(['onFilterConfirm']);
+const emit = defineEmits(['onFilterConfirm', 'onOrderChange']);
 
 const filterOpened = ref(false);
 
@@ -145,6 +209,16 @@ const filtersText = computed(() => {
         ? `${totalFilters} filtro(s) aplicado(s)`
         : 'Nenhum filtro aplicado';
 });
+
+const modelOrderAttrs = computed(() =>
+    Object.entries(model.value.FRIENDLY_COLUMN_NAMES).filter(
+        ([attr]) =>
+            ![
+                ...DEFAULT_ORDER_EXCLUDE_FIELDS,
+                ...(orderExcludeColumns?.value || []),
+            ].includes(attr)
+    )
+);
 
 const setFilterModalOpened = (value: boolean) => {
     filterOpened.value = value;

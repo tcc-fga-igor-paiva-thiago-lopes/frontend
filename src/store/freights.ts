@@ -2,8 +2,8 @@ import { defineStore, PiniaCustomStateProperties } from 'pinia';
 
 import { SyncStatus } from '@/services/sync';
 import { IFormData } from '@/components/Freights';
-import { FilterData } from '@/models/appBaseEntity';
 import { Freight, IFreight } from '@/models/freight';
+import { FilterData, IOrderData } from '@/models/appBaseEntity';
 
 type IFreightsStoreState = PiniaCustomStateProperties;
 
@@ -32,6 +32,7 @@ export const initialState = (): IFreightsStoreState => ({
     _filterData: {} as FilterData,
     _newItem: emptyFreightFormData(),
     _editItem: emptyFreightFormData(),
+    _orderData: { field: 'createdAt', order: 'DESC' },
 });
 
 export const useFreightsStore = defineStore('freights', {
@@ -39,6 +40,7 @@ export const useFreightsStore = defineStore('freights', {
     getters: {
         freights: (state) => state._items,
         syncing: (state) => state._syncing,
+        orderData: (state) => state._orderData,
         filterData: (state) => state._filterData,
         newFreight: (state: IFreightsStoreState) => state._newItem as IFormData,
         editFreight: (state: IFreightsStoreState) =>
@@ -50,6 +52,12 @@ export const useFreightsStore = defineStore('freights', {
         },
         setEditFreightAttrs(attrs: Record<keyof IFormData, any>) {
             Object.assign(this._editItem, attrs);
+        },
+        setFilter(value: FilterData) {
+            this.setFilterData(value);
+        },
+        setOrder(value: Partial<IOrderData>) {
+            this.changeOrderData(value);
         },
         async loadPaginated(pageSize: number, pageNum: number) {
             return this.loadAllPaginated<Freight>(Freight, pageSize, pageNum);
@@ -89,9 +97,6 @@ export const useFreightsStore = defineStore('freights', {
         },
         async syncFreights(): Promise<SyncStatus[]> {
             return this.syncRecords<Freight>(Freight);
-        },
-        setFilter(value: FilterData) {
-            this.setFilterData(value);
         },
     },
 });

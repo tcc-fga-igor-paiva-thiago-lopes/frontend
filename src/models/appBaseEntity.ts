@@ -41,6 +41,11 @@ export interface IFilterData {
 
 export type FilterData = Record<string, IFilterData>;
 
+export interface IOrderData {
+    field: string;
+    order: 'ASC' | 'DESC';
+}
+
 export const isDateType = (type: any) =>
     ['date', 'datetime'].includes(type as string) || type instanceof Date;
 
@@ -105,16 +110,19 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
         this: StaticThis<T>,
         filterData: FilterData,
         pageSize: number,
-        pageNum = 1
+        pageNum = 1,
+        orderData?: IOrderData
     ) {
         const repository = this.getRepository<T>();
         const queryBuilder = this.createQueryBuilder<T>();
 
         const columnsMap = Object.fromEntries(
-            repository.metadata.columns.map(({ propertyName, type }) => [
-                propertyName,
-                { type },
-            ])
+            repository.metadata.columns.map(
+                ({ propertyName, type, databaseName }) => [
+                    propertyName,
+                    { type, databaseName },
+                ]
+            )
         );
 
         Object.entries(filterData).forEach(([field, data]) => {
@@ -158,6 +166,13 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
                     throw Error('Invalid filter data type');
             }
         });
+
+        if (orderData) {
+            queryBuilder.orderBy(
+                columnsMap[orderData.field].databaseName,
+                orderData.order
+            );
+        }
 
         queryBuilder.skip((pageNum - 1) * pageSize).take(pageSize);
 

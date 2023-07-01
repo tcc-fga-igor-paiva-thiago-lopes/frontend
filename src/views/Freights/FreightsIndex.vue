@@ -19,6 +19,7 @@
                 itemName="Frete"
                 itemsName="Fretes"
                 :model="Freight"
+                :orderData="orderData"
                 :filterData="filterData"
                 :label="freightLabel"
                 :subLabel="freightSubLabel"
@@ -31,6 +32,7 @@
                 :paginationService="paginationService"
                 :filterExcludeColumns="FILTER_EXCLUDE_COLUMNS"
                 @onFilterConfirm="handleFilterConfirmation"
+                @onOrderChange="handleOrderData"
             />
         </ion-content>
     </ion-page>
@@ -57,8 +59,8 @@ import {
 import { Freight } from '@/models/freight';
 import { presentToast } from '@/utils/toast';
 import { useFreightsStore } from '@/store/freights';
-import { FilterData } from '@/models/appBaseEntity';
 import { formatDateDynamicYear } from '@/utils/date';
+import { FilterData, IOrderData } from '@/models/appBaseEntity';
 import PaginationService from '@/utils/pagination/paginationService';
 
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
@@ -78,9 +80,9 @@ const store = useFreightsStore();
 const route = useRoute();
 const router = useRouter();
 
-const { loadPaginated, removeFreight, setFilter } = store;
+const { loadPaginated, removeFreight, setFilter, setOrder } = store;
 
-const { freights, filterData } = storeToRefs(store);
+const { freights, filterData, orderData } = storeToRefs(store);
 
 const paginationService = reactive(new PaginationService(loadPaginated));
 
@@ -126,6 +128,12 @@ const freightSubLabel = (freight: Freight) => {
 
 const handleFilterConfirmation = async (filterData: FilterData) => {
     setFilter(filterData);
+
+    await paginationService.reset();
+};
+
+const handleOrderData = async (orderData: Partial<IOrderData>) => {
+    setOrder(orderData);
 
     await paginationService.reset();
 };

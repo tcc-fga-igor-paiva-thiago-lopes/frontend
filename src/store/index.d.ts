@@ -1,7 +1,7 @@
 import 'pinia';
 
-import APIAdapter from '@/services/api';
 import { SyncStatus } from '@/services/sync';
+import { IOrderData } from '@/models/appBaseEntity';
 import { SyncableEntity } from '@/models/syncableEntity';
 
 export type ModelClass<T> = { new (): T } & typeof SyncableEntity;
@@ -59,6 +59,7 @@ declare module 'pinia' {
             model: ModelClass<T>
         ) => Promise<SyncStatus[]>;
         setFilterData: (value: FilterData) => void;
+        changeOrderData: (value: Partial<IOrderData>) => void;
     }
 
     export interface PiniaCustomStateProperties {
@@ -67,5 +68,6 @@ declare module 'pinia' {
         _newItem: Record<string, any>;
         _editItem: Record<string, any>;
         _filterData: FilterData;
+        _orderData: IOrderData;
     }
 }
