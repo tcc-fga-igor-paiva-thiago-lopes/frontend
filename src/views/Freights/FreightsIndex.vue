@@ -30,6 +30,7 @@
                 :removeItem="deleteFreight"
                 :loadMoreItems="loadMoreItems"
                 :paginationService="paginationService"
+                :orderExcludeColumns="ORDER_EXCLUDE_COLUMNS"
                 :filterExcludeColumns="FILTER_EXCLUDE_COLUMNS"
                 @onFilterConfirm="handleFilterConfirmation"
                 @onOrderChange="handleOrderData"
@@ -72,6 +73,8 @@ const FILTER_EXCLUDE_COLUMNS = [
     'destinationLatitude',
     'destinationLongitude',
 ];
+
+const ORDER_EXCLUDE_COLUMNS = [...FILTER_EXCLUDE_COLUMNS, 'description'];
 
 const loading = ref(false);
 
