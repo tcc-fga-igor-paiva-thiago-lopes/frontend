@@ -17,6 +17,11 @@
         </ion-header>
 
         <ion-content class="ion-padding">
+            <ion-button color="danger" @click="handleFilterClear">
+                <ion-icon slot="start" :icon="closeCircle"></ion-icon>
+                Remover filtros
+            </ion-button>
+
             <div
                 v-for="columnMetadata in columnsMetadata"
                 :key="columnMetadata.propertyName"
@@ -301,18 +306,21 @@ import {
     IonItem,
     IonLabel,
     IonInput,
+    IonIcon,
     IonCheckbox,
     IonSelect,
     IonSelectOption,
 } from '@ionic/vue';
+import { closeCircle } from 'ionicons/icons';
+
 import {
     AppBaseEntity,
     IFilterData,
     FilterData,
     FilterDataType,
 } from '@/models/appBaseEntity';
-
 import DatetimeButton from '../DatetimeButton.vue';
+import { presentConfirmationAlert } from '@/utils/alert';
 
 interface IProps {
     opened: boolean;
@@ -390,6 +398,17 @@ const changeFilterData = (field: string, newData: Partial<IFilterData>) => {
     data.value = newFilterData;
 };
 
+const handleFilterClear = async () => {
+    await presentConfirmationAlert({
+        title: 'Remover filtros',
+        message: 'Deseja remover todos os filtros?',
+        confirmClass: 'alert-button-confirm',
+        confirmAction: () => {
+            data.value = mountFilterData();
+        },
+    });
+};
+
 const parseColumnType = (type: ColumnType): ColumnType => {
     switch (type) {
         case Date:
@@ -408,7 +427,7 @@ const parseColumnType = (type: ColumnType): ColumnType => {
     }
 };
 
-onBeforeMount(() => {
+const mountFilterData = () => {
     const newFilterData = {} as FilterData;
     const columns = model.value.getRepository().metadata.columns;
 
@@ -436,6 +455,10 @@ onBeforeMount(() => {
         };
     });
 
-    data.value = newFilterData;
+    return newFilterData;
+};
+
+onBeforeMount(() => {
+    data.value = mountFilterData();
 });
 </script>
