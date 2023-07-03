@@ -11,7 +11,7 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { parseISO } from '@/utils/date';
+import { formatISO, parseISO } from '@/utils/date';
 
 export type StaticThis<T> = { new (): T } & typeof BaseEntity;
 
@@ -35,6 +35,7 @@ export interface IFilterData {
     value: any;
     type: FilterDataType;
     active: boolean;
+    dateOnly?: boolean;
     // rangeStart: any;
     // rangeEnd: any;
 }
@@ -131,7 +132,10 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
             const { type } = columnsMap[field];
             const isDate = isDateType(type);
 
-            const value = isDate ? parseISO(data.value) : data.value;
+            let value = isDate ? parseISO(data.value) : data.value;
+
+            if (isDate && data.dateOnly)
+                value = formatISO(value, { representation: 'date' });
 
             switch (data.type) {
                 case 'equals_to':

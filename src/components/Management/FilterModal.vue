@@ -253,6 +253,29 @@
                                 "
                             />
                         </ion-item>
+
+                        <ion-item class="ion-margin-top">
+                            <ion-checkbox
+                                slot="start"
+                                :checked="
+                                    data[columnMetadata.propertyName]?.dateOnly
+                                "
+                                @ionChange="
+                                    (e) =>
+                                        changeFilterData(
+                                            columnMetadata.propertyName,
+                                            { dateOnly: e.target.checked }
+                                        )
+                                "
+                            ></ion-checkbox>
+
+                            <ion-label>Usar apenas a data?</ion-label>
+
+                            <ion-note slot="helper"
+                                >Isso irá ignorar a hora e minuto
+                                selecionado</ion-note
+                            >
+                        </ion-item>
                     </template>
                 </div>
             </div>
@@ -307,6 +330,7 @@ import {
     IonLabel,
     IonInput,
     IonIcon,
+    IonNote,
     IonCheckbox,
     IonSelect,
     IonSelectOption,
