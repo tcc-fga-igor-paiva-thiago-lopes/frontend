@@ -22,6 +22,17 @@
                 Remover filtros
             </ion-button>
 
+            <ion-text color="danger" v-if="hasInvalidField">
+                <h6
+                    v-for="[field, fieldMsg] in Object.entries(
+                        invalidFieldsMessages
+                    )"
+                    :key="field"
+                >
+                    {{ fieldMsg }}
+                </h6>
+            </ion-text>
+
             <div
                 v-for="columnMetadata in columnsMetadata"
                 :key="columnMetadata.propertyName"
@@ -90,7 +101,16 @@
                             </ion-select>
                         </ion-item>
 
-                        <ion-item class="ion-margin-top">
+                        <ion-item
+                            class="ion-margin-top"
+                            :class="
+                                invalidFieldsMessages[
+                                    columnMetadata.propertyName
+                                ]
+                                    ? 'ion-invalid'
+                                    : 'ion-valid'
+                            "
+                        >
                             <ion-label position="stacked">Valor</ion-label>
 
                             <ion-input
@@ -133,11 +153,27 @@
                                     >{{ enumItem }}</IonSelectOption
                                 >
                             </ion-select>
+
+                            <ion-note slot="error">
+                                {{
+                                    invalidFieldsMessages[
+                                        columnMetadata.propertyName
+                                    ]
+                                }}
+                            </ion-note>
                         </ion-item>
                     </template>
 
                     <template v-if="columnMetadata.type === 'boolean'">
-                        <ion-item>
+                        <ion-item
+                            :class="
+                                invalidFieldsMessages[
+                                    columnMetadata.propertyName
+                                ]
+                                    ? 'ion-invalid'
+                                    : 'ion-valid'
+                            "
+                        >
                             <ion-checkbox
                                 slot="start"
                                 :checked="
@@ -184,7 +220,16 @@
                             </ion-select>
                         </ion-item>
 
-                        <ion-item class="ion-margin-top">
+                        <ion-item
+                            class="ion-margin-top"
+                            :class="
+                                invalidFieldsMessages[
+                                    columnMetadata.propertyName
+                                ]
+                                    ? 'ion-invalid'
+                                    : 'ion-valid'
+                            "
+                        >
                             <ion-label position="stacked">Valor</ion-label>
 
                             <ion-input
@@ -201,6 +246,14 @@
                                         )
                                 "
                             ></ion-input>
+
+                            <ion-note slot="error">
+                                {{
+                                    invalidFieldsMessages[
+                                        columnMetadata.propertyName
+                                    ]
+                                }}
+                            </ion-note>
                         </ion-item>
                     </template>
 
@@ -232,7 +285,16 @@
                             </ion-select>
                         </ion-item>
 
-                        <ion-item class="ion-margin-top">
+                        <ion-item
+                            class="ion-margin-top"
+                            :class="
+                                invalidFieldsMessages[
+                                    columnMetadata.propertyName
+                                ]
+                                    ? 'ion-invalid'
+                                    : 'ion-valid'
+                            "
+                        >
                             <ion-label
                                 position="stacked"
                                 style="margin-bottom: 16px"
@@ -252,6 +314,14 @@
                                         )
                                 "
                             />
+
+                            <ion-note slot="error">
+                                {{
+                                    invalidFieldsMessages[
+                                        columnMetadata.propertyName
+                                    ]
+                                }}
+                            </ion-note>
                         </ion-item>
 
                         <ion-item class="ion-margin-top">
@@ -315,7 +385,7 @@
 
 <script setup lang="ts">
 import { ColumnType } from 'typeorm';
-import { ref, toRefs, onBeforeMount } from 'vue';
+import { ref, toRefs, onBeforeMount, computed } from 'vue';
 
 import {
     IonButton,
@@ -404,11 +474,36 @@ const emit = defineEmits(['onConfirm']);
 
 const data = ref<FilterData>({});
 const columnsMetadata = ref<IColumnMetadata[]>([]);
+const invalidFieldsMessages = ref<Record<string, string>>({});
+
+const hasInvalidField = computed(
+    () =>
+        Object.values(invalidFieldsMessages.value).filter((msg) => !msg)
+            .length > 0
+);
 
 const applyFilters = () => {
-    emit('onConfirm', data.value);
+    let valid = true;
 
-    setOpen(false);
+    Object.entries(data.value).forEach(([field, filterData]) => {
+        const { active, value } = filterData;
+
+        if (active && !value) {
+            valid = false;
+
+            invalidFieldsMessages.value[
+                field
+            ] = `${model.value.FRIENDLY_COLUMN_NAMES[field]}: valor inválido`;
+        } else {
+            invalidFieldsMessages.value[field] = '';
+        }
+    });
+
+    if (valid) {
+        emit('onConfirm', data.value);
+
+        setOpen(false);
+    }
 };
 
 const changeFilterData = (field: string, newData: Partial<IFilterData>) => {
