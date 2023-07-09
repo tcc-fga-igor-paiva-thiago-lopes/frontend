@@ -15,6 +15,7 @@ import FreightShow from '@/views/Freights/FreightShow.vue';
 import FreightEdit from '@/views/Freights/FreightEdit.vue';
 import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
 import FreightCreate from '@/views/Freights/FreightCreate.vue';
+import CategoryCreate from '@/views/Categories/CategoryCreate.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -73,6 +74,12 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/freights/:freightId(\\d+)/edit',
         name: 'FreightEdit',
         component: FreightEdit,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/categories/create',
+        name: 'CategoryCreate',
+        component: CategoryCreate,
         meta: { requiresAuth: true },
     },
     {
