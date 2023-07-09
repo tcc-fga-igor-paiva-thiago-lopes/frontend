@@ -4,13 +4,6 @@ interface IPaginationResult<PaginationEntity> {
     total: number;
 }
 
-interface IPaginationService {
-    pageSize: number;
-    currentPage: number;
-    totalResults: number;
-    queryFunc: QueryFunc;
-}
-
 type QueryFunc = (
     pageSize: number,
     pageNum: number

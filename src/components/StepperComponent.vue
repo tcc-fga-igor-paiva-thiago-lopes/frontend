@@ -50,9 +50,14 @@
                     Próximo
                 </ion-button>
 
-                <ion-button v-else @click="emit('lastStepAction')">
-                    {{ lastStepActionLabel }}
-                </ion-button>
+                <template v-else>
+                    <ion-button
+                        v-if="!hideSubmit"
+                        @click="emit('lastStepAction')"
+                    >
+                        {{ lastStepActionLabel }}
+                    </ion-button>
+                </template>
             </div>
         </div>
     </div>
@@ -114,10 +119,14 @@ interface IStep {
 interface IProps {
     steps: IStep[];
     activeStep: number;
+    hideSubmit?: boolean;
     contentPadding?: string;
     lastStepActionLabel: string;
 }
-const props = withDefaults(defineProps<IProps>(), { contentPadding: '16px 0' });
+const props = withDefaults(defineProps<IProps>(), {
+    hideSubmit: false,
+    contentPadding: '16px 0',
+});
 
 const slots = useSlots();
 

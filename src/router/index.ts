@@ -2,8 +2,8 @@ import { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 
 import AuthService from '@/services/auth';
-import { useAppStore } from '@/store/app';
 import { presentToast } from '@/utils/toast';
+import { isRouteOfflinePermitted } from '@/utils/offline';
 
 import SignUp from '../views/SignUp.vue';
 import SignIn from '../views/SignIn.vue';
@@ -11,7 +11,11 @@ import HomePage from '@/views/HomePage.vue';
 import NotFound from '@/views/NotFound.vue';
 import WelcomePage from '@/views/WelcomePage.vue';
 import CategoryCreate from '@/views/Categories/CategoryCreate.vue';
-import Categories from '@/views/Categories/Categories.vue';
+import SyncManagement from '@/views/Sync/SyncManagement.vue';
+import FreightShow from '@/views/Freights/FreightShow.vue';
+import FreightEdit from '@/views/Freights/FreightEdit.vue';
+import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
+import FreightCreate from '@/views/Freights/FreightCreate.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -46,6 +50,35 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/categories',
         name: 'CategoriesCreate',
         component: CategoryCreate,
+    },
+    {
+        path: '/sync',
+        name: 'SyncManagement',
+        component: SyncManagement,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights',
+        name: 'FreightsIndex',
+        component: FreightsIndex,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/create',
+        name: 'FreightCreate',
+        component: FreightCreate,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/:freightId(\\d+)',
+        name: 'FreightShow',
+        component: FreightShow,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/:freightId(\\d+)/edit',
+        name: 'FreightEdit',
+        component: FreightEdit,
         meta: { requiresAuth: true },
     },
     {
@@ -61,13 +94,18 @@ const router = createRouter({
     routes,
 });
 
-export const offlinePermittedRoutes = ['Home', 'Welcome', 'NotFound'];
+export const offlinePermittedRoutes = [
+    'Home',
+    'Welcome',
+    'NotFound',
+    'SyncManagement',
+    'FreightsIndex',
+    'FreightCreate',
+    'FreightShow',
+    'FreightEdit',
+];
 
 router.beforeEach(async (to, from) => {
-    const { readNetworkStatus } = useAppStore();
-
-    const connectionStatus = await readNetworkStatus();
-
     if (to.meta.requiresAuth && !(await AuthService.hasToken())) {
         return {
             name: 'SignIn',
@@ -75,10 +113,7 @@ router.beforeEach(async (to, from) => {
         };
     }
 
-    if (
-        !connectionStatus.connected &&
-        !offlinePermittedRoutes.includes(to.name as string)
-    ) {
+    if (await isRouteOfflinePermitted(to.name as string)) {
         presentToast(
             'Esta página não é permitida sem conexão com a Internet',
             'danger'

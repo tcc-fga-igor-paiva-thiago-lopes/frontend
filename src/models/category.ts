@@ -1,7 +1,7 @@
 import { Entity, Column } from 'typeorm';
-import { AppBaseEntity, IAppBaseEntity } from './appBaseEntity';
+import { ISyncableEntity, SyncableEntity } from './syncableEntity';
 
-export interface ICategory extends IAppBaseEntity {
+export interface ICategory extends ISyncableEntity {
     id: number;
     name: string;
     color: string;
@@ -10,17 +10,10 @@ export interface ICategory extends IAppBaseEntity {
 }
 
 @Entity('CATEGORY')
-export class Category extends AppBaseEntity implements ICategory {
+export class Category extends SyncableEntity implements ICategory {
     @Column({ nullable: false })
     name!: string;
 
     @Column({ nullable: false })
     color!: string;
-
-    static async findPaginated(pageSize: number, pageNum = 1) {
-        return Category.findAndCount({
-            take: pageSize,
-            skip: (pageNum - 1) * pageSize,
-        });
-    }
 }

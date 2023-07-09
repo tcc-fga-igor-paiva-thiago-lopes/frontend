@@ -1,9 +1,9 @@
 import { defineStore, PiniaCustomStateProperties } from 'pinia';
 
-import APIAdapter from '@/services/api';
+import { SyncStatus } from '@/services/sync';
 import { IFormData } from '@/components/Categories';
 import { Category, ICategory } from '@/models/category';
-import { callOperation } from './helpers/apiConnector';
+import { FilterData, IOrderData } from '@/models/appBaseEntity';
 
 type CategoriesStoreState = PiniaCustomStateProperties;
 
@@ -14,16 +14,20 @@ const emptyCategoryFormData = (): IFormData => ({
 
 export const initialState = (): CategoriesStoreState => ({
     _items: [],
+    _syncing: false,
+    _filterData: {} as FilterData,
     _newItem: emptyCategoryFormData(),
     _editItem: emptyCategoryFormData(),
+    _orderData: { field: 'createdAt', order: 'DESC' },
 });
-
-const apiAdapter = new APIAdapter('/Categories');
 
 export const useCategoriesStore = defineStore('Categories', {
     state: (): CategoriesStoreState => initialState(),
     getters: {
-        Categories: (state) => state._items,
+        categories: (state) => state._items,
+        syncing: (state) => state._syncing,
+        orderData: (state) => state._orderData,
+        filterData: (state) => state._filterData,
         newCategory: (state: CategoriesStoreState) =>
             state._newItem as IFormData,
         editCategory: (state: CategoriesStoreState) =>
@@ -36,41 +40,40 @@ export const useCategoriesStore = defineStore('Categories', {
         setEditCategoryAttrs(attrs: Record<keyof IFormData, any>) {
             Object.assign(this._editItem, attrs);
         },
+        setFilter(value: FilterData) {
+            this.setFilterData(value);
+        },
+        setOrder(value: Partial<IOrderData>) {
+            this.changeOrderData(value);
+        },
         async loadPaginated(pageSize: number, pageNum: number) {
             return this.loadAllPaginated<Category>(Category, pageSize, pageNum);
         },
         async findEditCategory(id: ICategory['id']) {
-            return this.findEditRecord<Category>({
-                model: Category,
-                id,
-            });
+            return this.findEditRecord<Category>({ model: Category, id });
         },
         async findCategory(id: ICategory['id'], asFormData = false) {
             return this.findRecord<Category>(Category, id, asFormData);
         },
         async createCategory() {
-            const [, apiAttrs] = await this.createRecordWithNewItem<Category>({
+            await this.createRecordWithNewItem<Category>({
                 model: Category,
-                errorMsg: 'Falha ao nova categoria.',
+                errorMsg: 'Falha ao criar categoria.',
                 successMsg: 'Categoria criada com sucesso!',
             });
 
             this._newItem = emptyCategoryFormData();
-
-            callOperation(() => apiAdapter.post({ url: '/', data: apiAttrs }));
         },
         async removeCategory(id: ICategory['id']) {
-            await this.removeRecord<Category>({
+            await this.softRemoveRecord<Category>({
                 id,
                 model: Category,
                 errorMsg: 'Falha ao remover categoria.',
                 successMsg: 'Categoria removida com sucesso!',
             });
-
-            callOperation(() => apiAdapter.delete({ url: `/${id}` }));
         },
         async updateCategory(id: ICategory['id']) {
-            const [, apiAttrs] = await this.updateRecordWithEditItem<Category>({
+            await this.updateRecordWithEditItem<Category>({
                 id,
                 model: Category,
                 errorMsg: 'Falha ao editar categoria.',
@@ -78,10 +81,9 @@ export const useCategoriesStore = defineStore('Categories', {
             });
 
             this._editItem = emptyCategoryFormData();
-
-            callOperation(() =>
-                apiAdapter.patch({ url: `/${id}`, data: apiAttrs })
-            );
+        },
+        async syncCategories(): Promise<SyncStatus[]> {
+            return this.syncRecords<Category>(Category);
         },
     },
 });

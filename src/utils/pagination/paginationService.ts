@@ -24,14 +24,28 @@ class PaginationService<PaginationEntity> {
         this.result = new PaginationResult<PaginationEntity>({ total: 0 });
     }
 
+    async reset() {
+        return this.getFirstPage();
+    }
+
     async getFirstPage() {
-        return this.getNextPage();
+        const result = await this.getPage(1);
+
+        this.currentPage = 1;
+
+        return result;
     }
 
     async getNextPage() {
-        const result = await this.queryPageResult(this.currentPage + 1);
+        const result = await this.getPage(this.currentPage + 1);
 
         this.currentPage++;
+
+        return result;
+    }
+
+    async getPage(page: number) {
+        const result = await this.queryPageResult(page);
 
         this.result = result;
 

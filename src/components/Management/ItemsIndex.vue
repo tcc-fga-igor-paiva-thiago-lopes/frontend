@@ -5,11 +5,14 @@
             lines="full"
             v-for="item in items"
             :key="item.id"
-            @click="() => showItem(item)"
+            @click="(ev) => handleShow(ev, item)"
         >
             <!-- <ion-checkbox slot="start"></ion-checkbox> -->
 
-            <ion-label text-wrap>{{ item[labelField] }}</ion-label>
+            <ion-label text-wrap>
+                <h2>{{ label(item) }}</h2>
+                <p v-if="subLabel">{{ subLabel(item) }}</p>
+            </ion-label>
 
             <div
                 slot="end"
@@ -20,7 +23,7 @@
                     size="large"
                     color="primary"
                     title="Editar item"
-                    style="margin-right: 16px"
+                    class="ion-margin-end"
                     @click="(ev) => handleEdit(ev, item)"
                 ></ion-icon>
 
@@ -36,7 +39,7 @@
     </ion-list>
 
     <ion-infinite-scroll
-        :disabled="!hasPagination()"
+        :disabled="!hasPagination"
         @ionInfinite="handleInfiniteScroll"
     >
         <ion-infinite-scroll-content
@@ -47,8 +50,8 @@
     </ion-infinite-scroll>
 
     <ion-text class="ion-text-center">
-        <h5 :class="!hasPagination() ? 'pagination-message' : ''">
-            {{ getPaginationMessage() }}
+        <h5 :class="!hasPagination ? 'pagination-message' : ''">
+            {{ paginationMessage }}
         </h5>
     </ion-text>
 </template>
@@ -70,7 +73,7 @@ button.alert-button.alert-button-confirm {
 </style>
 
 <script setup lang="ts">
-import { toRefs } from 'vue';
+import { computed, toRefs } from 'vue';
 import {
     IonList,
     IonItem,
@@ -89,10 +92,11 @@ interface IProps {
     items: any[];
     itemName: string;
     itemsName: string;
-    labelField: string;
     paginationService: PaginationService<unknown>;
-    editItem: (item: any) => void;
-    showItem: (item: any) => void;
+    label: (item: any) => string;
+    subLabel?: (item: any) => string;
+    editItem: (item: any) => Promise<void>;
+    showItem: (item: any) => Promise<void>;
     removeItem: (item: any) => Promise<any>;
     loadMoreItems: () => Promise<unknown>;
 }
@@ -102,27 +106,35 @@ const props = defineProps<IProps>();
 const { items, itemsName, paginationService } = toRefs(props);
 
 // eslint-disable-next-line vue/no-setup-props-destructure
-const { editItem, removeItem, loadMoreItems } = props;
+const { showItem, editItem, removeItem, label, subLabel, loadMoreItems } =
+    props;
 
-const hasPagination = () =>
-    items.value.length < paginationService.value.totalResults;
+const hasPagination = computed(
+    () => items.value.length < paginationService.value.totalResults
+);
 
-const getPaginationMessage = () => {
+const paginationMessage = computed(() => {
     const lowerCaseName = itemsName.value.toLowerCase();
 
     return `Exibindo ${items.value.length} ${lowerCaseName} de ${paginationService.value.totalResults} ${lowerCaseName}`;
+});
+
+const handleShow = async (ev: MouseEvent, item: any) => {
+    ev.stopPropagation();
+
+    await showItem(item);
 };
 
-const handleEdit = (ev: MouseEvent, item: any) => {
-    editItem(item);
-
+const handleEdit = async (ev: MouseEvent, item: any) => {
     ev.stopPropagation();
+
+    await editItem(item);
 };
 
 const handleRemoval = async (ev: MouseEvent, item: any) => {
-    await removeItem(item);
-
     ev.stopPropagation();
+
+    await removeItem(item);
 };
 
 const handleInfiniteScroll = async (ev: IonInfiniteScrollCustomEvent<void>) => {

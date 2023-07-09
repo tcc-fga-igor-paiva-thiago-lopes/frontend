@@ -14,6 +14,9 @@
             </ion-header>
 
             <ion-content>
+                <ion-loading :is-open="loading.open" :message="loading.message">
+                </ion-loading>
+
                 <ion-menu-toggle>
                     <ion-list>
                         <ion-item lines="none" class="ion-margin-bottom">
@@ -29,7 +32,7 @@
                                 slot="end"
                                 size="large"
                                 :icon="logOut"
-                                @click="AuthService.logout"
+                                @click="handleLogout"
                             ></ion-icon>
                         </ion-item>
 
@@ -60,6 +63,15 @@
     width: 48px;
     height: 48px;
 }
+
+.custom-alert .alert-wrapper {
+    --max-width: 90%;
+}
+
+button.alert-button.alert-button-confirm {
+    background-color: var(--ion-color-danger);
+    color: var(--ion-color-danger-contrast);
+}
 </style>
 
 <script setup lang="ts">
@@ -75,22 +87,28 @@ import {
     IonTitle,
     IonLabel,
     IonHeader,
+    IonLoading,
     IonContent,
     IonToolbar,
     IonMenuToggle,
     IonRouterOutlet,
+    IonicSafeString,
 } from '@ionic/vue';
 import {
     home,
-    navigate,
+    sync,
     logOut,
+    navigate,
     personCircleSharp,
     pricetags,
 } from 'ionicons/icons';
+
 import { useAppStore } from './store/app';
 import AuthService from './services/auth';
 import { presentToast } from './utils/toast';
-import { offlinePermittedRoutes } from '@/router';
+import { presentConfirmationAlert } from './utils/alert';
+import { isRouteOfflinePermitted } from './utils/offline';
+
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
 interface IMenuOption {
@@ -105,10 +123,17 @@ const router = useRouter();
 
 const appStore = useAppStore();
 
-const { loadUsername, addNetworkChangeListener, removeNetworkListeners } =
-    appStore;
+const {
+    syncAll,
+    loadUsername,
+    openLoading,
+    closeLoading,
+    readNetworkStatus,
+    addNetworkChangeListener,
+    removeNetworkListeners,
+} = appStore;
 
-const { username, connectionStatus } = storeToRefs(appStore);
+const { username, loading, platform, connectionStatus } = storeToRefs(appStore);
 
 const disabledMenuRoutes = ['Welcome', 'SignUp', 'SignIn'];
 
@@ -123,6 +148,13 @@ const allMenuOptions: IMenuOption[] = [
         route: 'FreightsIndex',
         icon: navigate,
         name: 'Fretes',
+        offlinePermitted: true,
+    },
+    {
+        route: 'SyncManagement',
+        icon: sync,
+        name: 'Sincronização',
+        offlinePermitted: true,
     },
     {
         route: 'CategoriesCreate',
@@ -144,20 +176,49 @@ const menuOptions = computed(() =>
     }))
 );
 
-onBeforeMount(async () => {
-    await loadUsername();
+const handleLogout = async () => {
+    const message = new IonicSafeString(`
+        Tem certeza que deseja encerrar sua sessão?<br /><br />
+        Você precisará se conectar novamente e todos os dados salvos poderão ser apagados
+    `);
 
-    await addNetworkChangeListener();
+    await presentConfirmationAlert({
+        message,
+        confirmText: 'Sim',
+        cssClass: 'custom-alert',
+        title: 'Encerrar sessão',
+        confirmClass: 'alert-button-confirm',
+        confirmAction: () => AuthService.logout(),
+    });
+};
+
+onBeforeMount(async () => {
+    openLoading();
+
+    const connected = (await readNetworkStatus()).connected;
+
+    if (connected) syncAll();
+
+    try {
+        await loadUsername();
+
+        if (platform.value !== 'web') await addNetworkChangeListener();
+    } finally {
+        closeLoading();
+    }
 });
 
 onBeforeUnmount(async () => {
-    await removeNetworkListeners();
+    if (platform.value !== 'web') await removeNetworkListeners();
 });
 
 appStore.$subscribe(async (_, state) => {
     if (
-        !state._connectionStatus.connected &&
-        !offlinePermittedRoutes.includes(route.name as string)
+        await isRouteOfflinePermitted(
+            route.name as string,
+            false,
+            state._connectionStatus.connected
+        )
     ) {
         await presentToast(
             'Esta página não é permitida sem conexão com a Internet',

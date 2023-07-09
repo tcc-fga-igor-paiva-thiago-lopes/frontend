@@ -7,7 +7,7 @@ import { DatabaseHelper } from '../../databaseHelper';
 
 const mockDataSource = DatabaseHelper.dataSource();
 
-jest.mock('@/database/databaseDataSource', () => {
+jest.mock('@/database/dataSource', () => {
     return jest.fn().mockImplementation(() => ({
         __esModule: true,
         default: mockDataSource,
@@ -22,7 +22,7 @@ beforeAll(async () => {
     await DatabaseHelper.instance.setupTestDB(mockDataSource);
 });
 
-afterAll(() => DatabaseHelper.instance.teardownTestDB);
+afterAll(() => DatabaseHelper.instance.teardownTestDB());
 
 describe('HomePage.vue', () => {
     it('renders home vue', async () => {

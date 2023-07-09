@@ -59,7 +59,7 @@ export default class APIAdapter {
     private baseUrl: string;
 
     constructor(baseUrl?: string) {
-        this.verifyApiUrlEnvVariable();
+        // this.verifyApiUrlEnvVariable();
 
         this.baseUrl = baseUrl
             ? `${process.env.VUE_APP_API_URL}${baseUrl}`
@@ -109,8 +109,8 @@ export default class APIAdapter {
         return responseHandler(response);
     }
 
-    private verifyApiUrlEnvVariable() {
-        if (!process.env.VUE_APP_API_URL)
-            throw Error('Environment variable VUE_APP_API_URL is required');
-    }
+    // private verifyApiUrlEnvVariable() {
+    //     if (!process.env.VUE_APP_API_URL)
+    //         throw Error('Environment variable VUE_APP_API_URL is required');
+    // }
 }

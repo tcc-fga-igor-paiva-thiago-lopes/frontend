@@ -78,7 +78,7 @@ const changeField = (field: string, value: unknown) => {
 
 onMounted(() => {
     setNewCategoryAttrs({
-        color: '#FFFFFF',
+        color: '#000000 ',
     });
 });
 </script>

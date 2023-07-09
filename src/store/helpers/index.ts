@@ -1,3 +1,5 @@
+import { TypeORMError } from 'typeorm';
+
 import { presentToast } from '@/utils/toast';
 
 export type InMemberOperationParams<Clazz, IAttrs> = {
@@ -31,10 +33,12 @@ export const inMemberOperation = async <Clazz, IAttrs>({
         presentToast(successMsg, 'success');
 
         return ret;
-    } catch (e) {
-        console.error(e);
+    } catch (error) {
+        console.error(error);
 
-        if ((e as { message: string }).message === 'Not found') throw e;
+        if ((error as { message: string }).message === 'Not found') throw error;
+
+        if (error instanceof TypeORMError) throw error;
 
         presentToast(errorMsg, 'danger');
     }
@@ -53,8 +57,10 @@ export const generalOperation = async ({
         presentToast(successMsg, 'success');
 
         return ret;
-    } catch (e) {
-        console.error(e);
+    } catch (error) {
+        console.error(error);
+
+        if (error instanceof TypeORMError) throw error;
 
         presentToast(errorMsg, 'danger');
     }

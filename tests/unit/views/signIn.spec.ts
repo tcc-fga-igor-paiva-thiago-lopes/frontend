@@ -2,15 +2,16 @@ import { createTestingPinia } from '@pinia/testing';
 import { mount, flushPromises } from '@vue/test-utils';
 import { Router, createRouter, createWebHistory } from 'vue-router';
 
+const mockRequestWithoutAuth = jest.fn();
+
 import { routes } from '@/router';
-import APIAdapter from '@/services/api';
 import SignIn from '@/views/SignIn.vue';
 import { initialState } from '@/store/app';
 import { DatabaseHelper } from '../../databaseHelper';
 
 const mockDataSource = DatabaseHelper.dataSource();
 
-jest.mock('@/database/databaseDataSource', () => {
+jest.mock('@/database/dataSource', () => {
     return jest.fn().mockImplementation(() => ({
         __esModule: true,
         default: mockDataSource,
@@ -21,7 +22,13 @@ jest.mock('@/database', () => {
     return jest.fn().mockImplementation(() => ({ default: {} }));
 });
 
-jest.mock('@/services/api');
+jest.mock('@/services/api', () => {
+    return jest.fn().mockImplementation(() => {
+        return {
+            requestWithoutAuth: mockRequestWithoutAuth,
+        };
+    });
+});
 
 let router: Router;
 
@@ -80,10 +87,20 @@ describe('SignIn.vue', () => {
             'Todos os campos com * são obrigatórios'
         );
 
-        expect(APIAdapter).toHaveBeenCalledTimes(0);
+        expect(mockRequestWithoutAuth).toHaveBeenCalledTimes(0);
     });
 
     it('sends request when all required data is filled properly', async () => {
+        const expectedResponse = {
+            status: 200,
+            headers: {},
+            url: 'http://localhost:5000/truck-drivers/login',
+            data: {
+                name: 'Igor Paiva',
+                token: 'eyJhbGciOiJ',
+            },
+        };
+
         const wrapper = mount(SignIn, {
             global: {
                 plugins: [
@@ -94,6 +111,8 @@ describe('SignIn.vue', () => {
                 ],
             },
         });
+
+        mockRequestWithoutAuth.mockResolvedValueOnce(expectedResponse);
 
         const validEmail = 'john@mail.com';
         const validPassword = '12345678';
@@ -107,5 +126,14 @@ describe('SignIn.vue', () => {
         await wrapper.get('form>ion-button').trigger('click');
 
         await flushPromises();
+
+        expect(mockRequestWithoutAuth).toHaveBeenCalledWith({
+            method: 'POST',
+            url: '/truck-drivers/login',
+            data: {
+                email: validEmail,
+                password: validPassword,
+            },
+        });
     });
 });

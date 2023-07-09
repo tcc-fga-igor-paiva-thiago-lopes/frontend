@@ -47,9 +47,6 @@
                         <Compact
                             v-model="dataFields.color.value"
                             @update:modelValue="updateColor"
-                            @ionChange="
-                                (e) => setAttribute('color', e.target.value)
-                            "
                         />
                     </ion-item>
                 </ion-list>
@@ -85,7 +82,6 @@
 
 <script setup lang="ts">
 import { Ref, ref, toRefs, computed } from 'vue';
-import validateHTMLColorHex from 'validate-color';
 import { Compact } from '@ckpack/vue-color';
 import {
     IonContent,
@@ -154,23 +150,6 @@ const loading = ref(false);
 
 const categoryRequiredFields = Category.requiredAttributes();
 
-const validateColorInput = (errors: ValidationErrors) => {
-    console.log('color: ', color);
-
-    if (validateHTMLColorHex(color)) return true;
-
-    const errorMessage = 'Cor inválida';
-    addErrorToField({
-        field: 'color',
-        errorMessages: [errorMessage],
-        fieldRef: colorRef,
-        validationErrors: errors,
-        overwriteErrors: true,
-    });
-
-    return false;
-};
-
 const validationErrors = ref<ValidationErrors>({});
 
 const updateColor = (selectedColor: any) => {
@@ -212,10 +191,7 @@ const validateData = () => {
 
     console.log(newValidationErrors);
 
-    validFields = validFields && validateColorInput(newValidationErrors);
-
     console.log(validFields);
-    console.log(validateColorInput(newValidationErrors));
 
     validationErrors.value = newValidationErrors;
 

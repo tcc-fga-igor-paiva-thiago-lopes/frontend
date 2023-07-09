@@ -1,7 +1,10 @@
 import 'pinia';
-import { AppBaseEntity } from '@/models/appBaseEntity';
 
-export type ModelClass<T> = { new (): T } & typeof AppBaseEntity;
+import { SyncStatus } from '@/services/sync';
+import { IOrderData } from '@/models/appBaseEntity';
+import { SyncableEntity } from '@/models/syncableEntity';
+
+export type ModelClass<T> = { new (): T } & typeof SyncableEntity;
 
 export interface IMemberActionParams<T> {
     id: any;
@@ -20,40 +23,51 @@ export interface IMemberActionWithAttrsParams<T>
 
 declare module 'pinia' {
     export interface PiniaCustomProperties {
-        loadAllPaginated: <T extends AppBaseEntity>(
+        loadAllPaginated: <T extends SyncableEntity>(
             model: ModelClass<T>,
             pageSize: number,
             pageNum: number
-        ) => Promise<any[], number>;
-        createRecordByAttrs: <T extends AppBaseEntity>(
+        ) => Promise<[T[], number]>;
+        createRecordByAttrs: <T extends SyncableEntity>(
             params: Omit<IMemberActionWithAttrsParams<T>, 'id'>
         ) => Promise<any>;
-        removeRecord: <T extends AppBaseEntity>(
+        removeRecord: <T extends SyncableEntity>(
             params: IMemberActionWithMsgParams<T>
         ) => Promise<void>;
-        updateRecord: <T extends AppBaseEntity>(
+        softRemoveRecord: <T extends SyncableEntity>(
+            params: IMemberActionWithMsgParams<T>
+        ) => Promise<void>;
+        updateRecord: <T extends SyncableEntity>(
             params: IMemberActionWithAttrsParams<T>
         ) => Promise<void>;
-        createRecordWithNewItem: <T extends AppBaseEntity>(
+        createRecordWithNewItem: <T extends SyncableEntity>(
             params: Omit<IMemberActionWithMsgParams<T>, 'id'>
         ) => Promise<[T, Record<string, any>]>;
 
-        findRecord: <T extends AppBaseEntity>(
+        findRecord: <T extends SyncableEntity>(
             model: ModelClass<T>,
             id: any,
             asFormData = false
         ) => Promise<Record<string, any> | T | null>;
-        findEditRecord: <T extends AppBaseEntity>(
+        findEditRecord: <T extends SyncableEntity>(
             params: IMemberActionParams<T>
         ) => Promise<boolean>;
-        updateRecordWithEditItem: <T extends AppBaseEntity>(
+        updateRecordWithEditItem: <T extends SyncableEntity>(
             params: IMemberActionWithMsgParams<T>
         ) => Promise<[T, Record<string, any>]>;
+        syncRecords: <T extends SyncableEntity>(
+            model: ModelClass<T>
+        ) => Promise<SyncStatus[]>;
+        setFilterData: (value: FilterData) => void;
+        changeOrderData: (value: Partial<IOrderData>) => void;
     }
 
     export interface PiniaCustomStateProperties {
+        _syncing: boolean;
         _items: Ref<any[]>;
         _newItem: Record<string, any>;
         _editItem: Record<string, any>;
+        _filterData: FilterData;
+        _orderData: IOrderData;
     }
 }
