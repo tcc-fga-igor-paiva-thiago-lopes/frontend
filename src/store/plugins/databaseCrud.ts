@@ -14,14 +14,23 @@ import {
 } from '@/utils/conversion';
 import APIAdapter from '@/services/api';
 import { SyncStatus } from '@/services/sync';
+import { FilterData, IOrderData } from '@/models/appBaseEntity';
 
 export const DatabaseCrudPlugin = () => ({
     _syncing: false,
     _items: [] as any[],
+    _filterData: {} as FilterData,
     _newItem: {} as Record<string, any>,
     _editItem: {} as Record<string, any>,
+    _orderData: { field: 'createdAt', order: 'DESC' } as IOrderData,
     mergeItems(items: any[]) {
         this._items = [...this._items, ...items];
+    },
+    setFilterData(value: FilterData) {
+        this._filterData = value;
+    },
+    changeOrderData(value: Partial<IOrderData>) {
+        Object.assign(this._orderData, value);
     },
     async createRecordWithNewItem<T extends SyncableEntity>({
         model,
@@ -95,10 +104,12 @@ export const DatabaseCrudPlugin = () => ({
         pageSize: number,
         pageNum: number
     ) {
-        const paginationRet = await model.findAndCount<T>({
-            take: pageSize,
-            skip: (pageNum - 1) * pageSize,
-        });
+        const paginationRet = await model.queryByFilterData<T>(
+            this._filterData,
+            pageSize,
+            pageNum,
+            this._orderData
+        );
 
         const [results] = paginationRet;
 

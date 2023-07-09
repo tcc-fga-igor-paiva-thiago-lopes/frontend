@@ -13,6 +13,8 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
+            <ion-loading :is-open="loading"></ion-loading>
+
             <ion-card class="ion-margin-bottom">
                 <ion-card-header class="header">
                     <div>
@@ -119,6 +121,7 @@ import {
     IonList,
     IonItem,
     IonLabel,
+    IonLoading,
     IonCardContent,
     IonicSafeString,
 } from '@ionic/vue';
@@ -153,7 +156,7 @@ const syncableEntitiesData = ref<any[]>([]);
 
 const appStore = useAppStore();
 
-const { syncAll, syncEntity } = appStore;
+const { syncAll, syncEntity, openLoading, closeLoading } = appStore;
 
 const { connectionStatus } = storeToRefs(appStore);
 
@@ -201,7 +204,7 @@ const handleSync = async (ev: MouseEvent, model: SyncableModel) => {
 
     const confirmAction = async () => {
         try {
-            loading.value = true;
+            openLoading(`Sincronizando ${model.FRIENDLY_NAME_PLURAL}...`);
 
             const [, statuses] = await syncEntity(model);
 
@@ -222,7 +225,7 @@ const handleSync = async (ev: MouseEvent, model: SyncableModel) => {
                 );
             }
         } finally {
-            loading.value = false;
+            closeLoading();
 
             updateEntitiesData();
         }
@@ -239,7 +242,7 @@ const handleSync = async (ev: MouseEvent, model: SyncableModel) => {
 const handleFullSync = async () => {
     const confirmAction = async () => {
         try {
-            loading.value = true;
+            openLoading('Sincronizando...');
 
             const result = await syncAll();
 
@@ -264,9 +267,9 @@ const handleFullSync = async () => {
                 buttons: ['OK'],
             });
         } finally {
-            loading.value = false;
+            await updateEntitiesData();
 
-            updateEntitiesData();
+            closeLoading();
         }
     };
 

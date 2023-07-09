@@ -18,6 +18,9 @@
             <ManageFreights
                 itemName="Frete"
                 itemsName="Fretes"
+                :model="Freight"
+                :orderData="orderData"
+                :filterData="filterData"
                 :label="freightLabel"
                 :subLabel="freightSubLabel"
                 :items="freights"
@@ -27,6 +30,10 @@
                 :removeItem="deleteFreight"
                 :loadMoreItems="loadMoreItems"
                 :paginationService="paginationService"
+                :orderExcludeColumns="ORDER_EXCLUDE_COLUMNS"
+                :filterExcludeColumns="FILTER_EXCLUDE_COLUMNS"
+                @onFilterConfirm="handleFilterConfirmation"
+                @onOrderChange="handleOrderData"
             />
         </ion-content>
     </ion-page>
@@ -54,10 +61,20 @@ import { Freight } from '@/models/freight';
 import { presentToast } from '@/utils/toast';
 import { useFreightsStore } from '@/store/freights';
 import { formatDateDynamicYear } from '@/utils/date';
+import { FilterData, IOrderData } from '@/models/appBaseEntity';
 import PaginationService from '@/utils/pagination/paginationService';
 
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 import ManageFreights from '@/components/Management/MainComponent.vue';
+
+const FILTER_EXCLUDE_COLUMNS = [
+    'originLatitude',
+    'originLongitude',
+    'destinationLatitude',
+    'destinationLongitude',
+];
+
+const ORDER_EXCLUDE_COLUMNS = [...FILTER_EXCLUDE_COLUMNS, 'description'];
 
 const loading = ref(false);
 
@@ -66,9 +83,9 @@ const store = useFreightsStore();
 const route = useRoute();
 const router = useRouter();
 
-const { loadPaginated, removeFreight } = store;
+const { loadPaginated, removeFreight, setFilter, setOrder } = store;
 
-const { freights } = storeToRefs(store);
+const { freights, filterData, orderData } = storeToRefs(store);
 
 const paginationService = reactive(new PaginationService(loadPaginated));
 
@@ -110,6 +127,18 @@ const freightLabel = (freight: Freight) => {
 const freightSubLabel = (freight: Freight) => {
     // return `${freight.originCity} (${freight.originState}) --> ${freight.destinationCity} (${freight.destinationState})`;
     return `${freight.originCity} --> ${freight.destinationCity}`;
+};
+
+const handleFilterConfirmation = async (filterData: FilterData) => {
+    setFilter(filterData);
+
+    await paginationService.reset();
+};
+
+const handleOrderData = async (orderData: Partial<IOrderData>) => {
+    setOrder(orderData);
+
+    await paginationService.reset();
 };
 
 const unwatch = watch([route], async (value) => {

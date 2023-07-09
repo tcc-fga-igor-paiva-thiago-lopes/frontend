@@ -41,6 +41,11 @@ export class SyncableEntity extends AppBaseEntity implements ISyncableEntity {
         this.synced = false;
     }
 
+    public static readonly FRIENDLY_COLUMN_NAMES: Record<string, string> = {
+        synced: 'Sincronizado',
+        ...AppBaseEntity.FRIENDLY_COLUMN_NAMES,
+    };
+
     static async notSynced<T extends SyncableEntity>(
         this: StaticThis<T>,
         maxRecords = 100

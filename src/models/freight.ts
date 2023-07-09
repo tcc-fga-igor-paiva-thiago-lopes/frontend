@@ -128,4 +128,28 @@ export class Freight extends SyncableEntity implements IFreight {
     public static readonly FRIENDLY_NAME_SINGULAR: string = 'Frete';
     public static readonly FRIENDLY_NAME_PLURAL: string = 'Fretes';
     public static readonly API_ENDPOINT_NAME: string = 'freights';
+
+    public static readonly FRIENDLY_COLUMN_NAMES: Record<string, string> = {
+        cargo: 'Tipo de carga',
+        status: 'Status',
+        description: 'Descrição',
+        contractor: 'Contratante',
+        cargoWeight: 'Peso carga',
+        agreedPayment: 'Pagamento total',
+        distance: 'Distância',
+        startDate: 'Data de início',
+        dueDate: 'Data limite',
+        finishedDate: 'Data de conclusão',
+        originCity: 'Cidade de origem',
+        originState: 'Estado de origem',
+        originCountry: 'País de origem',
+        originLatitude: 'Latitude de origem',
+        originLongitude: 'Longitude de origem',
+        destinationCity: 'Cidade de destino',
+        destinationState: 'Estado de destino',
+        destinationCountry: 'País de destino',
+        destinationLatitude: 'Latitude de destino',
+        destinationLongitude: 'Longitude de destino',
+        ...SyncableEntity.FRIENDLY_COLUMN_NAMES,
+    };
 }

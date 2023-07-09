@@ -48,11 +48,11 @@ export const useAppStore = defineStore('application', {
         connectionStatus: (state: IApplicationState) => state._connectionStatus,
     },
     actions: {
-        async openLoading(message?: string) {
+        openLoading(message?: string) {
             this._loading = { open: true, message };
         },
-        async closeLoading() {
-            this._loading = { open: false };
+        closeLoading() {
+            this._loading = { open: false, message: undefined };
         },
         async loadUsername() {
             this._username = (await Preferences.get({ key: USERNAME_KEY }))
