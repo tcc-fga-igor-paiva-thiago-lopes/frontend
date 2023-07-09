@@ -13,37 +13,93 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
-            <ion-loading :is-open="loading"></ion-loading>
+            <div class="options-container">
+                <ion-button
+                    v-for="option in menuOptions"
+                    :key="option.route"
+                    shape="round"
+                    class="options-button"
+                    :disabled="!option.available"
+                    :onclick="() => $router.push({ name: option.route })"
+                >
+                    <ion-icon slot="start" :icon="option.icon"></ion-icon>
 
-            <ion-text class="ion-text-center">
-                <h6>There's nothing here</h6>
-            </ion-text>
+                    {{ option.name }}
+                </ion-button>
+            </div>
         </ion-content>
     </ion-page>
 </template>
 
-<style></style>
+<style>
+.options-container {
+    width: 100%;
+    display: flex;
+    padding-top: 32px;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.options-button {
+    width: 250px;
+    margin-top: 32px;
+}
+</style>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
+
 import {
     IonPage,
-    IonText,
     IonTitle,
     IonHeader,
     IonContent,
     IonToolbar,
-    IonLoading,
+    IonIcon,
+    IonButton,
     IonButtons,
     IonMenuButton,
 } from '@ionic/vue';
+import { sync, navigate } from 'ionicons/icons';
 
-import { onMounted, ref } from 'vue';
+import { useAppStore } from '../store/app';
 
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
-const loading = ref(true);
+interface IMenuOption {
+    icon: string;
+    name: string;
+    route: string;
+    offlinePermitted?: boolean;
+}
 
-onMounted(async () => {
-    loading.value = false;
-});
+const appStore = useAppStore();
+
+const { connectionStatus } = storeToRefs(appStore);
+
+const allMenuOptions: IMenuOption[] = [
+    {
+        route: 'FreightsIndex',
+        icon: navigate,
+        name: 'Fretes',
+        offlinePermitted: true,
+    },
+    {
+        route: 'SyncManagement',
+        icon: sync,
+        name: 'Sincronização',
+        offlinePermitted: true,
+    },
+];
+
+const menuOptions = computed(() =>
+    allMenuOptions.map((option) => ({
+        ...option,
+        available:
+            connectionStatus.value.connected ||
+            (!connectionStatus.value.connected && !!option.offlinePermitted),
+    }))
+);
 </script>
