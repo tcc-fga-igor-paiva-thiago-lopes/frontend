@@ -21,7 +21,7 @@ import CategoryShow from '@/views/Categories/CategoryShow.vue';
 import CategoryEdit from '@/views/Categories/CategoryEdit.vue';
 
 import AnalysisIndex from '@/views/Analysis/AnalysisIndex.vue';
-import CargoIndicator from '@/views/Analysis/CargoIndicator.vue';
+import ProfitPerColumn from '@/views/Analysis/Indicators/ProfitPerColumn.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -66,8 +66,8 @@ export const routes: Array<RouteRecordRaw> = [
     },
     {
         path: '/analysis/cargo',
-        name: 'CargoIndicator',
-        component: CargoIndicator,
+        name: 'ProfitPerColumn',
+        component: ProfitPerColumn,
         meta: { requiresAuth: true },
     },
     {

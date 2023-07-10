@@ -14,13 +14,22 @@
 
         <ion-content :fullscreen="true" class="ion-padding">
             <div
-                class="display-flex ion-justify-content-between ion-margin-vertical"
+                class="display-flex ion-justify-content-between ion-align-items-center ion-margin-vertical"
             >
-                <ion-text>
-                    <h5>
-                        <strong>Tipo de carga</strong>
-                    </h5>
-                </ion-text>
+                <ion-item class="sort-item">
+                    <ion-label position="stacked">Agrupar por</ion-label>
+
+                    <ion-select interface="popover" v-model="column">
+                        <IonSelectOption
+                            v-for="column in FILTER_COLUMNS"
+                            :value="column"
+                            :key="column"
+                            >{{
+                                Freight.FRIENDLY_COLUMN_NAMES[column]
+                            }}</IonSelectOption
+                        >
+                    </ion-select>
+                </ion-item>
 
                 <ion-button @click="queryResults()">
                     <ion-icon slot="start" :icon="sync"></ion-icon>
@@ -43,14 +52,14 @@
             <div>
                 <ion-text>
                     <h5>
-                        <strong>Lucro por tipo de carga</strong>
+                        <strong>Lucro por {{ columnFriendlyName }}</strong>
                     </h5>
                 </ion-text>
 
                 <ion-list>
-                    <ion-item v-for="data in profitPerCargo" :key="data.cargo">
+                    <ion-item v-for="data in profitPerColumn" :key="data.cargo">
                         <ion-label text-wrap>
-                            <h2>{{ data.cargo }}</h2>
+                            <h2>{{ data[column] }}</h2>
 
                             <p>
                                 Total de fretes:
@@ -76,7 +85,7 @@
 </style>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import {
     IonIcon,
@@ -92,41 +101,55 @@ import {
     IonItem,
     IonLabel,
     IonButton,
+    IonSelect,
+    IonSelectOption,
 } from '@ionic/vue';
 
 import { sync } from 'ionicons/icons';
 
 import { brazilFormatter } from '@/utils/currency';
-import { Freight, ProfitPerCargoResult } from '@/models/freight';
+import { Freight, IProfitPerCargoResult } from '@/models/freight';
 
 import DateRange from '@/components/Analysis/DateRange.vue';
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
+
+const FILTER_COLUMNS = ['cargo', 'contractor'];
 
 const loading = ref(false);
 
 const startDate = ref('');
 const endDate = ref('');
+const column = ref('cargo');
 
-const profitPerCargo = ref<ProfitPerCargoResult[]>([]);
+const profitPerColumn = ref<IProfitPerCargoResult[]>([]);
+
+const columnFriendlyName = computed(() =>
+    Freight.FRIENDLY_COLUMN_NAMES[column.value].toLowerCase()
+);
 
 const queryResults = async () => {
-    console.log('startDate: ', startDate.value);
-
     loading.value = true;
 
     try {
-        profitPerCargo.value = await Freight.profitPerCargo(
+        profitPerColumn.value = await Freight.profitPerColumn(
+            column.value,
             startDate.value,
             endDate.value
         );
-
-        console.log('result: ', profitPerCargo.value);
     } finally {
         loading.value = false;
     }
 };
 
+const unwatch = watch([column], async () => {
+    await queryResults();
+});
+
 onMounted(async () => {
     await queryResults();
+});
+
+onBeforeUnmount(() => {
+    unwatch();
 });
 </script>

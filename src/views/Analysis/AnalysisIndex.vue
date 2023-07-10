@@ -37,7 +37,9 @@
                             <ion-label text-wrap>
                                 <h2>{{ indicator.label }}</h2>
 
-                                <p>{{ indicator.sublabel }}</p>
+                                <p v-if="indicator.sublabel">
+                                    {{ indicator.sublabel }}
+                                </p>
                             </ion-label>
 
                             <div
@@ -86,8 +88,6 @@
 </style>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
 import {
     IonIcon,
     IonHeader,
@@ -111,9 +111,9 @@ import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
 const indicators = [
     {
-        route: 'CargoIndicator',
-        label: 'Tipo de carga',
-        sublabel: 'Lucro por tipo de carga',
+        route: 'ProfitPerColumn',
+        label: 'Tipo de carga e contratante',
+        sublabel: 'Lucro por tipo de carga/contratante',
     },
 ];
 </script>

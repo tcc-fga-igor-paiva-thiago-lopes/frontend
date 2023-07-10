@@ -49,11 +49,10 @@ export interface IFreight extends ISyncableEntity {
     updatedAt?: Date;
 }
 
-export type ProfitPerCargoResult = {
+export interface IProfitPerCargoResult extends Record<string, any> {
     num: number;
     total: number;
-    cargo: string;
-};
+}
 
 @Entity('FREIGHT')
 export class Freight extends SyncableEntity implements IFreight {
@@ -154,14 +153,19 @@ export class Freight extends SyncableEntity implements IFreight {
         ...SyncableEntity.FRIENDLY_COLUMN_NAMES,
     };
 
-    static profitPerCargo(startDate?: string, endDate?: string) {
+    static profitPerColumn(
+        column: string,
+        startDate?: string,
+        endDate?: string
+    ) {
         // TODO: consider spents
         const queryBuilder = Freight.createQueryBuilder()
-            .select('cargo')
+            .select(column)
             .addSelect('COUNT(FREIGHT.id)', 'num')
             .addSelect('SUM(FREIGHT.agreed_payment)', 'total')
             .where({ status: FreightStatus.FINISHED })
-            .groupBy('cargo');
+            .groupBy(column)
+            .orderBy('total', 'DESC');
 
         if (startDate) {
             queryBuilder.andWhere({
@@ -175,6 +179,6 @@ export class Freight extends SyncableEntity implements IFreight {
             });
         }
 
-        return queryBuilder.getRawMany<ProfitPerCargoResult>();
+        return queryBuilder.getRawMany<IProfitPerCargoResult>();
     }
 }
