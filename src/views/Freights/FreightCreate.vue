@@ -42,6 +42,7 @@ import {
     IonMenuButton,
 } from '@ionic/vue';
 
+import { formatISO } from '@/utils/date';
 import { presentToast } from '@/utils/toast';
 import { FreightStatus } from '@/models/freight';
 import { useFreightsStore } from '@/store/freights';
@@ -82,7 +83,7 @@ onMounted(() => {
         originCountry: 'Brasil',
         destinationCountry: 'Brasil',
         status: FreightStatus.NOT_STARTED,
-        startDate: new Date().toISOString(),
+        startDate: formatISO(new Date()),
     });
 });
 </script>

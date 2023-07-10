@@ -26,7 +26,7 @@ const convertFormDataToType = (type: any, value: any) => {
     switch (type) {
         case Date:
         case 'datetime':
-            return valueIsString ? value : value.toISOString();
+            return valueIsString ? value : formatISO(value);
         case 'decimal':
         case Number:
             return valueIsNumber ? value : parseFloat(value);
@@ -42,7 +42,7 @@ export type FormDataConversionMap = Partial<
 >;
 
 const formDataTypeConversion: FormDataConversionMap = {
-    date: (value: Date) => value.toISOString(),
+    date: (value: Date) => formatISO(value),
     number: (value: number) => `${value}`,
     boolean: (value: boolean) => value,
     null: (value: null) => value,

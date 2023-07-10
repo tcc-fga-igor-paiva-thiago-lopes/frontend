@@ -1,6 +1,7 @@
 import {
     Like,
     Equal,
+    Between,
     MoreThan,
     LessThan,
     BaseEntity,
@@ -11,7 +12,7 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { formatISO, parseISO } from '@/utils/date';
+import { formatISO } from '@/utils/date';
 
 export type StaticThis<T> = { new (): T } & typeof BaseEntity;
 
@@ -48,7 +49,7 @@ export interface IOrderData {
 }
 
 export const isDateType = (type: any) =>
-    ['date', 'datetime'].includes(type as string) || type instanceof Date;
+    ['date', 'datetime'].includes(type as string) || type === Date;
 
 export const isNumberType = (type: any) =>
     ['integer', 'number', 'numeric', 'decimal'].includes(type as string) ||
@@ -130,16 +131,27 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
             if (!data.active) return;
 
             const { type } = columnsMap[field];
+
             const isDate = isDateType(type);
 
-            let value = isDate ? parseISO(data.value) : data.value;
+            let value = isDate ? new Date(data.value) : data.value;
 
             if (isDate && data.dateOnly)
                 value = formatISO(value, { representation: 'date' });
 
             switch (data.type) {
                 case 'equals_to':
-                    queryBuilder.andWhere({ [field]: Equal(value) });
+                    if (isDate && data.dateOnly) {
+                        queryBuilder.andWhere({
+                            [field]: Between(
+                                new Date(`${value} 00:00`),
+                                new Date(`${value} 23:59`)
+                            ),
+                        });
+                    } else {
+                        queryBuilder.andWhere({ [field]: Equal(value) });
+                    }
+
                     break;
                 case 'greater_than':
                     queryBuilder.andWhere({ [field]: MoreThan(value) });
