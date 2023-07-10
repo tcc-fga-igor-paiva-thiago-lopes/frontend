@@ -1,7 +1,5 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { SyncableEntity, ISyncableEntity } from './syncableEntity';
-import { datetimeTransformer } from './helpers/datetimeTransformer';
-
 export enum FreightCargo {
     GENERAL = 'Geral',
     CONTAINERIZED = 'Conteinerizada',
@@ -51,6 +49,12 @@ export interface IFreight extends ISyncableEntity {
     updatedAt?: Date;
 }
 
+export type ProfitPerCargoResult = {
+    num: number;
+    total: number;
+    cargo: string;
+};
+
 @Entity('FREIGHT')
 export class Freight extends SyncableEntity implements IFreight {
     @Column({ nullable: false, enum: FreightCargo })
@@ -77,21 +81,18 @@ export class Freight extends SyncableEntity implements IFreight {
     @Column({
         name: 'start_date',
         nullable: false,
-        transformer: datetimeTransformer,
     })
     startDate!: Date;
 
     @Column({
         name: 'due_date',
         nullable: true,
-        transformer: datetimeTransformer,
     })
     dueDate?: Date;
 
     @Column({
         name: 'finished_date',
         nullable: true,
-        transformer: datetimeTransformer,
     })
     finishedDate?: Date;
 
@@ -152,4 +153,28 @@ export class Freight extends SyncableEntity implements IFreight {
         destinationLongitude: 'Longitude de destino',
         ...SyncableEntity.FRIENDLY_COLUMN_NAMES,
     };
+
+    static profitPerCargo(startDate?: string, endDate?: string) {
+        // TODO: consider spents
+        const queryBuilder = Freight.createQueryBuilder()
+            .select('cargo')
+            .addSelect('COUNT(FREIGHT.id)', 'num')
+            .addSelect('SUM(FREIGHT.agreed_payment)', 'total')
+            .where({ status: FreightStatus.FINISHED })
+            .groupBy('cargo');
+
+        if (startDate) {
+            queryBuilder.andWhere({
+                finishedDate: MoreThanOrEqual(new Date(startDate)),
+            });
+        }
+
+        if (endDate) {
+            queryBuilder.andWhere({
+                finishedDate: LessThanOrEqual(new Date(endDate)),
+            });
+        }
+
+        return queryBuilder.getRawMany<ProfitPerCargoResult>();
+    }
 }

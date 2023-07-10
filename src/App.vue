@@ -101,6 +101,7 @@ import {
     logOut,
     navigate,
     pricetags,
+    statsChart,
     personCircleSharp,
 } from 'ionicons/icons';
 
@@ -161,6 +162,12 @@ const allMenuOptions: IMenuOption[] = [
         route: 'SyncManagement',
         icon: sync,
         name: 'Sincronização',
+        offlinePermitted: true,
+    },
+    {
+        route: 'AnalysisIndex',
+        icon: statsChart,
+        name: 'Indicadores',
         offlinePermitted: true,
     },
 ];

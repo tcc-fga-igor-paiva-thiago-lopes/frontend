@@ -62,7 +62,7 @@ import {
     IonButtons,
     IonMenuButton,
 } from '@ionic/vue';
-import { sync, navigate } from 'ionicons/icons';
+import { sync, navigate, statsChart } from 'ionicons/icons';
 
 import { useAppStore } from '../store/app';
 
@@ -90,6 +90,12 @@ const allMenuOptions: IMenuOption[] = [
         route: 'SyncManagement',
         icon: sync,
         name: 'Sincronização',
+        offlinePermitted: true,
+    },
+    {
+        route: 'AnalysisIndex',
+        icon: statsChart,
+        name: 'Indicadores',
         offlinePermitted: true,
     },
 ];

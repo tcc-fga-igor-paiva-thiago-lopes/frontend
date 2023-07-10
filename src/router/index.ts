@@ -20,6 +20,8 @@ import CategoryCreate from '@/views/Categories/CategoryCreate.vue';
 import CategoryShow from '@/views/Categories/CategoryShow.vue';
 import CategoryEdit from '@/views/Categories/CategoryEdit.vue';
 
+import AnalysisIndex from '@/views/Analysis/AnalysisIndex.vue';
+
 export const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
@@ -53,6 +55,12 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/sync',
         name: 'SyncManagement',
         component: SyncManagement,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/analysis',
+        name: 'AnalysisIndex',
+        component: AnalysisIndex,
         meta: { requiresAuth: true },
     },
     {

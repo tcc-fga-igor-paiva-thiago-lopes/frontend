@@ -56,7 +56,7 @@ import { IonText, IonButton } from '@ionic/vue';
 import { menu, navigate } from 'ionicons/icons';
 
 import { parseISO } from '@/utils/date';
-import { Freight } from '@/models/freight';
+import { Freight, FreightStatus } from '@/models/freight';
 import GeneralData from './GeneralData.vue';
 import LocationInfo from './LocationInfo.vue';
 import StepperComponent from '@/components/StepperComponent.vue';
@@ -224,14 +224,26 @@ const validateDueDate = (errors: ValidationErrors) => {
 };
 
 const validateFinishedDate = (errors: ValidationErrors) => {
-    const { finishedDate, startDate } = formData.value;
+    const { status, finishedDate, startDate } = formData.value;
 
-    if (!finishedDate) return true;
+    if (status !== FreightStatus.FINISHED && !finishedDate) return true;
 
-    const errorMessage =
-        'A data de conclusão não pode ser anterior a data de início';
+    if (status === FreightStatus.FINISHED && !finishedDate) {
+        addErrorToField({
+            field: 'finishedDate',
+            errorMessages: ['Obrigatório para fretes finalizados'],
+            fieldRef: finishedDateRef,
+            validationErrors: errors,
+            overwriteErrors: true,
+        });
+
+        return false;
+    }
 
     if (isDateBefore(finishedDate, startDate)) {
+        const errorMessage =
+            'A data de conclusão não pode ser anterior a data de início';
+
         addErrorToField({
             field: 'finishedDate',
             errorMessages: [errorMessage],
