@@ -56,11 +56,31 @@
                 @ion-change="handleDisplayModeChange"
             >
                 <ion-segment-button value="list">
-                    <ion-label>Lista</ion-label>
+                    <div
+                        class="display-flex ion-justify-content-between ion-align-items-center"
+                    >
+                        <ion-icon
+                            :icon="list"
+                            class="ion-margin-end"
+                            style="width: 24px; height: 24px"
+                        ></ion-icon>
+
+                        <ion-label>Lista</ion-label>
+                    </div>
                 </ion-segment-button>
 
                 <ion-segment-button value="chart">
-                    <ion-label>Gráfico</ion-label>
+                    <div
+                        class="display-flex ion-justify-content-between ion-align-items-center"
+                    >
+                        <ion-icon
+                            :icon="barChart"
+                            class="ion-margin-end"
+                            style="width: 24px; height: 24px"
+                        ></ion-icon>
+
+                        <ion-label>Gráfico</ion-label>
+                    </div>
                 </ion-segment-button>
             </ion-segment>
 
@@ -137,7 +157,7 @@ import {
     IonSegmentButton,
     SegmentChangeEventDetail,
 } from '@ionic/vue';
-import { sync } from 'ionicons/icons';
+import { sync, list, barChart } from 'ionicons/icons';
 import { IonSegmentCustomEvent } from '@ionic/core';
 
 import { useAppStore } from '@/store/app';
