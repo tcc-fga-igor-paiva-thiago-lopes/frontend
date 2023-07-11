@@ -1,5 +1,6 @@
 import { Entity, Column, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { SyncableEntity, ISyncableEntity } from './syncableEntity';
+
 export enum FreightCargo {
     GENERAL = 'Geral',
     CONTAINERIZED = 'Conteinerizada',

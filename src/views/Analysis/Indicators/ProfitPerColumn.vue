@@ -13,6 +13,8 @@
         </ion-header>
 
         <ion-content :fullscreen="true" class="ion-padding">
+            <ion-loading :is-open="loading"></ion-loading>
+
             <div
                 class="display-flex ion-justify-content-between ion-align-items-center ion-margin-vertical"
             >
@@ -49,6 +51,19 @@
 
             <hr class="divider-line" />
 
+            <ion-segment
+                :value="displayMode"
+                @ion-change="handleDisplayModeChange"
+            >
+                <ion-segment-button value="list">
+                    <ion-label>Lista</ion-label>
+                </ion-segment-button>
+
+                <ion-segment-button value="chart">
+                    <ion-label>Gráfico</ion-label>
+                </ion-segment-button>
+            </ion-segment>
+
             <div>
                 <ion-text>
                     <h5>
@@ -56,22 +71,32 @@
                     </h5>
                 </ion-text>
 
-                <ion-list>
-                    <ion-item v-for="data in profitPerColumn" :key="data.cargo">
-                        <ion-label text-wrap>
-                            <h2>{{ data[column] }}</h2>
+                <template v-if="displayMode === 'list'">
+                    <ion-list>
+                        <ion-item
+                            v-for="data in profitPerColumn"
+                            :key="data.cargo"
+                        >
+                            <ion-label text-wrap>
+                                <h2>{{ data[column] }}</h2>
 
-                            <p>
-                                Total de fretes:
-                                {{ data.num }}
-                            </p>
-                        </ion-label>
+                                <p>
+                                    Total de fretes:
+                                    {{ data.num }}
+                                </p>
+                            </ion-label>
 
-                        <span slot="end">{{
-                            brazilFormatter.format(data.total)
-                        }}</span>
-                    </ion-item>
-                </ion-list>
+                            <span slot="end">{{
+                                brazilFormatter.format(data.total)
+                            }}</span>
+                        </ion-item>
+                    </ion-list>
+                </template>
+
+                <canvas
+                    ref="chartRef"
+                    :style="{ display: displayMode === 'chart' ? '' : 'none' }"
+                ></canvas>
             </div>
         </ion-content>
     </ion-page>
@@ -85,6 +110,10 @@
 </style>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { useRoute } from 'vue-router';
+import { Chart, registerables } from 'chart.js';
+import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import {
@@ -103,29 +132,94 @@ import {
     IonButton,
     IonSelect,
     IonSelectOption,
+    IonLoading,
+    IonSegment,
+    IonSegmentButton,
+    SegmentChangeEventDetail,
 } from '@ionic/vue';
-
 import { sync } from 'ionicons/icons';
+import { IonSegmentCustomEvent } from '@ionic/core';
 
+import { useAppStore } from '@/store/app';
 import { brazilFormatter } from '@/utils/currency';
 import { Freight, IProfitPerCargoResult } from '@/models/freight';
 
 import DateRange from '@/components/Analysis/DateRange.vue';
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
+Chart.register(...registerables);
+
 const FILTER_COLUMNS = ['cargo', 'contractor'];
+
+const appStore = useAppStore();
+
+const { platform } = storeToRefs(appStore);
+
+const route = useRoute();
 
 const loading = ref(false);
 
 const startDate = ref('');
 const endDate = ref('');
 const column = ref('cargo');
+const displayMode = ref<'list' | 'chart'>('list');
+
+const chart = ref<Chart | null>(null);
+const chartRef = ref<Element | null>(null);
 
 const profitPerColumn = ref<IProfitPerCargoResult[]>([]);
 
 const columnFriendlyName = computed(() =>
     Freight.FRIENDLY_COLUMN_NAMES[column.value].toLowerCase()
 );
+
+const generateChart = () => {
+    const style = getComputedStyle(document.body);
+
+    chart.value?.destroy();
+
+    chart.value = new Chart(chartRef.value as any, {
+        type: 'bar',
+        data: {
+            labels: profitPerColumn.value.map((item) => item[column.value]),
+            datasets: [
+                {
+                    label: 'Lucro',
+                    backgroundColor: style.getPropertyValue(
+                        '--ion-color-primary'
+                    ),
+                    data: profitPerColumn.value.map((item) => item.total),
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+        },
+    });
+};
+
+const handleDisplayModeChange = async (
+    event: IonSegmentCustomEvent<SegmentChangeEventDetail>
+) => {
+    loading.value = true;
+
+    const value = event.target.value as 'list' | 'chart';
+
+    displayMode.value = value;
+
+    try {
+        if (value === 'chart') {
+            if (platform.value !== 'web')
+                await ScreenOrientation.lock({ orientation: 'landscape' });
+
+            generateChart();
+        } else {
+            if (platform.value !== 'web') await ScreenOrientation.unlock();
+        }
+    } finally {
+        loading.value = false;
+    }
+};
 
 const queryResults = async () => {
     loading.value = true;
@@ -141,8 +235,18 @@ const queryResults = async () => {
     }
 };
 
-const unwatch = watch([column], async () => {
+const unwatchColumn = watch([column], async () => {
     await queryResults();
+});
+
+const unwatchRoute = watch([route], async () => {
+    if (route.name !== 'ProfitPerColumn') {
+        ScreenOrientation.unlock();
+
+        displayMode.value = 'list';
+    } else {
+        await queryResults();
+    }
 });
 
 onMounted(async () => {
@@ -150,6 +254,9 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-    unwatch();
+    unwatchColumn();
+    unwatchRoute();
+
+    ScreenOrientation.unlock();
 });
 </script>
