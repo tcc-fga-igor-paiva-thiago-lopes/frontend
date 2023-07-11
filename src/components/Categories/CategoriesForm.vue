@@ -1,84 +1,51 @@
 <template>
-    <ion-page id="main-content">
-        <ion-header :translucent="true">
-            <ion-toolbar>
-                <ion-buttons slot="start">
-                    <ion-button @click="() => $router.back()">
-                        <ion-icon slot="icon-only" :icon="arrowBack"></ion-icon>
-                    </ion-button>
-                </ion-buttons>
+    <form class="form ion-padding">
+        <ion-item ref="nameRef" class="form-item">
+            <ion-label position="stacked">Nome *</ion-label>
 
-                <ion-title>Cadastro</ion-title>
-            </ion-toolbar>
-        </ion-header>
+            <ion-input
+                required
+                name="name"
+                autocomplete="name"
+                :readonly="readonly"
+                :value="formData.name"
+                @ion-change="(ev) => setAttribute('name', ev.target.value)"
+                placeholder="Digite o nome da categoria"
+            >
+            </ion-input>
 
-        <ion-content :fullscreen="true">
-            <ion-loading v-if="loading" />
+            <InputErrorNote
+                field="name"
+                defaultMsg="Nome inválido"
+                :validationErrors="validationErrors"
+            />
+        </ion-item>
 
-            <form class="form ion-padding">
-                <ion-list class="ion-no-padding">
-                    <ion-item
-                        :ref="nameRef"
-                        class="form-item"
-                        :disabled="readonly"
-                    >
-                        <ion-label position="stacked">Nome *</ion-label>
+        <ion-item class="form-item" ref="colorRef" :disabled="readonly">
+            <ion-label position="stacked" style="margin-bottom: 8px"
+                >Cor *</ion-label
+            >
 
-                        <ion-input
-                            required
-                            name="name"
-                            autocomplete="name"
-                            :value="formData.name"
-                            @ion-change="
-                                (ev) => setAttribute('name', ev.target.value)
-                            "
-                            placeholder="Digite o nome da categoria"
-                        >
-                        </ion-input>
+            <Compact
+                :modelValue="formData.color"
+                @update:model-value="(e) => setAttribute('color', e.hex)"
+            />
 
-                        <InputErrorNote
-                            field="name"
-                            defaultMsg="Nome inválido"
-                            :validationErrors="validationErrors"
-                        />
-                    </ion-item>
+            <InputErrorNote
+                field="color"
+                defaultMsg="Cor inválida"
+                :validationErrors="validationErrors"
+            />
+        </ion-item>
 
-                    <ion-item class="form-item" :ref="colorRef">
-                        <ion-label position="stacked" style="margin-bottom: 8px"
-                            >Cor *</ion-label
-                        >
+        <ion-text color="danger on-align-self-center" v-if="!!errorMessage">
+            <h6>{{ errorMessage }}</h6>
+        </ion-text>
 
-                        <Compact
-                            :modelValue="formData.color || '#000000'"
-                            @update:model-value="
-                                (e) => setAttribute('color', e.hex)
-                            "
-                        />
-
-                        <InputErrorNote
-                            field="color"
-                            defaultMsg="Cor inválida"
-                            :validationErrors="validationErrors"
-                        />
-                    </ion-item>
-                </ion-list>
-
-                <ion-text
-                    color="danger on-align-self-center"
-                    v-if="!loading && !!errorMessage"
-                >
-                    <h6>{{ errorMessage }}</h6>
-                </ion-text>
-
-                <ion-button
-                    shape="round"
-                    @click="handleSubmit"
-                    class="ion-margin-top"
-                    >{{ edit ? 'Editar categoria' : 'Criar categoria' }}
-                </ion-button>
-            </form>
-        </ion-content>
-    </ion-page>
+        <ion-button shape="round" @click="handleSubmit" class="ion-margin-top"
+            >{{ edit ? 'Editar categoria' : 'Criar categoria' }}
+        </ion-button>
+    </form>
 </template>
 
 <style>
@@ -93,36 +60,10 @@
 </style>
 
 <script setup lang="ts">
-import {
-    Ref,
-    ref,
-    toRefs,
-    computed,
-    onMounted,
-    onBeforeMount,
-    onUpdated,
-} from 'vue';
+import { ref, toRefs } from 'vue';
 import { Compact } from '@ckpack/vue-color';
-import {
-    IonContent,
-    IonHeader,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-    IonText,
-    IonLoading,
-    IonInput,
-    IonButton,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonButtons,
-    IonIcon,
-} from '@ionic/vue';
-import { arrowBack } from 'ionicons/icons';
-import { Category } from '@/models/category';
+import { IonText, IonInput, IonButton, IonItem, IonLabel } from '@ionic/vue';
 
-import InputErrorNote from '@/components/InputErrorNote.vue';
 import { IFormData } from './index';
 
 import {
@@ -130,6 +71,8 @@ import {
     clearFieldsErrors,
     validateRequiredFields,
 } from '@/utils/errors';
+
+import InputErrorNote from '@/components/InputErrorNote.vue';
 
 interface IProps {
     edit?: boolean;
@@ -143,10 +86,7 @@ const props = withDefaults(defineProps<IProps>(), {
     readonly: false,
 });
 
-// eslint-disable-next-line vue/no-setup-props-destructure
-const { setAttribute } = props;
-
-const { edit, readonly, formData } = toRefs(props);
+const { edit, readonly, formData, setAttribute } = toRefs(props);
 
 const emit = defineEmits(['onSubmit']);
 
@@ -154,8 +94,6 @@ const errorMessage = ref('');
 
 const nameRef = ref('');
 const colorRef = ref('');
-
-const loading = ref(false);
 
 const validationErrors = ref<ValidationErrors>({});
 
@@ -171,26 +109,21 @@ const validateData = () => {
 
     const fieldsRefs = formFieldsRefs();
 
-    console.log('asdasd: ', (fieldsRefs.color.value as any).$el);
-
-    (fieldsRefs.color.value as any).$el.classList.add('ion-invalid');
-
     errorMessage.value = '';
 
-    clearFieldsErrors(formFieldsRefs());
+    clearFieldsErrors(fieldsRefs);
 
     validFields = validateRequiredFields(
         newValidationErrors,
-        formData,
-        formFieldsRefs()
+        {
+            name: formData.value.name,
+            color: formData.value.color,
+        },
+        fieldsRefs
     );
 
     if (!validFields)
         errorMessage.value = 'Todos os campos com * são obrigatórios';
-
-    console.log('formData: ', formData.value);
-
-    console.log('valid fields: ', validFields);
 
     validationErrors.value = newValidationErrors;
 
@@ -202,12 +135,4 @@ const handleSubmit = () => {
         emit('onSubmit');
     }
 };
-
-onBeforeMount(() => {
-    console.log('formData: ', formData.value);
-});
-
-onUpdated(() => {
-    console.log('formData: ', formData.value);
-});
 </script>

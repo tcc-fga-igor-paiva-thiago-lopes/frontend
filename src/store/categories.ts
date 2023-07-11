@@ -35,11 +35,7 @@ export const useCategoriesStore = defineStore('categories', {
     },
     actions: {
         setNewCategoryAttrs(attrs: Record<keyof IFormData, any>) {
-            console.log('attrs: ', attrs);
-
             Object.assign(this._newItem, attrs);
-
-            console.log('this._newItem: ', this._newItem);
         },
         setEditCategoryAttrs(attrs: Record<keyof IFormData, any>) {
             Object.assign(this._editItem, attrs);
