@@ -22,6 +22,7 @@ import CategoryEdit from '@/views/Categories/CategoryEdit.vue';
 
 import AnalysisIndex from '@/views/Analysis/AnalysisIndex.vue';
 import ProfitPerColumn from '@/views/Analysis/Indicators/ProfitPerColumn.vue';
+import ProfitPerPeriod from '@/views/Analysis/Indicators/ProfitPerPeriod.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -65,11 +66,18 @@ export const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true },
     },
     {
-        path: '/analysis/cargo',
+        path: '/analysis/profit_per_column',
         name: 'ProfitPerColumn',
         component: ProfitPerColumn,
         meta: { requiresAuth: true },
     },
+    {
+        path: '/analysis/profit_per_period',
+        name: 'ProfitPerPeriod',
+        component: ProfitPerPeriod,
+        meta: { requiresAuth: true },
+    },
+
     {
         path: '/freights',
         name: 'FreightsIndex',

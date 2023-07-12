@@ -115,5 +115,10 @@ const indicators = [
         label: 'Tipo de carga e contratante',
         sublabel: 'Lucro por tipo de carga/contratante',
     },
+    {
+        route: 'ProfitPerPeriod',
+        label: 'Lucro por período',
+        sublabel: 'Lucro por mês e ano',
+    },
 ];
 </script>

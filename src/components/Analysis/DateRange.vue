@@ -77,8 +77,8 @@ interface IProps {
     helperText?: string;
     endHelperText: string;
     startHelperText: string;
-    startDate: string;
-    endDate: string;
+    startDate?: string | null;
+    endDate?: string | null;
 }
 
 const props = defineProps<IProps>();

@@ -21,14 +21,14 @@
                 <ion-item class="sort-item">
                     <ion-label position="stacked">Agrupar por</ion-label>
 
-                    <ion-select interface="popover" v-model="column">
+                    <ion-select interface="popover" v-model="groupOption">
                         <IonSelectOption
-                            v-for="column in FILTER_COLUMNS"
-                            :value="column"
-                            :key="column"
-                            >{{
-                                Freight.FRIENDLY_COLUMN_NAMES[column]
-                            }}</IonSelectOption
+                            v-for="[option, name] in Object.entries(
+                                FILTER_PERIOD_OPTIONS
+                            )"
+                            :value="option"
+                            :key="option"
+                            >{{ name }}</IonSelectOption
                         >
                     </ion-select>
                 </ion-item>
@@ -87,18 +87,18 @@
             <div>
                 <ion-text>
                     <h5>
-                        <strong>Lucro por {{ columnFriendlyName }}</strong>
+                        <strong>Lucro por {{ groupOptionFriendlyName }}</strong>
                     </h5>
                 </ion-text>
 
                 <template v-if="displayMode === 'list'">
                     <ion-list>
                         <ion-item
-                            v-for="data in profitPerColumn"
-                            :key="data.cargo"
+                            v-for="data in queryData"
+                            :key="data[groupOption]"
                         >
                             <ion-label text-wrap>
-                                <h2>{{ data[column] }}</h2>
+                                <h2>{{ data[groupOption] }}</h2>
 
                                 <p>
                                     Total de fretes:
@@ -114,6 +114,7 @@
                 </template>
 
                 <canvas
+                    id="chartCanvas"
                     ref="chartRef"
                     :style="{ display: displayMode === 'chart' ? '' : 'none' }"
                 ></canvas>
@@ -160,16 +161,20 @@ import {
 import { sync, list, barChart } from 'ionicons/icons';
 import { IonSegmentCustomEvent } from '@ionic/core';
 
+import { sleep } from '@/utils';
 import { useAppStore } from '@/store/app';
 import { brazilFormatter } from '@/utils/currency';
-import { Freight, IGroupedResult } from '@/models/freight';
+import { Freight, IProfitPerPeriodResult } from '@/models/freight';
 
 import DateRange from '@/components/Analysis/DateRange.vue';
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
 Chart.register(...registerables);
 
-const FILTER_COLUMNS = ['cargo', 'contractor'];
+const FILTER_PERIOD_OPTIONS = {
+    month: 'Mês',
+    year: 'Ano',
+};
 
 const appStore = useAppStore();
 
@@ -181,16 +186,16 @@ const loading = ref(false);
 
 const startDate = ref('');
 const endDate = ref('');
-const column = ref('cargo');
+const groupOption = ref<'month' | 'year'>('month');
 const displayMode = ref<'list' | 'chart'>('list');
 
 const chart = ref<Chart | null>(null);
 const chartRef = ref<Element | null>(null);
 
-const profitPerColumn = ref<IGroupedResult[]>([]);
+const queryData = ref<IProfitPerPeriodResult[]>([]);
 
-const columnFriendlyName = computed(() =>
-    Freight.FRIENDLY_COLUMN_NAMES[column.value].toLowerCase()
+const groupOptionFriendlyName = computed(
+    () => FILTER_PERIOD_OPTIONS[groupOption.value]
 );
 
 const generateChart = () => {
@@ -199,16 +204,14 @@ const generateChart = () => {
     chart.value?.destroy();
 
     chart.value = new Chart(chartRef.value as any, {
-        type: 'bar',
+        type: 'line',
         data: {
-            labels: profitPerColumn.value.map((item) => item[column.value]),
+            labels: queryData.value.map((item) => item[groupOption.value]),
             datasets: [
                 {
                     label: 'Lucro',
-                    backgroundColor: style.getPropertyValue(
-                        '--ion-color-primary'
-                    ),
-                    data: profitPerColumn.value.map((item) => item.total),
+                    data: queryData.value.map((item) => item.total),
+                    borderColor: style.getPropertyValue('--ion-color-primary'),
                 },
             ],
         },
@@ -243,8 +246,8 @@ const queryResults = async () => {
     loading.value = true;
 
     try {
-        profitPerColumn.value = await Freight.profitPerColumn(
-            column.value,
+        queryData.value = await Freight.profitPerPeriod(
+            groupOption.value,
             startDate.value,
             endDate.value
         );
@@ -255,12 +258,12 @@ const queryResults = async () => {
     }
 };
 
-const unwatchColumn = watch([column], async () => {
+const unwatchColumn = watch([groupOption], async () => {
     await queryResults();
 });
 
 const unwatchRoute = watch([route], async () => {
-    if (route.name !== 'ProfitPerColumn') {
+    if (route.name !== 'ProfitPerPeriod') {
         ScreenOrientation.unlock();
 
         displayMode.value = 'list';
