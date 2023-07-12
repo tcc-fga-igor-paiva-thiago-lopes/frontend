@@ -12,6 +12,10 @@ import {
     useCategoriesStore,
 } from '@/store/categories';
 
+jest.mock('@ckpack/vue-color', () => ({
+    Compact: jest.fn(),
+}));
+
 const mockDataSource = DatabaseHelper.dataSource();
 
 jest.mock('@/database/dataSource', () => {

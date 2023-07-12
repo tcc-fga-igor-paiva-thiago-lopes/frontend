@@ -9,6 +9,10 @@ import { initialState as appInitialState } from '@/store/app';
 import CategoryCreate from '@/views/Categories/CategoryCreate.vue';
 import { initialState as categoriesInitialState } from '@/store/categories';
 
+jest.mock('@ckpack/vue-color', () => ({
+    Compact: jest.fn(),
+}));
+
 const mockDataSource = DatabaseHelper.dataSource();
 
 jest.mock('@/database/dataSource', () => {
