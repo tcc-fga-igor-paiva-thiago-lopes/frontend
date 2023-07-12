@@ -331,6 +331,8 @@ const handleStepChange = (newStep: number) => {
 const handleSubmit = () => {
     if (edit.value || validateLocationInfo()) {
         emit('onSubmit');
+
+        step.value = 0;
     }
 };
 </script>
