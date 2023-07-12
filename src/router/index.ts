@@ -15,7 +15,10 @@ import FreightShow from '@/views/Freights/FreightShow.vue';
 import FreightEdit from '@/views/Freights/FreightEdit.vue';
 import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
 import FreightCreate from '@/views/Freights/FreightCreate.vue';
+import CategoriesIndex from '@/views/Categories/CategoriesIndex.vue';
 import CategoryCreate from '@/views/Categories/CategoryCreate.vue';
+import CategoryShow from '@/views/Categories/CategoryShow.vue';
+import CategoryEdit from '@/views/Categories/CategoryEdit.vue';
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -77,9 +80,27 @@ export const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true },
     },
     {
+        path: '/categories',
+        name: 'CategoriesIndex',
+        component: CategoriesIndex,
+        meta: { requiresAuth: true },
+    },
+    {
         path: '/categories/create',
         name: 'CategoryCreate',
         component: CategoryCreate,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/categories/:categoryId(\\d+)',
+        name: 'CategoryShow',
+        component: CategoryShow,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/categories/:categoryId(\\d+)/edit',
+        name: 'CategoryEdit',
+        component: CategoryEdit,
         meta: { requiresAuth: true },
     },
     {
