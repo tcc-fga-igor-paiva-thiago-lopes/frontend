@@ -100,6 +100,7 @@ import {
     sync,
     logOut,
     navigate,
+    pricetags,
     personCircleSharp,
 } from 'ionicons/icons';
 
@@ -148,6 +149,12 @@ const allMenuOptions: IMenuOption[] = [
         route: 'FreightsIndex',
         icon: navigate,
         name: 'Fretes',
+        offlinePermitted: true,
+    },
+    {
+        route: 'CategoriesIndex',
+        icon: pricetags,
+        name: 'Categorias',
         offlinePermitted: true,
     },
     {
