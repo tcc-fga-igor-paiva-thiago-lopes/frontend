@@ -105,7 +105,10 @@ const handleFormSubmit = async () => {
 
         await presentToast('Categoria criada com sucesso!', 'success');
 
-        await router.push({ name: 'CategoryIndex', query: { reset: 'true' } });
+        await router.push({
+            name: 'CategoriesIndex',
+            query: { reset: 'true' },
+        });
     } catch (error) {
         console.error(error);
 
