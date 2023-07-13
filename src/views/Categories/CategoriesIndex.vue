@@ -54,6 +54,7 @@ import {
     IonLoading,
     IonButtons,
     IonMenuButton,
+    IonicSafeString,
 } from '@ionic/vue';
 
 import { Category } from '@/models/category';
@@ -108,13 +109,17 @@ const deleteCategory = async (category: Category) => {
 
 const loadMoreItems = () => paginationService.getNextPage();
 
-const categoryLabel = (category: Category) =>
-    category.name.charAt(0).toUpperCase() + category.name.slice(1);
+const categoryLabel = (category: Category) => {
+    const categoryName =
+        category.name.charAt(0).toUpperCase() + category.name.slice(1);
 
-// const categorySubLabel = (category: Category) => {
-//     // return `${category.originCity} (${category.originState}) --> ${category.destinationCity} (${category.destinationState})`;
-//     return `${category.originCity} --> ${category.destinationCity}`;
-// };
+    return new IonicSafeString(`
+        <div style="display:flex; align-items: center">
+            <div style="width: 24px; height:24px; margin-right:8px; border-radius: 50%; background:${category.color}"></div>
+            ${categoryName}
+        </div>
+    `);
+};
 
 const handleFilterConfirmation = async (filterData: FilterData) => {
     setFilter(filterData);

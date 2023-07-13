@@ -15,6 +15,7 @@ export type LastSyncData = {
 
 export const NAME_TO_CLASS: Record<string, typeof SyncableEntity> = {
     [Freight.name]: Freight,
+    [Category.name]: Category,
 };
 
 export const SYNCABLE_ENTITIES = [Freight, Category];
