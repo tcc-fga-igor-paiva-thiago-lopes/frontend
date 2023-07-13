@@ -21,12 +21,18 @@
             />
         </ion-item>
 
-        <ion-item class="form-item" ref="colorRef" :disabled="readonly">
+        <ion-item class="form-item" ref="colorRef">
             <ion-label position="stacked" style="margin-bottom: 8px"
                 >Cor *</ion-label
             >
+            <div
+                v-if="readonly"
+                class="color-item"
+                :style="{ background: formData.color }"
+            ></div>
 
             <Compact
+                v-else
                 :modelValue="formData.color"
                 @update:model-value="(e) => setAttribute('color', e.hex)"
             />
@@ -56,6 +62,13 @@
 
 .form-item {
     margin: 8px 0;
+}
+
+.color-item {
+    width: 100%;
+    height: 32px;
+    margin: 8px 0;
+    border-radius: 32px;
 }
 </style>
 
