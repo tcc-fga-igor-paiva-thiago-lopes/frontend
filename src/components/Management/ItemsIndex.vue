@@ -10,7 +10,8 @@
             <!-- <ion-checkbox slot="start"></ion-checkbox> -->
 
             <ion-label text-wrap>
-                <h2>{{ label(item) }}</h2>
+                <h2 v-html="getLabel(item)"></h2>
+
                 <p v-if="subLabel">{{ subLabel(item) }}</p>
             </ion-label>
 
@@ -80,6 +81,7 @@ import {
     IonIcon,
     IonText,
     IonLabel,
+    IonicSafeString,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
 } from '@ionic/vue';
@@ -93,7 +95,7 @@ interface IProps {
     itemName: string;
     itemsName: string;
     paginationService: PaginationService<unknown>;
-    label: (item: any) => string;
+    label: (item: any) => IonicSafeString | string;
     subLabel?: (item: any) => string;
     editItem: (item: any) => Promise<void>;
     showItem: (item: any) => Promise<void>;
@@ -112,6 +114,12 @@ const { showItem, editItem, removeItem, label, subLabel, loadMoreItems } =
 const hasPagination = computed(
     () => items.value.length < paginationService.value.totalResults
 );
+
+const getLabel = (item: any) => {
+    const labelValue = label(item);
+
+    return typeof labelValue === 'string' ? labelValue : labelValue.value;
+};
 
 const paginationMessage = computed(() => {
     const lowerCaseName = itemsName.value.toLowerCase();
