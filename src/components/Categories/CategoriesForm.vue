@@ -44,7 +44,7 @@
             />
         </ion-item>
 
-        <ion-text color="danger on-align-self-center" v-if="!!errorMessage">
+        <ion-text color="danger" v-if="!!errorMessage">
             <h6>{{ errorMessage }}</h6>
         </ion-text>
 
