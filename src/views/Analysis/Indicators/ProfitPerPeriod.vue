@@ -161,7 +161,6 @@ import {
 import { sync, list, barChart } from 'ionicons/icons';
 import { IonSegmentCustomEvent } from '@ionic/core';
 
-import { sleep } from '@/utils';
 import { useAppStore } from '@/store/app';
 import { brazilFormatter } from '@/utils/currency';
 import { Freight, IProfitPerPeriodResult } from '@/models/freight';

@@ -1,4 +1,11 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import {
+    Entity,
+    Column,
+    ManyToOne,
+    JoinColumn,
+    BeforeUpdate,
+    BeforeInsert,
+} from 'typeorm';
 import { ISyncableEntity, SyncableEntity } from './syncableEntity';
 import { Freight } from './freight';
 import { Category } from './category';
@@ -65,6 +72,12 @@ export class Account extends SyncableEntity implements IAccount {
     })
     @JoinColumn({ name: 'category_id', referencedColumnName: 'id' })
     category!: Promise<Category>;
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    updateSyncedOnUpdate() {
+        this.value = -1 * Math.abs(this.value);
+    }
 
     public static readonly FRIENDLY_NAME_SINGULAR: string = 'Conta';
     public static readonly FRIENDLY_NAME_PLURAL: string = 'Contas';

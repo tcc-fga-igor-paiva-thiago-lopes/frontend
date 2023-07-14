@@ -19,6 +19,7 @@ import CategoriesIndex from '@/views/Categories/CategoriesIndex.vue';
 import CategoryCreate from '@/views/Categories/CategoryCreate.vue';
 import CategoryShow from '@/views/Categories/CategoryShow.vue';
 import CategoryEdit from '@/views/Categories/CategoryEdit.vue';
+import FreightAccountCreate from '@/views/Freights/Accounts/FreightAccountCreate.vue';
 
 import AnalysisIndex from '@/views/Analysis/AnalysisIndex.vue';
 import ProfitPerColumn from '@/views/Analysis/Indicators/ProfitPerColumn.vue';
@@ -100,6 +101,12 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/freights/:freightId(\\d+)/edit',
         name: 'FreightEdit',
         component: FreightEdit,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/:freightId(\\d+)/accounts/create',
+        name: 'FreightAccountCreate',
+        component: FreightAccountCreate,
         meta: { requiresAuth: true },
     },
     {

@@ -17,8 +17,6 @@
 
             <CategoriesForm
                 :formData="newCategory"
-                :name="newCategory.name"
-                :color="newCategory.color"
                 :setAttribute="changeField"
                 @on-submit="handleFormSubmit"
             />
