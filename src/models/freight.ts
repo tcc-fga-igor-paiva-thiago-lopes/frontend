@@ -1,11 +1,13 @@
 import {
     Entity,
     Column,
+    OneToMany,
     MoreThanOrEqual,
     LessThanOrEqual,
     SelectQueryBuilder,
 } from 'typeorm';
 import { SyncableEntity, ISyncableEntity } from './syncableEntity';
+import { Account } from './account';
 
 export enum FreightCargo {
     GENERAL = 'Geral',
@@ -136,6 +138,9 @@ export class Freight extends SyncableEntity implements IFreight {
 
     @Column({ name: 'destination_longitude', nullable: true, type: 'decimal' })
     destinationLongitude?: number;
+
+    @OneToMany(() => Account, (account) => account.freight, { lazy: true })
+    accounts!: Promise<Account[]>;
 
     public static readonly FRIENDLY_NAME_SINGULAR: string = 'Frete';
     public static readonly FRIENDLY_NAME_PLURAL: string = 'Fretes';
