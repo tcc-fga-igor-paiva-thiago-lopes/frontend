@@ -102,12 +102,15 @@
 
                                 <p>
                                     Total de fretes:
-                                    {{ data.num }}
+                                    {{ data.freights_num }}
+                                    <br />
+                                    Total de gastos:
+                                    {{ data.accounts_num }}
                                 </p>
                             </ion-label>
 
                             <span slot="end">{{
-                                brazilFormatter.format(data.total)
+                                brazilFormatter.format(data.profit)
                             }}</span>
                         </ion-item>
                     </ion-list>
@@ -162,11 +165,10 @@ import { IonSegmentCustomEvent } from '@ionic/core';
 
 import { useAppStore } from '@/store/app';
 import { brazilFormatter } from '@/utils/currency';
-import { Freight, IGroupedResult } from '@/models/freight';
+import { Freight, IProfitPerColumnResult } from '@/models/freight';
 
 import DateRange from '@/components/Analysis/DateRange.vue';
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
-
 Chart.register(...registerables);
 
 const FILTER_COLUMNS = ['cargo', 'contractor'];
@@ -187,7 +189,7 @@ const displayMode = ref<'list' | 'chart'>('list');
 const chart = ref<Chart | null>(null);
 const chartRef = ref<Element | null>(null);
 
-const profitPerColumn = ref<IGroupedResult[]>([]);
+const profitPerColumn = ref<IProfitPerColumnResult[]>([]);
 
 const columnFriendlyName = computed(() =>
     Freight.FRIENDLY_COLUMN_NAMES[column.value].toLowerCase()
@@ -208,7 +210,7 @@ const generateChart = () => {
                     backgroundColor: style.getPropertyValue(
                         '--ion-color-primary'
                     ),
-                    data: profitPerColumn.value.map((item) => item.total),
+                    data: profitPerColumn.value.map((item) => item.profit),
                 },
             ],
         },

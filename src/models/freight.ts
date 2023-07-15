@@ -58,12 +58,15 @@ export interface IFreight extends ISyncableEntity {
     updatedAt?: Date;
 }
 
-export interface IGroupedResult extends Record<string, any> {
-    num: number;
-    total: number;
+export interface IProfitPerColumnResult extends Record<string, any> {
+    profit: number;
+    income: number;
+    expenses: number;
+    freights_num: number;
+    accounts_num: number;
 }
 
-export interface IProfitPerPeriodResult extends Record<string, any> {
+export interface IProfitPerPeriodResult extends IProfitPerColumnResult {
     month: string;
     year: string;
 }
@@ -170,26 +173,55 @@ export class Freight extends SyncableEntity implements IFreight {
         ...SyncableEntity.FRIENDLY_COLUMN_NAMES,
     };
 
-    static profitPerColumn(
+    static async finishedFreightsPerColumn(column: string) {
+        const freightsPerColumnResult = await Freight.createQueryBuilder()
+            .addSelect(column, column)
+            .addSelect('COUNT(freight.id) as num')
+            .where({ status: FreightStatus.FINISHED })
+            .groupBy(column)
+            .getRawMany();
+
+        return Object.fromEntries(
+            freightsPerColumnResult.map((result) => [
+                result[column],
+                result.num,
+            ])
+        ) as Record<string, number>;
+    }
+
+    static async profitPerColumn(
         column: string,
         startDate?: string,
         endDate?: string
     ) {
-        // TODO: consider spents
-        const queryBuilder = Freight.createQueryBuilder()
-            .select(column)
-            .addSelect('COUNT(FREIGHT.id)', 'num')
-            .addSelect('SUM(FREIGHT.agreed_payment)', 'total')
+        const freightsPerColumn = await Freight.finishedFreightsPerColumn(
+            column
+        );
+
+        const queryBuilder = Freight.createQueryBuilder('freight')
+            .leftJoin('freight.accounts', 'account')
+            .addSelect(`freight.${column}`, column)
+            .addSelect('COUNT(account.id)', 'accounts_num')
+            .addSelect('SUM(freight.agreedPayment) AS income')
+            .addSelect('SUM(IFNULL(account.value, 0)) AS expenses')
+            .addSelect(
+                'SUM(freight.agreedPayment) + SUM(IFNULL(account.value, 0)) AS profit'
+            )
             .where({ status: FreightStatus.FINISHED })
-            .groupBy(column)
-            .orderBy('total', 'DESC');
+            .groupBy(`freight.${column}`)
+            .orderBy('profit', 'DESC');
 
         this.addDateRage(queryBuilder, 'finishedDate', startDate, endDate);
 
-        return queryBuilder.getRawMany<IGroupedResult>();
+        const results = await queryBuilder.getRawMany<IProfitPerColumnResult>();
+
+        return results.map((result) => ({
+            ...result,
+            freights_num: freightsPerColumn[result[column]],
+        }));
     }
 
-    static profitPerPeriod(
+    static async profitPerPeriod(
         groupBy: 'year' | 'month',
         startDate?: string,
         endDate?: string
@@ -198,18 +230,31 @@ export class Freight extends SyncableEntity implements IFreight {
 
         const strftimeStatement = `strftime('${strftimeString}', finished_date)`;
 
-        // TODO: consider spents
-        const queryBuilder = Freight.createQueryBuilder()
-            .addSelect('COUNT(FREIGHT.id)', 'num')
-            .addSelect('SUM(FREIGHT.agreed_payment)', 'total')
-            .addSelect(`${strftimeStatement} as ${groupBy}`)
+        const freightsPerColumn = await Freight.finishedFreightsPerColumn(
+            strftimeStatement
+        );
+
+        const queryBuilder = Freight.createQueryBuilder('freight')
+            .leftJoin('freight.accounts', 'account')
+            .addSelect('COUNT(account.id)', 'accounts_num')
+            .addSelect('SUM(freight.agreedPayment) AS income')
+            .addSelect('SUM(IFNULL(account.value, 0)) AS expenses')
+            .addSelect(
+                'SUM(freight.agreedPayment) + SUM(IFNULL(account.value, 0)) AS profit'
+            )
+            .addSelect(strftimeStatement, groupBy)
             .where({ status: FreightStatus.FINISHED })
             .groupBy(groupBy)
             .orderBy('finished_date', 'ASC');
 
         this.addDateRage(queryBuilder, 'finishedDate', startDate, endDate);
 
-        return queryBuilder.getRawMany<IProfitPerPeriodResult>();
+        const results = await queryBuilder.getRawMany<IProfitPerPeriodResult>();
+
+        return results.map((result) => ({
+            ...result,
+            freights_num: freightsPerColumn[result[groupBy]],
+        }));
     }
 
     private static addDateRage(

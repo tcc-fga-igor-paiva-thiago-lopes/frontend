@@ -102,12 +102,15 @@
 
                                 <p>
                                     Total de fretes:
-                                    {{ data.num }}
+                                    {{ data.freights_num }}
+                                    <br />
+                                    Total de gastos:
+                                    {{ data.accounts_num }}
                                 </p>
                             </ion-label>
 
                             <span slot="end">{{
-                                brazilFormatter.format(data.total)
+                                brazilFormatter.format(data.profit)
                             }}</span>
                         </ion-item>
                     </ion-list>
@@ -209,7 +212,7 @@ const generateChart = () => {
             datasets: [
                 {
                     label: 'Lucro',
-                    data: queryData.value.map((item) => item.total),
+                    data: queryData.value.map((item) => item.profit),
                     borderColor: style.getPropertyValue('--ion-color-primary'),
                 },
             ],
