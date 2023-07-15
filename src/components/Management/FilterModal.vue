@@ -434,13 +434,16 @@ const DEFAULT_EXCLUDE_COLUMNS = ['id', 'identifier', 'deletedAt'];
 
 const STRING_FILTER_OPTIONS: Record<string, string> = {
     includes: 'Contém',
+    not_includes: 'Não contém',
     equals_to: 'Igual a',
+    not_equals_to: 'Diferente de',
     starts_with: 'Começa com',
     ends_with: 'Termina com',
 };
 
 const NUMBER_FILTER_OPTIONS: Record<string, string> = {
     equals_to: 'Igual a',
+    not_equals_to: 'Diferente de',
     less_than: 'Menor que',
     less_than_or_equal: 'Menor ou igual que',
     greater_than: 'Maior que',
@@ -450,6 +453,7 @@ const NUMBER_FILTER_OPTIONS: Record<string, string> = {
 
 const DATETIME_FILTER_OPTIONS: Record<string, string> = {
     equals_to: 'Igual a',
+    not_equals_to: 'Diferente de',
     less_than: 'Anterior a',
     less_than_or_equal: 'Anterior ou igual a',
     greater_than: 'Posterior a',

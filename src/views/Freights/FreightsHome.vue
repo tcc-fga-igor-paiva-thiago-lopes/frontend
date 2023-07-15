@@ -83,6 +83,7 @@ const options: IMenuOption[] = [
         icon: open,
         name: 'Fretes em aberto',
         query: {
+            filterType: 'not_equals_to',
             status: FreightStatus.FINISHED,
             orderKey: 'startDate',
             orderType: 'DESC',

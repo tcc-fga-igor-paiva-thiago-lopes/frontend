@@ -142,7 +142,7 @@ const handleOrderData = async (orderData: Partial<IOrderData>) => {
 };
 
 const applyQueryParams = () => {
-    const { status, orderKey, orderType } = route.query;
+    const { status, filterType, orderKey, orderType } = route.query;
 
     if (status === 'all') {
         setFilter({});
@@ -152,7 +152,7 @@ const applyQueryParams = () => {
         setFilter({
             status: {
                 value: status,
-                type: 'equals_to',
+                type: filterType,
                 active: true,
             },
         });

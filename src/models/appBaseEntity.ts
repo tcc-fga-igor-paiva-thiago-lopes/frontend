@@ -1,4 +1,5 @@
 import {
+    Not,
     Like,
     Equal,
     Between,
@@ -31,7 +32,9 @@ export type FilterDataType =
     | 'equals_to'
     | 'greater_than'
     | 'greater_than_or_equal'
-    | 'less_than_or_equal';
+    | 'less_than_or_equal'
+    | 'not_equals_to'
+    | 'not_includes';
 
 export interface IFilterData {
     value: any;
@@ -152,6 +155,21 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
                     }
 
                     break;
+                case 'not_equals_to':
+                    if (isDate && data.dateOnly) {
+                        queryBuilder.andWhere({
+                            [field]: Not(
+                                Between(
+                                    new Date(`${value} 00:00`),
+                                    new Date(`${value} 23:59`)
+                                )
+                            ),
+                        });
+                    } else {
+                        queryBuilder.andWhere({ [field]: Not(value) });
+                    }
+
+                    break;
                 case 'greater_than':
                     queryBuilder.andWhere({ [field]: MoreThan(value) });
                     break;
@@ -170,6 +188,11 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
                     break;
                 case 'includes':
                     queryBuilder.andWhere({ [field]: Like(`%${data.value}%`) });
+                    break;
+                case 'not_includes':
+                    queryBuilder.andWhere({
+                        [field]: Not(Like(`%${data.value}%`)),
+                    });
                     break;
                 case 'starts_with':
                     queryBuilder.andWhere({ [field]: Like(`${value}%`) });
