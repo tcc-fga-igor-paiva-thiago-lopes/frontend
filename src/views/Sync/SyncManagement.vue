@@ -16,29 +16,85 @@
             <ion-loading :is-open="loading"></ion-loading>
 
             <ion-card class="ion-margin-bottom">
-                <ion-card-header class="header">
-                    <div>
-                        <ion-text>
-                            <h4>
-                                <strong>Sincronizações</strong>
-                            </h4>
-                        </ion-text>
+                <ion-card-header class="flex-direction-column">
+                    <div
+                        class="display-flex ion-justify-content-between ion-align-items-center"
+                    >
+                        <div>
+                            <ion-text>
+                                <h4>
+                                    <strong>Sincronizações</strong>
+                                </h4>
+                            </ion-text>
 
-                        <ion-text v-if="!connectionStatus.connected">
-                            <h6 style="font-size: 14px">
-                                Para sincronizar é necessário conexão com a
-                                Internet
-                            </h6>
-                        </ion-text>
+                            <ion-text v-if="!connectionStatus.connected">
+                                <h6 style="font-size: 14px">
+                                    Para sincronizar é necessário conexão com a
+                                    Internet
+                                </h6>
+                            </ion-text>
+                        </div>
+
+                        <ion-button
+                            :disabled="!connectionStatus.connected"
+                            @click="handleFullSync"
+                        >
+                            <ion-icon slot="start" :icon="sync"></ion-icon>
+                            Sincronizar
+                        </ion-button>
                     </div>
 
-                    <ion-button
-                        :disabled="!connectionStatus.connected"
-                        @click="handleFullSync"
-                    >
-                        <ion-icon slot="start" :icon="sync"></ion-icon>
-                        Sincronizar
-                    </ion-button>
+                    <div class="display-flex ion-align-items-center">
+                        <ion-text class="ion-margin-end">
+                            <h5>
+                                <strong>Legenda status</strong>
+                            </h5>
+                        </ion-text>
+
+                        <ion-icon
+                            :icon="informationCircle"
+                            size="large"
+                            color="primary"
+                            id="hover-trigger"
+                        ></ion-icon>
+                    </div>
+
+                    <ion-popover trigger="hover-trigger" trigger-action="hover">
+                        <ion-content class="ion-padding">
+                            <div class="display-flex ion-align-items-center">
+                                <ion-icon
+                                    :icon="checkmarkCircle"
+                                    size="large"
+                                    color="success"
+                                    style="margin-right: 8px"
+                                ></ion-icon>
+
+                                Sincronizado com sucesso
+                            </div>
+
+                            <div class="display-flex ion-align-items-center">
+                                <ion-icon
+                                    :icon="alertCircle"
+                                    size="large"
+                                    color="warning"
+                                    style="margin-right: 8px"
+                                ></ion-icon>
+
+                                Nada a sincronizar
+                            </div>
+
+                            <div class="display-flex ion-align-items-center">
+                                <ion-icon
+                                    :icon="closeCircle"
+                                    size="large"
+                                    color="danger"
+                                    style="margin-right: 8px"
+                                ></ion-icon>
+
+                                Falha ao sincronizar
+                            </div>
+                        </ion-content>
+                    </ion-popover>
                 </ion-card-header>
 
                 <ion-card-content class="content">
@@ -115,6 +171,7 @@ import {
     IonButtons,
     IonText,
     IonCard,
+    IonPopover,
     IonCardHeader,
     IonMenuButton,
     IonContent,
@@ -128,9 +185,10 @@ import {
 
 import {
     sync,
-    checkmarkCircle,
     closeCircle,
     alertCircle,
+    checkmarkCircle,
+    informationCircle,
 } from 'ionicons/icons';
 
 import {
