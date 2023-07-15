@@ -9,6 +9,7 @@ import {
     LessThanOrEqual,
     CreateDateColumn,
     UpdateDateColumn,
+    SelectQueryBuilder,
     PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -108,15 +109,13 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
         });
     }
 
-    static queryByFilterData<T extends AppBaseEntity>(
+    static addFilterToQuery<T extends AppBaseEntity>(
         this: StaticThis<T>,
+        queryBuilder: SelectQueryBuilder<T>,
         filterData: FilterData,
-        pageSize: number,
-        pageNum = 1,
         orderData?: IOrderData
     ) {
         const repository = this.getRepository<T>();
-        const queryBuilder = this.createQueryBuilder<T>();
 
         const columnsMap = Object.fromEntries(
             repository.metadata.columns.map(
@@ -189,6 +188,26 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
                 orderData.order
             );
         }
+
+        return queryBuilder;
+    }
+
+    static queryByFilterData<T extends AppBaseEntity>(
+        this: StaticThis<T> & {
+            addFilterToQuery(
+                queryBuilder: SelectQueryBuilder<T>,
+                filterData: FilterData,
+                orderData?: IOrderData
+            ): SelectQueryBuilder<T>;
+        },
+        filterData: FilterData,
+        pageSize: number,
+        pageNum = 1,
+        orderData?: IOrderData
+    ) {
+        const queryBuilder = this.createQueryBuilder<T>();
+
+        this.addFilterToQuery(queryBuilder, filterData, orderData);
 
         queryBuilder.skip((pageNum - 1) * pageSize).take(pageSize);
 

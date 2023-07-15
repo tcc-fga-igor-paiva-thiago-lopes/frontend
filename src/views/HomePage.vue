@@ -87,12 +87,6 @@ const allMenuOptions: IMenuOption[] = [
         offlinePermitted: true,
     },
     {
-        route: 'SyncManagement',
-        icon: sync,
-        name: 'Sincronização',
-        offlinePermitted: true,
-    },
-    {
         route: 'CategoriesIndex',
         icon: pricetags,
         name: 'Categorias',
@@ -102,6 +96,12 @@ const allMenuOptions: IMenuOption[] = [
         route: 'AnalysisIndex',
         icon: statsChart,
         name: 'Indicadores',
+        offlinePermitted: true,
+    },
+    {
+        route: 'SyncManagement',
+        icon: sync,
+        name: 'Sincronização',
         offlinePermitted: true,
     },
 ];

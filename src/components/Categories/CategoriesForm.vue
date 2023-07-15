@@ -48,7 +48,11 @@
             <h6>{{ errorMessage }}</h6>
         </ion-text>
 
-        <ion-button shape="round" @click="handleSubmit" class="ion-margin-top"
+        <ion-button
+            v-if="!readonly"
+            shape="round"
+            @click="handleSubmit"
+            class="ion-margin-top"
             >{{ edit ? 'Editar categoria' : 'Criar categoria' }}
         </ion-button>
     </form>

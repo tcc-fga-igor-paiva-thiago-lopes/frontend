@@ -8,6 +8,7 @@ import { FilterData, IOrderData } from '@/models/appBaseEntity';
 type IFreightsStoreState = PiniaCustomStateProperties;
 
 const emptyFreightFormData = (): IFormData => ({
+    id: 0,
     description: '',
     cargo: '',
     status: 'Não iniciado',

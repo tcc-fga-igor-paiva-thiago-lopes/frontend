@@ -3,6 +3,7 @@ import { Ref } from 'vue';
 export * from './';
 
 export interface IFormData extends Record<string, unknown> {
+    id: number;
     description: string;
     cargo: string;
     status: string;

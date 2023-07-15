@@ -52,7 +52,6 @@ export class Account extends SyncableEntity implements IAccount {
     categoryId!: number;
 
     @ManyToOne(() => Freight, (freight) => freight.accounts, {
-        // TODO: check if lazy: true,
         lazy: true,
         cascade: true,
         nullable: false,
@@ -63,15 +62,14 @@ export class Account extends SyncableEntity implements IAccount {
     freight!: Promise<Freight>;
 
     @ManyToOne(() => Category, undefined, {
-        // TODO: check if lazy: true,
-        lazy: true,
+        eager: true,
         cascade: true,
         nullable: false,
         onDelete: 'RESTRICT',
         onUpdate: 'NO ACTION',
     })
     @JoinColumn({ name: 'category_id', referencedColumnName: 'id' })
-    category!: Promise<Category>;
+    category!: Category;
 
     @BeforeInsert()
     @BeforeUpdate()

@@ -9,6 +9,23 @@
         @changeStep="handleStepChange"
     >
         <template v-slot:content>
+            <ion-button
+                v-if="readonly || edit"
+                size="small"
+                class="accounts-button"
+                @click="
+                    () =>
+                        $router.push({
+                            name: 'FreightAccountsIndex',
+                            params: { freightId: formData.id },
+                        })
+                "
+            >
+                <ion-icon slot="start" :icon="cash"></ion-icon>
+
+                Gastos
+            </ion-button>
+
             <GeneralData
                 v-if="step === 0"
                 :readonly="readonly"
@@ -47,13 +64,17 @@
 .form-item {
     margin: 8px 0;
 }
+
+.accounts-button {
+    --background: #598c58;
+}
 </style>
 
 <script setup lang="ts">
 import { Ref, computed, ref, toRefs } from 'vue';
 
-import { IonText, IonButton } from '@ionic/vue';
-import { menu, navigate } from 'ionicons/icons';
+import { IonText, IonButton, IonIcon } from '@ionic/vue';
+import { cash, menu, navigate } from 'ionicons/icons';
 
 import { parseISO } from '@/utils/date';
 import { Freight, FreightStatus } from '@/models/freight';

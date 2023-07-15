@@ -56,8 +56,8 @@
                 :maxlength="30"
                 :readonly="readonly"
                 :value="formData.name"
-                @ion-change="(ev) => setAttribute('name', ev.target.value)"
                 placeholder="Digite o nome da gasto"
+                @ion-change="(ev) => setAttribute('name', ev.target.value)"
             >
             </ion-input>
 
@@ -179,7 +179,11 @@
             <h6>{{ errorMessage }}</h6>
         </ion-text>
 
-        <ion-button shape="round" @click="handleSubmit" class="ion-margin-top"
+        <ion-button
+            v-if="!readonly"
+            shape="round"
+            @click="handleSubmit"
+            class="ion-margin-top"
             >{{ edit ? 'Editar gasto' : 'Criar gasto' }}
         </ion-button>
     </form>
@@ -212,6 +216,7 @@ import {
     toRefs,
     watch,
 } from 'vue';
+import { useRoute } from 'vue-router';
 import {
     IonText,
     IonInput,
@@ -233,13 +238,12 @@ import {
     validateRequiredFields,
 } from '@/utils/errors';
 import { IFormData } from './index';
+import { Freight } from '@/models/freight';
+import { Category } from '@/models/category';
+import { formatDatetime } from '@/utils/date';
 
 import DatetimeButton from '../DatetimeButton.vue';
 import InputErrorNote from '@/components/InputErrorNote.vue';
-import { Freight } from '@/models/freight';
-import { formatDatetime } from '@/utils/date';
-import { useRoute } from 'vue-router';
-import { Category } from '@/models/category';
 
 interface IProps {
     edit?: boolean;
@@ -349,8 +353,6 @@ const handleSubmit = () => {
 };
 
 const fetchCategories = async () => {
-    console.log('fetch categories');
-
     categories.value = await Category.find();
 };
 

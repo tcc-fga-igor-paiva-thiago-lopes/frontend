@@ -88,5 +88,18 @@ export const useAccountsStore = defineStore('accounts', {
         async syncAccounts(): Promise<SyncStatus[]> {
             return this.syncRecords<Account>(Account);
         },
+        async findFreightAccounts(
+            freightId: number,
+            filterData: FilterData,
+            orderData: IOrderData
+        ): Promise<[Account[], number]> {
+            return Account.addFilterToQuery(
+                Account.createQueryBuilder('account')
+                    .where({ freightId })
+                    .innerJoinAndSelect('account.category', 'category'),
+                filterData,
+                orderData
+            ).getManyAndCount();
+        },
     },
 });

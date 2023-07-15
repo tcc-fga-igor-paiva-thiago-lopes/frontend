@@ -10,16 +10,23 @@ import SignIn from '../views/SignIn.vue';
 import HomePage from '@/views/HomePage.vue';
 import NotFound from '@/views/NotFound.vue';
 import WelcomePage from '@/views/WelcomePage.vue';
+
 import SyncManagement from '@/views/Sync/SyncManagement.vue';
+
 import FreightShow from '@/views/Freights/FreightShow.vue';
 import FreightEdit from '@/views/Freights/FreightEdit.vue';
 import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
 import FreightCreate from '@/views/Freights/FreightCreate.vue';
-import CategoriesIndex from '@/views/Categories/CategoriesIndex.vue';
-import CategoryCreate from '@/views/Categories/CategoryCreate.vue';
+
 import CategoryShow from '@/views/Categories/CategoryShow.vue';
 import CategoryEdit from '@/views/Categories/CategoryEdit.vue';
+import CategoryCreate from '@/views/Categories/CategoryCreate.vue';
+import CategoriesIndex from '@/views/Categories/CategoriesIndex.vue';
+
+import FreightAccountEdit from '@/views/Freights/Accounts/FreightAccountEdit.vue';
+import FreightAccountShow from '@/views/Freights/Accounts/FreightAccountShow.vue';
 import FreightAccountCreate from '@/views/Freights/Accounts/FreightAccountCreate.vue';
+import FreightAccountsIndex from '@/views/Freights/Accounts/FreightAccountsIndex.vue';
 
 import AnalysisIndex from '@/views/Analysis/AnalysisIndex.vue';
 import ProfitPerColumn from '@/views/Analysis/Indicators/ProfitPerColumn.vue';
@@ -104,9 +111,27 @@ export const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true },
     },
     {
+        path: '/freights/:freightId(\\d+)/accounts',
+        name: 'FreightAccountsIndex',
+        component: FreightAccountsIndex,
+        meta: { requiresAuth: true },
+    },
+    {
         path: '/freights/:freightId(\\d+)/accounts/create',
         name: 'FreightAccountCreate',
         component: FreightAccountCreate,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/:freightId(\\d+)/accounts/:accountId(\\d+)',
+        name: 'FreightAccountShow',
+        component: FreightAccountShow,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/:freightId(\\d+)/accounts/:accountId(\\d+)/edit',
+        name: 'FreightAccountEdit',
+        component: FreightAccountEdit,
         meta: { requiresAuth: true },
     },
     {
