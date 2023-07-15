@@ -6,7 +6,7 @@
                     <ion-menu-button></ion-menu-button>
                 </ion-buttons>
 
-                <ion-title>Gastos Fretes</ion-title>
+                <ion-title>Gastos Frete</ion-title>
 
                 <ConnectionStatus slot="primary" />
             </ion-toolbar>
