@@ -1,50 +1,70 @@
 <template>
     <form class="form ion-padding">
-        <div class="flex-direction-column ion-margin-bottom">
-            <ion-text color="medium">
-                <h5>
-                    <strong>Frete ({{ freight?.cargo }})</strong>
-                </h5>
-            </ion-text>
-
-            <div class="flex-direction-column" style="padding: 0 8px">
-                <div class="display-flex ion-justify-content-between">
-                    <ion-text color="medium">
-                        <h6 style="margin: 0">
-                            <strong>Início: </strong>{{ freightStartDate }}
-                        </h6>
-                    </ion-text>
-
-                    <ion-text color="medium">
-                        <h6 style="margin: 0">
-                            <strong>Fim: </strong>{{ freightFinishedDate }}
-                        </h6>
-                    </ion-text>
-                </div>
+        <ion-accordion-group>
+            <ion-accordion value="first">
+                <ion-item slot="header" color="light">
+                    <ion-label>Frete ({{ freight?.cargo }})</ion-label>
+                </ion-item>
 
                 <div
-                    class="display-flex ion-justify-content-between ion-align-items-center ion-margin-top"
+                    slot="content"
+                    class="flex-direction-column ion-margin-bottom ion-padding-top"
                 >
-                    <ion-text color="medium">
-                        <h6 style="margin: 0">
-                            <strong>De: </strong>{{ freightOriginText }}
-                        </h6>
-                    </ion-text>
+                    <div class="flex-direction-column" style="padding: 0 8px">
+                        <div class="display-flex ion-justify-content-between">
+                            <ion-text color="medium">
+                                <h6 style="margin: 0">
+                                    <strong>Início: </strong
+                                    >{{ freightStartDate }}
+                                </h6>
+                            </ion-text>
 
-                    <ion-icon
-                        :icon="arrowForward"
-                        size="small"
-                        color="medium"
-                    ></ion-icon>
+                            <ion-text color="medium">
+                                <h6 style="margin: 0">
+                                    <strong>Fim: </strong
+                                    >{{ freightFinishedDate }}
+                                </h6>
+                            </ion-text>
+                        </div>
 
-                    <ion-text color="medium">
-                        <h6 style="margin: 0">
-                            <strong>Para: </strong>{{ freightDestinationText }}
-                        </h6>
-                    </ion-text>
+                        <div
+                            class="display-flex ion-justify-content-between ion-align-items-center ion-margin-top"
+                        >
+                            <ion-text color="medium">
+                                <h6 style="margin: 0">
+                                    <strong>De: </strong>{{ freightOriginText }}
+                                </h6>
+                            </ion-text>
+
+                            <ion-icon
+                                :icon="arrowForward"
+                                size="small"
+                                color="medium"
+                            ></ion-icon>
+
+                            <ion-text color="medium">
+                                <h6 style="margin: 0">
+                                    <strong>Para: </strong
+                                    >{{ freightDestinationText }}
+                                </h6>
+                            </ion-text>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </ion-accordion>
+        </ion-accordion-group>
+
+        <template v-if="readonly || edit">
+            <RecordActions
+                :edit="edit"
+                :readonly="readonly"
+                :createdAt="createdAt"
+                :updatedAt="updatedAt"
+                @view="redirectToCategoryRoute('CategoryShow')"
+                @edit="redirectToCategoryRoute('CategoryEdit')"
+                @remove="handleCategoryRemove"
+            />
+        </template>
 
         <ion-item ref="nameRef" class="form-item">
             <ion-label position="stacked">Nome *</ion-label>
@@ -216,7 +236,7 @@ import {
     toRefs,
     watch,
 } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import {
     IonText,
     IonInput,
@@ -227,6 +247,8 @@ import {
     IonIcon,
     IonSelect,
     IonTextarea,
+    IonAccordion,
+    IonAccordionGroup,
     IonSelectOption,
 } from '@ionic/vue';
 import { arrowForward } from 'ionicons/icons';
@@ -240,10 +262,13 @@ import {
 import { IFormData } from './index';
 import { Freight } from '@/models/freight';
 import { Category } from '@/models/category';
-import { formatDatetime } from '@/utils/date';
+import { useAccountsStore } from '@/store/accounts';
+import { formatDatetime, parseISO } from '@/utils/date';
 
+import RecordActions from '../RecordActions.vue';
 import DatetimeButton from '../DatetimeButton.vue';
 import InputErrorNote from '@/components/InputErrorNote.vue';
+import { presentConfirmationAlert } from '@/utils/alert';
 
 interface IProps {
     edit?: boolean;
@@ -263,6 +288,9 @@ const { edit, readonly, formData, setAttribute, freight } = toRefs(props);
 const emit = defineEmits(['onSubmit']);
 
 const route = useRoute();
+const router = useRouter();
+
+const { removeAccount } = useAccountsStore();
 
 const errorMessage = ref('');
 
@@ -295,6 +323,13 @@ const freightFinishedDate = computed(() =>
         : 'andamento'
 );
 
+const createdAt = computed(() =>
+    formatDatetime(parseISO(formData.value.createdAt))
+);
+const updatedAt = computed(() =>
+    formatDatetime(parseISO(formData.value.updatedAt))
+);
+
 const formFieldsRefs = () => ({
     name: nameRef,
     value: valueRef,
@@ -302,6 +337,31 @@ const formFieldsRefs = () => ({
     accountDate: accountDateRef,
     categoryId: categoryIdRef,
 });
+
+const redirectToCategoryRoute = async (name: string) => {
+    await router.push({
+        name,
+        params: { categoryId: formData.value.id },
+    });
+};
+
+const handleCategoryRemove = async () => {
+    await presentConfirmationAlert({
+        title: 'Remover categoria',
+        message: 'Deseja remover esta categoria?',
+        confirmAction: async () => {
+            await removeAccount(formData.value.id);
+            await router.push({
+                name: 'FreightAccountsIndex',
+                params: {
+                    freightId: route.params.freightId,
+                },
+                query: { reset: 'true' },
+            });
+        },
+        confirmClass: 'alert-button-confirm',
+    });
+};
 
 const validateData = () => {
     let validFields = true;

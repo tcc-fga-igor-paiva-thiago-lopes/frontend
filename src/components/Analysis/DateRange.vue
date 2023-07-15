@@ -52,12 +52,7 @@
     </ion-accordion-group>
 </template>
 
-<style>
-.divider-line {
-    margin: 16px 0;
-    background: var(--ion-color-medium);
-}
-</style>
+<style></style>
 
 <script setup lang="ts">
 import { toRefs } from 'vue';

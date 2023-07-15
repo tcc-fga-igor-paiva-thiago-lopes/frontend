@@ -25,6 +25,8 @@ const emptyFreightFormData = (): IFormData => ({
     destinationCountry: 'Brasil',
     destinationCity: '',
     destinationState: '',
+    createdAt: '',
+    updatedAt: '',
 });
 
 export const initialState = (): IFreightsStoreState => ({

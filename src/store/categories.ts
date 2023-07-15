@@ -8,8 +8,11 @@ import { FilterData, IOrderData } from '@/models/appBaseEntity';
 type CategoriesStoreState = PiniaCustomStateProperties;
 
 const emptyCategoryFormData = (): IFormData => ({
+    id: 0,
     name: '',
     color: '#FFFFFF',
+    createdAt: '',
+    updatedAt: '',
 });
 
 export const initialState = (): CategoriesStoreState => ({

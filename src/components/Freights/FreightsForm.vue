@@ -9,22 +9,27 @@
         @changeStep="handleStepChange"
     >
         <template v-slot:content>
-            <ion-button
-                v-if="readonly || edit"
-                size="small"
-                class="accounts-button"
-                @click="
-                    () =>
-                        $router.push({
-                            name: 'FreightAccountsIndex',
-                            params: { freightId: formData.id },
-                        })
-                "
-            >
-                <ion-icon slot="start" :icon="cash"></ion-icon>
+            <template v-if="readonly || edit">
+                <ion-button
+                    size="small"
+                    class="accounts-button"
+                    @click="redirectToFreightRoute('FreightAccountsIndex')"
+                >
+                    <ion-icon slot="start" :icon="cash"></ion-icon>
 
-                Gastos
-            </ion-button>
+                    Gastos
+                </ion-button>
+
+                <RecordActions
+                    :edit="edit"
+                    :readonly="readonly"
+                    :createdAt="createdAt"
+                    :updatedAt="updatedAt"
+                    @view="redirectToFreightRoute('FreightShow')"
+                    @edit="redirectToFreightRoute('FreightEdit')"
+                    @remove="handleFreightRemove"
+                />
+            </template>
 
             <GeneralData
                 v-if="step === 0"
@@ -76,7 +81,7 @@ import { Ref, computed, ref, toRefs } from 'vue';
 import { IonText, IonButton, IonIcon } from '@ionic/vue';
 import { cash, menu, navigate } from 'ionicons/icons';
 
-import { parseISO } from '@/utils/date';
+import { parseISO, formatDatetime } from '@/utils/date';
 import { Freight, FreightStatus } from '@/models/freight';
 import GeneralData from './GeneralData.vue';
 import LocationInfo from './LocationInfo.vue';
@@ -88,6 +93,10 @@ import {
     clearFieldsErrors,
     validateRequiredFields,
 } from '@/utils/errors';
+import RecordActions from '../RecordActions.vue';
+import { presentConfirmationAlert } from '@/utils/alert';
+import { useFreightsStore } from '@/store/freights';
+import { useRouter } from 'vue-router';
 
 interface IProps {
     edit?: boolean;
@@ -103,6 +112,10 @@ const props = withDefaults(defineProps<IProps>(), {
 const { edit, readonly, formData, setAttribute } = toRefs(props);
 
 const emit = defineEmits(['onSubmit']);
+
+const { removeFreight } = useFreightsStore();
+
+const router = useRouter();
 
 const steps = [
     {
@@ -213,7 +226,36 @@ const locationInfoFields = computed<ILocationInfoFields>(() => ({
     },
 }));
 
+const createdAt = computed(() =>
+    formatDatetime(parseISO(formData.value.createdAt))
+);
+const updatedAt = computed(() =>
+    formatDatetime(parseISO(formData.value.updatedAt))
+);
+
 const freightRequiredFields = Freight.requiredAttributes();
+
+const redirectToFreightRoute = async (name: string) => {
+    await router.push({
+        name,
+        params: { freightId: formData.value.id },
+    });
+};
+
+const handleFreightRemove = async () => {
+    await presentConfirmationAlert({
+        title: 'Remover frete',
+        message: 'Deseja remover este frete?',
+        confirmAction: async () => {
+            await removeFreight(formData.value.id);
+            await router.push({
+                name: 'FreightsIndex',
+                query: { reset: 'true' },
+            });
+        },
+        confirmClass: 'alert-button-confirm',
+    });
+};
 
 const isDateBefore = (strDateA: string, strDateB: string) => {
     const dateA = parseISO(strDateA);

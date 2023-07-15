@@ -1,5 +1,17 @@
 <template>
     <form class="form ion-padding">
+        <template v-if="readonly || edit">
+            <RecordActions
+                :edit="edit"
+                :readonly="readonly"
+                :createdAt="createdAt"
+                :updatedAt="updatedAt"
+                @view="redirectToCategoryRoute('CategoryShow')"
+                @edit="redirectToCategoryRoute('CategoryEdit')"
+                @remove="handleCategoryRemove"
+            />
+        </template>
+
         <ion-item ref="nameRef" class="form-item">
             <ion-label position="stacked">Nome *</ion-label>
 
@@ -77,18 +89,22 @@
 </style>
 
 <script setup lang="ts">
-import { ref, toRefs } from 'vue';
+import { computed, ref, toRefs } from 'vue';
+import { useRouter } from 'vue-router';
 import { Compact } from '@ckpack/vue-color';
 import { IonText, IonInput, IonButton, IonItem, IonLabel } from '@ionic/vue';
-
-import { IFormData } from './index';
 
 import {
     ValidationErrors,
     clearFieldsErrors,
     validateRequiredFields,
 } from '@/utils/errors';
+import { IFormData } from './index';
+import { useCategoriesStore } from '@/store/categories';
+import { formatDatetime, parseISO } from '@/utils/date';
+import { presentConfirmationAlert } from '@/utils/alert';
 
+import RecordActions from '../RecordActions.vue';
 import InputErrorNote from '@/components/InputErrorNote.vue';
 
 interface IProps {
@@ -105,7 +121,11 @@ const props = withDefaults(defineProps<IProps>(), {
 
 const { edit, readonly, formData, setAttribute } = toRefs(props);
 
+const { removeCategory } = useCategoriesStore();
+
 const emit = defineEmits(['onSubmit']);
+
+const router = useRouter();
 
 const errorMessage = ref('');
 
@@ -114,10 +134,39 @@ const colorRef = ref('');
 
 const validationErrors = ref<ValidationErrors>({});
 
+const createdAt = computed(() =>
+    formatDatetime(parseISO(formData.value.createdAt))
+);
+const updatedAt = computed(() =>
+    formatDatetime(parseISO(formData.value.updatedAt))
+);
+
 const formFieldsRefs = () => ({
     name: nameRef,
     color: colorRef,
 });
+
+const redirectToCategoryRoute = async (name: string) => {
+    await router.push({
+        name,
+        params: { categoryId: formData.value.id },
+    });
+};
+
+const handleCategoryRemove = async () => {
+    await presentConfirmationAlert({
+        title: 'Remover categoria',
+        message: 'Deseja remover esta categoria?',
+        confirmAction: async () => {
+            await removeCategory(formData.value.id);
+            await router.push({
+                name: 'CategoriesIndex',
+                query: { reset: 'true' },
+            });
+        },
+        confirmClass: 'alert-button-confirm',
+    });
+};
 
 const validateData = () => {
     let validFields = true;

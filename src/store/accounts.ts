@@ -8,12 +8,15 @@ import { FilterData, IOrderData } from '@/models/appBaseEntity';
 type AccountsStoreState = PiniaCustomStateProperties;
 
 const emptyAccountFormData = (): IFormData => ({
+    id: 0,
     name: '',
     value: '',
     description: '',
     accountDate: '',
     freightId: '',
     categoryId: '',
+    createdAt: '',
+    updatedAt: '',
 });
 
 export const initialState = (): AccountsStoreState => ({
