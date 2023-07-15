@@ -110,7 +110,14 @@ const handleFormSubmit = async () => {
     } catch (error) {
         console.error(error);
 
-        await presentToast('Falha ao criar categoria', 'danger');
+        if (error.message.includes('UNIQUE constraint failed')) {
+            await presentToast(
+                'Já existe uma categoria com este nome',
+                'danger'
+            );
+        } else {
+            await presentToast('Falha ao criar categoria', 'danger');
+        }
     }
 };
 

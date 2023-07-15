@@ -11,6 +11,7 @@ import { RemovesAccountTable1685665132986 } from './migrations/1685665132986-Rem
 import { AddSyncRelatedColumnsToFreights1686187611180 } from './migrations/1686187611180-AddSyncRelatedColumnsToFreights';
 import { AddCategoryTable1688937016763 } from './migrations/1688937016763-AddCategoryTable';
 import { AddsAccountTable1689247621818 } from './migrations/1689247621818-AddsAccountTable';
+import { AddsUniqueIndexToCategoryName1689446434894 } from './migrations/1689446434894-AddsUniqueIndexToCategoryName';
 
 export type DataSourceType = DataSource;
 
@@ -27,6 +28,7 @@ export default new DataSource({
         AddSyncRelatedColumnsToFreights1686187611180,
         AddCategoryTable1688937016763,
         AddsAccountTable1689247621818,
+        AddsUniqueIndexToCategoryName1689446434894,
     ],
     // entities: ['src/models/**/*.ts', '!src/models/appBaseEntity.ts'],
     // migrations: ['src/database/migrations/**/*.ts'],

@@ -1,4 +1,4 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
 import { ISyncableEntity, SyncableEntity } from './syncableEntity';
 
 export interface ICategory extends ISyncableEntity {
@@ -11,6 +11,7 @@ export interface ICategory extends ISyncableEntity {
 
 @Entity('CATEGORY')
 export class Category extends SyncableEntity implements ICategory {
+    @Index({ unique: true })
     @Column({ nullable: false })
     name!: string;
 
