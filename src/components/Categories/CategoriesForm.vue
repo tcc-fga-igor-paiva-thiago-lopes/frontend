@@ -135,10 +135,14 @@ const colorRef = ref('');
 const validationErrors = ref<ValidationErrors>({});
 
 const createdAt = computed(() =>
-    formatDatetime(parseISO(formData.value.createdAt))
+    formData.value.createdAt
+        ? formatDatetime(parseISO(formData.value.createdAt))
+        : ''
 );
 const updatedAt = computed(() =>
-    formatDatetime(parseISO(formData.value.updatedAt))
+    formData.value.updatedAt
+        ? formatDatetime(parseISO(formData.value.updatedAt))
+        : ''
 );
 
 const formFieldsRefs = () => ({
