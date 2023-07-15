@@ -15,8 +15,9 @@ import SyncManagement from '@/views/Sync/SyncManagement.vue';
 
 import FreightShow from '@/views/Freights/FreightShow.vue';
 import FreightEdit from '@/views/Freights/FreightEdit.vue';
-import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
+import FreightsHome from '@/views/Freights/FreightsHome.vue';
 import FreightCreate from '@/views/Freights/FreightCreate.vue';
+import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
 
 import CategoryShow from '@/views/Categories/CategoryShow.vue';
 import CategoryEdit from '@/views/Categories/CategoryEdit.vue';
@@ -85,9 +86,14 @@ export const routes: Array<RouteRecordRaw> = [
         component: ProfitPerPeriod,
         meta: { requiresAuth: true },
     },
-
     {
         path: '/freights',
+        name: 'FreightsHome',
+        component: FreightsHome,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/freights/all',
         name: 'FreightsIndex',
         component: FreightsIndex,
         meta: { requiresAuth: true },

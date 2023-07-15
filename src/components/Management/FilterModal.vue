@@ -420,6 +420,7 @@ interface IProps {
     opened: boolean;
     toExcludeColumns?: string[];
     model: typeof AppBaseEntity;
+    filterData?: Record<string, Partial<IFilterData>>;
     setOpen: (value: boolean) => void;
 }
 
@@ -468,7 +469,7 @@ const props = defineProps<IProps>();
 // eslint-disable-next-line vue/no-setup-props-destructure
 const { setOpen } = props;
 
-const { opened, model, toExcludeColumns } = toRefs(props);
+const { opened, model, toExcludeColumns, filterData } = toRefs(props);
 
 const emit = defineEmits(['onConfirm']);
 
@@ -546,7 +547,7 @@ const parseColumnType = (type: ColumnType): ColumnType => {
     }
 };
 
-const mountFilterData = () => {
+const mountFilterData = (filterData?: Record<string, Partial<IFilterData>>) => {
     const newFilterData = {} as FilterData;
     const columns = model.value.getRepository().metadata.columns;
 
@@ -571,6 +572,7 @@ const mountFilterData = () => {
             type: DEFAULT_FILTER_VALUES[
                 column.type as string
             ] as FilterDataType,
+            ...((filterData && filterData[column.propertyName]) || {}),
         };
     });
 
@@ -578,6 +580,6 @@ const mountFilterData = () => {
 };
 
 onBeforeMount(() => {
-    data.value = mountFilterData();
+    data.value = mountFilterData(filterData?.value);
 });
 </script>

@@ -184,7 +184,7 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
 
         if (orderData) {
             queryBuilder.orderBy(
-                columnsMap[orderData.field].databaseName,
+                columnsMap[orderData.field]?.databaseName,
                 orderData.order
             );
         }

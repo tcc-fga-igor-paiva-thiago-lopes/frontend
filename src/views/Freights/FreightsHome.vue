@@ -6,7 +6,7 @@
                     <ion-menu-button></ion-menu-button>
                 </ion-buttons>
 
-                <ion-title>Página inicial</ion-title>
+                <ion-title>Fretes</ion-title>
 
                 <ConnectionStatus slot="primary" />
             </ion-toolbar>
@@ -15,12 +15,17 @@
         <ion-content :fullscreen="true">
             <div class="options-container">
                 <ion-button
-                    v-for="option in menuOptions"
+                    v-for="option in options"
                     :key="option.route"
                     shape="round"
                     class="options-button"
-                    :disabled="!option.available"
-                    :onclick="() => $router.push({ name: option.route })"
+                    :onclick="
+                        () =>
+                            $router.push({
+                                name: option.route,
+                                query: option.query,
+                            })
+                    "
                 >
                     <ion-icon slot="start" :icon="option.icon"></ion-icon>
 
@@ -48,9 +53,6 @@
 </style>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { storeToRefs } from 'pinia';
-
 import {
     IonPage,
     IonTitle,
@@ -62,9 +64,9 @@ import {
     IonButtons,
     IonMenuButton,
 } from '@ionic/vue';
-import { sync, navigate, statsChart, pricetags } from 'ionicons/icons';
+import { open, list } from 'ionicons/icons';
 
-import { useAppStore } from '../store/app';
+import { FreightStatus } from '@/models/freight';
 
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
@@ -72,46 +74,27 @@ interface IMenuOption {
     icon: string;
     name: string;
     route: string;
-    offlinePermitted?: boolean;
+    query?: Record<string, string>;
 }
 
-const appStore = useAppStore();
-
-const { connectionStatus } = storeToRefs(appStore);
-
-const allMenuOptions: IMenuOption[] = [
+const options: IMenuOption[] = [
     {
-        route: 'FreightsHome',
-        icon: navigate,
-        name: 'Fretes',
-        offlinePermitted: true,
+        route: 'FreightsIndex',
+        icon: open,
+        name: 'Fretes em aberto',
+        query: {
+            status: FreightStatus.FINISHED,
+            orderKey: 'startDate',
+            orderType: 'DESC',
+        },
     },
     {
-        route: 'CategoriesIndex',
-        icon: pricetags,
-        name: 'Categorias',
-        offlinePermitted: true,
-    },
-    {
-        route: 'AnalysisIndex',
-        icon: statsChart,
-        name: 'Indicadores',
-        offlinePermitted: true,
-    },
-    {
-        route: 'SyncManagement',
-        icon: sync,
-        name: 'Sincronização',
-        offlinePermitted: true,
+        route: 'FreightsIndex',
+        icon: list,
+        name: 'Todos os fretes',
+        query: {
+            status: 'all',
+        },
     },
 ];
-
-const menuOptions = computed(() =>
-    allMenuOptions.map((option) => ({
-        ...option,
-        available:
-            connectionStatus.value.connected ||
-            (!connectionStatus.value.connected && !!option.offlinePermitted),
-    }))
-);
 </script>

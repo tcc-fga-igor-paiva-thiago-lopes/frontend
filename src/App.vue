@@ -147,7 +147,7 @@ const allMenuOptions: IMenuOption[] = [
         offlinePermitted: true,
     },
     {
-        route: 'FreightsIndex',
+        route: 'FreightsHome',
         icon: navigate,
         name: 'Fretes',
         offlinePermitted: true,

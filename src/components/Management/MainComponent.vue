@@ -107,6 +107,7 @@
             <FilterModal
                 :model="model"
                 :opened="filterOpened"
+                :filterData="filterData"
                 :setOpen="setFilterModalOpened"
                 :toExcludeColumns="filterExcludeColumns"
                 @onConfirm="(filterData) => emit('onFilterConfirm', filterData)"
