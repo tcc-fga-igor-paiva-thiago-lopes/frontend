@@ -60,9 +60,9 @@
                 :readonly="readonly"
                 :createdAt="createdAt"
                 :updatedAt="updatedAt"
-                @view="redirectToCategoryRoute('CategoryShow')"
-                @edit="redirectToCategoryRoute('CategoryEdit')"
-                @remove="handleCategoryRemove"
+                @view="redirectToAccountRoute('FreightAccountShow')"
+                @edit="redirectToAccountRoute('FreightAccountEdit')"
+                @remove="handleAccountRemove"
             />
         </template>
 
@@ -342,14 +342,17 @@ const formFieldsRefs = () => ({
     categoryId: categoryIdRef,
 });
 
-const redirectToCategoryRoute = async (name: string) => {
+const redirectToAccountRoute = async (name: string) => {
     await router.push({
         name,
-        params: { categoryId: formData.value.id },
+        params: {
+            freightId: route.params.freightId,
+            accountId: formData.value.id,
+        },
     });
 };
 
-const handleCategoryRemove = async () => {
+const handleAccountRemove = async () => {
     await presentConfirmationAlert({
         title: 'Remover categoria',
         message: 'Deseja remover esta categoria?',
