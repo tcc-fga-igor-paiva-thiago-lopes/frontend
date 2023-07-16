@@ -19,7 +19,6 @@ const emptyCategoryFormData = (): IFormData => ({
 
 export const initialState = (): CategoriesStoreState => ({
     _items: [],
-    _syncing: false,
     _filterData: {} as FilterData,
     _newItem: emptyCategoryFormData(),
     _editItem: emptyCategoryFormData(),
@@ -30,7 +29,6 @@ export const useCategoriesStore = defineStore('categories', {
     state: (): CategoriesStoreState => initialState(),
     getters: {
         categories: (state) => state._items,
-        syncing: (state) => state._syncing,
         orderData: (state) => state._orderData,
         filterData: (state) => state._filterData,
         newCategory: (state: CategoriesStoreState) =>

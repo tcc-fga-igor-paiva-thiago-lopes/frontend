@@ -21,7 +21,6 @@ const emptyAccountFormData = (): IFormData => ({
 
 export const initialState = (): AccountsStoreState => ({
     _items: [],
-    _syncing: false,
     _filterData: {} as FilterData,
     _newItem: emptyAccountFormData(),
     _editItem: emptyAccountFormData(),
@@ -32,7 +31,6 @@ export const useAccountsStore = defineStore('accounts', {
     state: (): AccountsStoreState => initialState(),
     getters: {
         accounts: (state) => state._items,
-        syncing: (state) => state._syncing,
         orderData: (state) => state._orderData,
         filterData: (state) => state._filterData,
         newAccount: (state: AccountsStoreState) => state._newItem as IFormData,
