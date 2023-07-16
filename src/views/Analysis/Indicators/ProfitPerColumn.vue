@@ -26,9 +26,7 @@
                             v-for="column in FILTER_COLUMNS"
                             :value="column"
                             :key="column"
-                            >{{
-                                Freight.FRIENDLY_COLUMN_NAMES[column]
-                            }}</IonSelectOption
+                            >{{ columnNames[column] }}</IonSelectOption
                         >
                     </ion-select>
                 </ion-item>
@@ -171,7 +169,7 @@ import DateRange from '@/components/Analysis/DateRange.vue';
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 Chart.register(...registerables);
 
-const FILTER_COLUMNS = ['cargo', 'contractor'];
+const FILTER_COLUMNS = ['cargo', 'contractor', 'route'];
 
 const appStore = useAppStore();
 
@@ -191,8 +189,13 @@ const chartRef = ref<Element | null>(null);
 
 const profitPerColumn = ref<IProfitPerColumnResult[]>([]);
 
+const columnNames: Record<string, string> = {
+    ...Freight.FRIENDLY_COLUMN_NAMES,
+    route: 'Trajeto',
+};
+
 const columnFriendlyName = computed(() =>
-    Freight.FRIENDLY_COLUMN_NAMES[column.value].toLowerCase()
+    columnNames[column.value].toLowerCase()
 );
 
 const generateChart = () => {
