@@ -209,16 +209,37 @@ const generateChart = () => {
             labels: profitPerColumn.value.map((item) => item[column.value]),
             datasets: [
                 {
+                    label: 'Receita',
+                    data: profitPerColumn.value.map((item) => item.income),
+                    backgroundColor: style.getPropertyValue(
+                        '--ion-color-tertiary'
+                    ),
+                    stack: 'Stack 0',
+                },
+                {
+                    label: 'Despesa',
+                    data: profitPerColumn.value.map((item) => item.expenses),
+                    backgroundColor: style.getPropertyValue(
+                        '--ion-color-secondary'
+                    ),
+                    stack: 'Stack 0',
+                },
+                {
                     label: 'Lucro',
+                    data: profitPerColumn.value.map((item) => item.profit),
                     backgroundColor: style.getPropertyValue(
                         '--ion-color-primary'
                     ),
-                    data: profitPerColumn.value.map((item) => item.profit),
+                    stack: 'Stack 1',
                 },
             ],
         },
         options: {
             responsive: true,
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true },
+            },
         },
     });
 };

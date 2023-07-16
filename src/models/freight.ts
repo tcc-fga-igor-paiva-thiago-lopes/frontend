@@ -193,7 +193,7 @@ export class Freight extends SyncableEntity implements IFreight {
     ) {
         const statement =
             column === 'route'
-                ? `(freight.origin_state || ' -> ' || freight.destination_state)`
+                ? `(freight.origin_state || ' - ' || freight.destination_state)`
                 : column;
 
         const freightsPerColumn = await Freight.finishedFreightsPerColumn(
