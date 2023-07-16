@@ -2,6 +2,9 @@ import { Repository } from 'typeorm';
 
 import { formatISO } from './date';
 import { AppBaseEntity } from '@/models/appBaseEntity';
+import { SyncableEntity } from '@/models/syncableEntity';
+
+export type ModelClass<T> = { new (): T } & typeof SyncableEntity;
 
 export type FieldsConversion = Record<string, (value: any) => any>;
 
@@ -54,9 +57,21 @@ const getColumnNamesMap = <Model extends AppBaseEntity>(
 ) => {
     return Object.fromEntries(
         repository.metadata.columns.map(
-            ({ propertyName, databaseName, type }) => [
+            ({
                 propertyName,
-                { databaseName, type },
+                databaseName,
+                type,
+                referencedColumn,
+                relationMetadata,
+            }) => [
+                propertyName,
+                {
+                    databaseName,
+                    type,
+                    isRelationship: !!referencedColumn,
+                    relationModel:
+                        relationMetadata?.type as typeof SyncableEntity,
+                },
             ]
         )
     );
@@ -101,9 +116,9 @@ export const formDataToDatabaseAndApi = <Model extends AppBaseEntity>({
     return [newAttrs, apiAttrs] as [Record<string, any>, Record<string, any>];
 };
 
-export const multipleDatabaseToApi = <Model extends AppBaseEntity>(
+export const multipleDatabaseToApi = async <Model extends AppBaseEntity>(
+    model: ModelClass<Model>,
     records: Model[],
-    repository: Repository<Model>,
     toRemoveFields: string[] = [
         'id',
         'synced',
@@ -112,14 +127,44 @@ export const multipleDatabaseToApi = <Model extends AppBaseEntity>(
         'deletedAt',
     ]
 ) => {
+    const repository = model.getRepository<Model>();
     const columnNamesMap = getColumnNamesMap(repository);
+
+    const relationModels = repository.metadata.columns
+        .map((col) => col.relationMetadata?.type)
+        .filter((klass) => !!klass) as (typeof SyncableEntity)[];
+
+    const idToIdentifiers = Object.fromEntries(
+        await Promise.all(
+            relationModels.map(async (entity) => [
+                entity.name,
+                await entity.idToIdentifiersMap(),
+            ])
+        )
+    );
 
     return records.map((record) => {
         return Object.fromEntries(
             Object.entries(record)
-                .filter(([field]) => !toRemoveFields.includes(field))
+                .filter(
+                    ([field]) =>
+                        !toRemoveFields.includes(field) &&
+                        !!columnNamesMap[field]
+                )
                 .map(([field, value]) => {
-                    const { type, databaseName } = columnNamesMap[field];
+                    const {
+                        type,
+                        databaseName,
+                        isRelationship,
+                        relationModel,
+                    } = columnNamesMap[field];
+
+                    if (isRelationship) {
+                        return [
+                            databaseName.replace('_id', '_identifier'),
+                            idToIdentifiers[relationModel.name][value],
+                        ];
+                    }
 
                     return [databaseName, convertDatabaseToApi(type, value)];
                 })

@@ -1,6 +1,7 @@
 import { Preferences } from '@capacitor/preferences';
 
 import { Freight } from '@/models/freight';
+import { Account } from '@/models/account';
 import { Category } from '@/models/category';
 import { SyncableEntity } from '@/models/syncableEntity';
 
@@ -15,10 +16,11 @@ export type LastSyncData = {
 
 export const NAME_TO_CLASS: Record<string, typeof SyncableEntity> = {
     [Freight.name]: Freight,
+    [Account.name]: Account,
     [Category.name]: Category,
 };
 
-export const SYNCABLE_ENTITIES = [Freight, Category];
+export const SYNCABLE_ENTITIES = [Freight, Category, Account];
 
 export const lastSyncDataKey = (entity: string) => `${entity}_last_sync`;
 

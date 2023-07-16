@@ -46,6 +46,19 @@ export class SyncableEntity extends AppBaseEntity implements ISyncableEntity {
         ...AppBaseEntity.FRIENDLY_COLUMN_NAMES,
     };
 
+    static async idToIdentifiersMap<T extends SyncableEntity>(
+        this: StaticThis<T>
+    ) {
+        const idAndIdentifiers = await this.createQueryBuilder<T>()
+            .select(['id', 'identifier'])
+            .withDeleted()
+            .getRawMany<{ id: number; identifier: string }>();
+
+        return Object.fromEntries(
+            idAndIdentifiers.map((result) => [result.id, result.identifier])
+        ) as Record<number, string>;
+    }
+
     static async notSynced<T extends SyncableEntity>(
         this: StaticThis<T>,
         maxRecords = 100

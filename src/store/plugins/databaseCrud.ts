@@ -213,10 +213,7 @@ export const DatabaseCrudPlugin = () => ({
                     apiAdapter
                         .patch({
                             url: '/',
-                            data: multipleDatabaseToApi(
-                                toSync,
-                                model.getRepository<T>()
-                            ),
+                            data: await multipleDatabaseToApi(model, toSync),
                         })
                         .then((response) =>
                             runDatabaseOperation(() =>
