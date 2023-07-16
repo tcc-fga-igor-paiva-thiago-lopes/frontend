@@ -295,9 +295,14 @@ const submit = async () => {
         });
 
         errorMessage.value = '';
-        presentToast('Conta criada com sucesso!', 'success');
+        await presentToast('Conta criada com sucesso!', 'success');
 
-        router.push({ name: 'Home' });
+        name.value = '';
+        email.value = '';
+        password.value = '';
+        passwordConfirmation.value = '';
+
+        await router.push({ name: 'Home' });
     } catch (error) {
         console.error(error);
 

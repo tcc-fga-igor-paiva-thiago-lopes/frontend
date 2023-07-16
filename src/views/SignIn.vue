@@ -137,7 +137,10 @@ const submit = async () => {
         await AuthService.setToken(response.data.token);
         await setUsername(response.data.name);
 
-        router.push({ name: 'Home' });
+        email.value = '';
+        password.value = '';
+
+        await router.push({ name: 'Home' });
     } catch (error) {
         console.error(error);
 
