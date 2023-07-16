@@ -212,23 +212,22 @@ const generateChart = () => {
                     label: 'Receita',
                     data: profitPerColumn.value.map((item) => item.income),
                     backgroundColor: style.getPropertyValue(
-                        '--ion-color-tertiary'
+                        '--ion-color-primary'
                     ),
                     stack: 'Stack 0',
                 },
                 {
                     label: 'Despesa',
                     data: profitPerColumn.value.map((item) => item.expenses),
-                    backgroundColor: style.getPropertyValue(
-                        '--ion-color-secondary'
-                    ),
+                    backgroundColor:
+                        style.getPropertyValue('--ion-color-danger'),
                     stack: 'Stack 0',
                 },
                 {
                     label: 'Lucro',
                     data: profitPerColumn.value.map((item) => item.profit),
                     backgroundColor: style.getPropertyValue(
-                        '--ion-color-primary'
+                        '--ion-color-success'
                     ),
                     stack: 'Stack 1',
                 },
