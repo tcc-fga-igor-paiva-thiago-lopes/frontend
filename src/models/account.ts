@@ -30,7 +30,7 @@ export class Account extends SyncableEntity implements IAccount {
     @Column({ nullable: false })
     description!: string;
 
-    @Column({ nullable: false })
+    @Column({ nullable: false, type: 'decimal' })
     value!: number;
 
     @Column({
@@ -74,6 +74,7 @@ export class Account extends SyncableEntity implements IAccount {
     @BeforeInsert()
     @BeforeUpdate()
     updateSyncedOnUpdate() {
+        this.synced = false;
         this.value = -1 * Math.abs(this.value);
     }
 
