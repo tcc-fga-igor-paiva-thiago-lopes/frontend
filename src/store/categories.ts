@@ -4,6 +4,8 @@ import { SyncStatus } from '@/services/sync';
 import { IFormData } from '@/components/Categories';
 import { Category, ICategory } from '@/models/category';
 import { FilterData, IOrderData } from '@/models/appBaseEntity';
+import { Account } from '@/models/account';
+import { presentToast } from '@/utils/toast';
 
 type CategoriesStoreState = PiniaCustomStateProperties;
 
@@ -68,6 +70,22 @@ export const useCategoriesStore = defineStore('categories', {
             this._newItem = emptyCategoryFormData();
         },
         async removeCategory(id: ICategory['id']) {
+            const hasAssociatedRecords = await Account.createQueryBuilder(
+                'account'
+            )
+                .innerJoin('account.category', 'category')
+                .where({ categoryId: id })
+                .getExists();
+
+            if (hasAssociatedRecords) {
+                await presentToast(
+                    'Esta categoria possui gastos associados',
+                    'danger'
+                );
+
+                return;
+            }
+
             await this.softRemoveRecord<Category>({
                 id,
                 model: Category,
