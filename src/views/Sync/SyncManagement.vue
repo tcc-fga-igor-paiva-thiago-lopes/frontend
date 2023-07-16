@@ -260,6 +260,8 @@ const updateEntitiesData = async () => {
 const handleSync = async (ev: MouseEvent, model: SyncableModel) => {
     ev.stopPropagation();
 
+    if (model.name === 'Account') return handleFullSync();
+
     const confirmAction = async () => {
         try {
             openLoading(`Sincronizando ${model.FRIENDLY_NAME_PLURAL}...`);
