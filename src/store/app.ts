@@ -133,15 +133,16 @@ export const useAppStore = defineStore('application', {
         async clearDatabase() {
             return runDatabaseOperation(() => {
                 return dataSource.transaction(async () => {
-                    const promises = [Account, Freight, Category].map(
-                        (entity) =>
+                    await Account.createQueryBuilder().delete().execute();
+
+                    await Promise.all(
+                        [Freight, Category].map((entity) =>
                             (entity as typeof SyncableEntity)
                                 .createQueryBuilder()
                                 .delete()
                                 .execute()
+                        )
                     );
-
-                    await Promise.all(promises);
                 });
             });
         },
