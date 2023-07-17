@@ -1,5 +1,6 @@
 import router from '@/router';
 import { useAppStore } from '@/store/app';
+import { presentToast } from '@/utils/toast';
 import { Preferences } from '@capacitor/preferences';
 
 const TOKEN_KEY = 'token';
@@ -24,12 +25,28 @@ export default class AuthService {
     }
 
     static async logout() {
-        const { setUsername } = useAppStore();
+        const { setUsername, openLoading, closeLoading, clearDatabase } =
+            useAppStore();
 
-        await AuthService.deleteToken();
+        openLoading();
 
-        await setUsername('');
+        try {
+            await clearDatabase();
 
-        router.push({ name: 'Welcome' });
+            await Preferences.clear();
+
+            await setUsername('');
+
+            await router.replace({ name: 'Welcome' });
+        } catch (error) {
+            console.error(error);
+
+            await presentToast(
+                'Falha ao deslogar. Tente novamente mais tarde...',
+                'danger'
+            );
+        } finally {
+            closeLoading();
+        }
     }
 }

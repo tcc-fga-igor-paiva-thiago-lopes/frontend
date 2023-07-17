@@ -188,7 +188,7 @@ const menuOptions = computed(() =>
 const handleLogout = async () => {
     const message = new IonicSafeString(`
         Tem certeza que deseja encerrar sua sessão?<br /><br />
-        Você precisará se conectar novamente e todos os dados salvos poderão ser apagados.<br /><br />
+        Você precisará se conectar novamente e todos os dados salvos localmente serão ser apagados.<br /><br />
         Recomendamos que faça uma sincronização total de todos os dados antes de encerrar a sessão.
         Procure por "Sincronização" na página inicial ou no menu lateral
     `);
