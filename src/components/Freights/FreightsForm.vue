@@ -9,6 +9,28 @@
         @changeStep="handleStepChange"
     >
         <template v-slot:content>
+            <template v-if="readonly || edit">
+                <ion-button
+                    size="small"
+                    class="accounts-button"
+                    @click="redirectToFreightRoute('FreightAccountsIndex')"
+                >
+                    <ion-icon slot="start" :icon="cash"></ion-icon>
+
+                    Gastos
+                </ion-button>
+
+                <RecordActions
+                    :edit="edit"
+                    :readonly="readonly"
+                    :createdAt="createdAt"
+                    :updatedAt="updatedAt"
+                    @view="redirectToFreightRoute('FreightShow')"
+                    @edit="redirectToFreightRoute('FreightEdit')"
+                    @remove="handleFreightRemove"
+                />
+            </template>
+
             <GeneralData
                 v-if="step === 0"
                 :readonly="readonly"
@@ -47,16 +69,20 @@
 .form-item {
     margin: 8px 0;
 }
+
+.accounts-button {
+    --background: #598c58;
+}
 </style>
 
 <script setup lang="ts">
 import { Ref, computed, ref, toRefs } from 'vue';
 
-import { IonText, IonButton } from '@ionic/vue';
-import { menu, navigate } from 'ionicons/icons';
+import { IonText, IonButton, IonIcon } from '@ionic/vue';
+import { cash, menu, navigate } from 'ionicons/icons';
 
-import { parseISO } from '@/utils/date';
-import { Freight } from '@/models/freight';
+import { parseISO, formatDatetime } from '@/utils/date';
+import { Freight, FreightStatus } from '@/models/freight';
 import GeneralData from './GeneralData.vue';
 import LocationInfo from './LocationInfo.vue';
 import StepperComponent from '@/components/StepperComponent.vue';
@@ -67,6 +93,10 @@ import {
     clearFieldsErrors,
     validateRequiredFields,
 } from '@/utils/errors';
+import RecordActions from '../RecordActions.vue';
+import { presentConfirmationAlert } from '@/utils/alert';
+import { useFreightsStore } from '@/store/freights';
+import { useRouter } from 'vue-router';
 
 interface IProps {
     edit?: boolean;
@@ -82,6 +112,10 @@ const props = withDefaults(defineProps<IProps>(), {
 const { edit, readonly, formData, setAttribute } = toRefs(props);
 
 const emit = defineEmits(['onSubmit']);
+
+const { removeFreight } = useFreightsStore();
+
+const router = useRouter();
 
 const steps = [
     {
@@ -192,7 +226,40 @@ const locationInfoFields = computed<ILocationInfoFields>(() => ({
     },
 }));
 
+const createdAt = computed(() =>
+    formData.value.createdAt
+        ? formatDatetime(parseISO(formData.value.createdAt))
+        : ''
+);
+const updatedAt = computed(() =>
+    formData.value.updatedAt
+        ? formatDatetime(parseISO(formData.value.updatedAt))
+        : ''
+);
+
 const freightRequiredFields = Freight.requiredAttributes();
+
+const redirectToFreightRoute = async (name: string) => {
+    await router.push({
+        name,
+        params: { freightId: formData.value.id },
+    });
+};
+
+const handleFreightRemove = async () => {
+    await presentConfirmationAlert({
+        title: 'Remover frete',
+        message: 'Deseja remover este frete?',
+        confirmAction: async () => {
+            await removeFreight(formData.value.id);
+            await router.push({
+                name: 'FreightsIndex',
+                query: { reset: 'true' },
+            });
+        },
+        confirmClass: 'alert-button-confirm',
+    });
+};
 
 const isDateBefore = (strDateA: string, strDateB: string) => {
     const dateA = parseISO(strDateA);
@@ -224,14 +291,26 @@ const validateDueDate = (errors: ValidationErrors) => {
 };
 
 const validateFinishedDate = (errors: ValidationErrors) => {
-    const { finishedDate, startDate } = formData.value;
+    const { status, finishedDate, startDate } = formData.value;
 
-    if (!finishedDate) return true;
+    if (status !== FreightStatus.FINISHED && !finishedDate) return true;
 
-    const errorMessage =
-        'A data de conclusão não pode ser anterior a data de início';
+    if (status === FreightStatus.FINISHED && !finishedDate) {
+        addErrorToField({
+            field: 'finishedDate',
+            errorMessages: ['Obrigatório para fretes finalizados'],
+            fieldRef: finishedDateRef,
+            validationErrors: errors,
+            overwriteErrors: true,
+        });
+
+        return false;
+    }
 
     if (isDateBefore(finishedDate, startDate)) {
+        const errorMessage =
+            'A data de conclusão não pode ser anterior a data de início';
+
         addErrorToField({
             field: 'finishedDate',
             errorMessages: [errorMessage],
@@ -319,6 +398,8 @@ const handleStepChange = (newStep: number) => {
 const handleSubmit = () => {
     if (edit.value || validateLocationInfo()) {
         emit('onSubmit');
+
+        step.value = 0;
     }
 };
 </script>

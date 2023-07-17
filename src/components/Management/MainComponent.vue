@@ -107,6 +107,7 @@
             <FilterModal
                 :model="model"
                 :opened="filterOpened"
+                :filterData="filterData"
                 :setOpen="setFilterModalOpened"
                 :toExcludeColumns="filterExcludeColumns"
                 @onConfirm="(filterData) => emit('onFilterConfirm', filterData)"
@@ -147,6 +148,7 @@ import {
     IonCardHeader,
     IonCardContent,
     IonSelectOption,
+    IonicSafeString,
 } from '@ionic/vue';
 import { add, funnel, arrowDown, arrowUp } from 'ionicons/icons';
 import { presentConfirmationAlert } from '@/utils/alert';
@@ -167,7 +169,7 @@ interface IProps {
     orderExcludeColumns?: string[];
     filterExcludeColumns: string[];
     paginationService: PaginationService<unknown>;
-    label: (item: any) => string;
+    label: (item: any) => IonicSafeString | string;
     subLabel?: (item: any) => string;
     addItem: () => void;
     editItem: (item: any) => Promise<void>;

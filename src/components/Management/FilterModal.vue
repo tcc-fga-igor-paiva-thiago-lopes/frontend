@@ -420,6 +420,7 @@ interface IProps {
     opened: boolean;
     toExcludeColumns?: string[];
     model: typeof AppBaseEntity;
+    filterData?: Record<string, Partial<IFilterData>>;
     setOpen: (value: boolean) => void;
 }
 
@@ -433,13 +434,16 @@ const DEFAULT_EXCLUDE_COLUMNS = ['id', 'identifier', 'deletedAt'];
 
 const STRING_FILTER_OPTIONS: Record<string, string> = {
     includes: 'Contém',
+    not_includes: 'Não contém',
     equals_to: 'Igual a',
+    not_equals_to: 'Diferente de',
     starts_with: 'Começa com',
     ends_with: 'Termina com',
 };
 
 const NUMBER_FILTER_OPTIONS: Record<string, string> = {
     equals_to: 'Igual a',
+    not_equals_to: 'Diferente de',
     less_than: 'Menor que',
     less_than_or_equal: 'Menor ou igual que',
     greater_than: 'Maior que',
@@ -449,6 +453,7 @@ const NUMBER_FILTER_OPTIONS: Record<string, string> = {
 
 const DATETIME_FILTER_OPTIONS: Record<string, string> = {
     equals_to: 'Igual a',
+    not_equals_to: 'Diferente de',
     less_than: 'Anterior a',
     less_than_or_equal: 'Anterior ou igual a',
     greater_than: 'Posterior a',
@@ -468,7 +473,7 @@ const props = defineProps<IProps>();
 // eslint-disable-next-line vue/no-setup-props-destructure
 const { setOpen } = props;
 
-const { opened, model, toExcludeColumns } = toRefs(props);
+const { opened, model, toExcludeColumns, filterData } = toRefs(props);
 
 const emit = defineEmits(['onConfirm']);
 
@@ -546,7 +551,7 @@ const parseColumnType = (type: ColumnType): ColumnType => {
     }
 };
 
-const mountFilterData = () => {
+const mountFilterData = (filterData?: Record<string, Partial<IFilterData>>) => {
     const newFilterData = {} as FilterData;
     const columns = model.value.getRepository().metadata.columns;
 
@@ -571,6 +576,7 @@ const mountFilterData = () => {
             type: DEFAULT_FILTER_VALUES[
                 column.type as string
             ] as FilterDataType,
+            ...((filterData && filterData[column.propertyName]) || {}),
         };
     });
 
@@ -578,6 +584,6 @@ const mountFilterData = () => {
 };
 
 onBeforeMount(() => {
-    data.value = mountFilterData();
+    data.value = mountFilterData(filterData?.value);
 });
 </script>

@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
-import { onBeforeUnmount, onMounted, reactive, watch, ref } from 'vue';
+import { onBeforeUnmount, onBeforeMount, reactive, watch, ref } from 'vue';
 
 import {
     IonPage,
@@ -141,12 +141,35 @@ const handleOrderData = async (orderData: Partial<IOrderData>) => {
     await paginationService.reset();
 };
 
+const applyQueryParams = () => {
+    const { status, filterType, orderKey, orderType } = route.query;
+
+    if (status === 'all') {
+        setFilter({});
+
+        setOrder({ field: 'createdAt', order: 'DESC' });
+    } else {
+        setFilter({
+            status: {
+                value: status,
+                type: filterType,
+                active: true,
+            },
+        });
+
+        setOrder({ field: orderKey, order: orderType });
+    }
+};
+
 const unwatch = watch([route], async (value) => {
     if (value[0].query.reset === 'true') await paginationService.reset();
+    else if (value[0].query.status) applyQueryParams();
 });
 
-onMounted(async () => {
+onBeforeMount(async () => {
     try {
+        if (route.query.status) applyQueryParams();
+
         await paginationService.getFirstPage();
     } catch (e) {
         console.error(e);

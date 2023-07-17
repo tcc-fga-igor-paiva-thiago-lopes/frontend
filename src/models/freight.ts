@@ -1,6 +1,13 @@
-import { Entity, Column } from 'typeorm';
+import {
+    Entity,
+    Column,
+    OneToMany,
+    MoreThanOrEqual,
+    LessThanOrEqual,
+    SelectQueryBuilder,
+} from 'typeorm';
 import { SyncableEntity, ISyncableEntity } from './syncableEntity';
-import { datetimeTransformer } from './helpers/datetimeTransformer';
+import { Account } from './account';
 
 export enum FreightCargo {
     GENERAL = 'Geral',
@@ -51,6 +58,19 @@ export interface IFreight extends ISyncableEntity {
     updatedAt?: Date;
 }
 
+export interface IProfitPerColumnResult extends Record<string, any> {
+    profit: number;
+    income: number;
+    expenses: number;
+    freights_num: number;
+    accounts_num: number;
+}
+
+export interface IProfitPerPeriodResult extends IProfitPerColumnResult {
+    month: string;
+    year: string;
+}
+
 @Entity('FREIGHT')
 export class Freight extends SyncableEntity implements IFreight {
     @Column({ nullable: false, enum: FreightCargo })
@@ -77,21 +97,18 @@ export class Freight extends SyncableEntity implements IFreight {
     @Column({
         name: 'start_date',
         nullable: false,
-        transformer: datetimeTransformer,
     })
     startDate!: Date;
 
     @Column({
         name: 'due_date',
         nullable: true,
-        transformer: datetimeTransformer,
     })
     dueDate?: Date;
 
     @Column({
         name: 'finished_date',
         nullable: true,
-        transformer: datetimeTransformer,
     })
     finishedDate?: Date;
 
@@ -125,6 +142,9 @@ export class Freight extends SyncableEntity implements IFreight {
     @Column({ name: 'destination_longitude', nullable: true, type: 'decimal' })
     destinationLongitude?: number;
 
+    @OneToMany(() => Account, (account) => account.freight, { lazy: true })
+    accounts!: Promise<Account[]>;
+
     public static readonly FRIENDLY_NAME_SINGULAR: string = 'Frete';
     public static readonly FRIENDLY_NAME_PLURAL: string = 'Fretes';
     public static readonly API_ENDPOINT_NAME: string = 'freights';
@@ -152,4 +172,111 @@ export class Freight extends SyncableEntity implements IFreight {
         destinationLongitude: 'Longitude de destino',
         ...SyncableEntity.FRIENDLY_COLUMN_NAMES,
     };
+
+    static async finishedFreightsPerColumn(column: string, alias: string) {
+        const freightsPerColumnResult = await Freight.createQueryBuilder()
+            .addSelect(column, alias)
+            .addSelect('COUNT(freight.id) as num')
+            .where({ status: FreightStatus.FINISHED })
+            .groupBy(column)
+            .getRawMany();
+
+        return Object.fromEntries(
+            freightsPerColumnResult.map((result) => [result[alias], result.num])
+        ) as Record<string, number>;
+    }
+
+    static async profitPerColumn(
+        column: string,
+        startDate?: string,
+        endDate?: string
+    ) {
+        const statement =
+            column === 'route'
+                ? `(freight.origin_state || ' - ' || freight.destination_state)`
+                : column;
+
+        const freightsPerColumn = await Freight.finishedFreightsPerColumn(
+            statement,
+            column
+        );
+
+        const queryBuilder = Freight.createQueryBuilder('freight')
+            .leftJoin('freight.accounts', 'account')
+            .addSelect(statement, column)
+            .addSelect('COUNT(account.id)', 'accounts_num')
+            .addSelect('SUM(freight.agreedPayment) AS income')
+            .addSelect('SUM(IFNULL(account.value, 0)) AS expenses')
+            .addSelect(
+                'SUM(freight.agreedPayment) + SUM(IFNULL(account.value, 0)) AS profit'
+            )
+            .where({ status: FreightStatus.FINISHED })
+            .groupBy(statement)
+            .orderBy('profit', 'DESC');
+
+        this.addDateRage(queryBuilder, 'finishedDate', startDate, endDate);
+
+        const results = await queryBuilder.getRawMany<IProfitPerColumnResult>();
+
+        return results.map((result) => ({
+            ...result,
+            freights_num: freightsPerColumn[result[column]],
+        }));
+    }
+
+    static async profitPerPeriod(
+        groupBy: 'year' | 'month',
+        startDate?: string,
+        endDate?: string
+    ) {
+        const strftimeString = groupBy === 'month' ? '%m/%Y' : '%Y';
+
+        const strftimeStatement = `strftime('${strftimeString}', finished_date)`;
+
+        const freightsPerColumn = await Freight.finishedFreightsPerColumn(
+            strftimeStatement,
+            groupBy
+        );
+
+        const queryBuilder = Freight.createQueryBuilder('freight')
+            .leftJoin('freight.accounts', 'account')
+            .addSelect('COUNT(account.id)', 'accounts_num')
+            .addSelect('SUM(freight.agreedPayment) AS income')
+            .addSelect('SUM(IFNULL(account.value, 0)) AS expenses')
+            .addSelect(
+                'SUM(freight.agreedPayment) + SUM(IFNULL(account.value, 0)) AS profit'
+            )
+            .addSelect(strftimeStatement, groupBy)
+            .where({ status: FreightStatus.FINISHED })
+            .groupBy(groupBy)
+            .orderBy('finished_date', 'ASC');
+
+        this.addDateRage(queryBuilder, 'finishedDate', startDate, endDate);
+
+        const results = await queryBuilder.getRawMany<IProfitPerPeriodResult>();
+
+        return results.map((result) => ({
+            ...result,
+            freights_num: freightsPerColumn[result[groupBy]],
+        }));
+    }
+
+    private static addDateRage(
+        queryBuilder: SelectQueryBuilder<Freight>,
+        column: string,
+        startDate?: string,
+        endDate?: string
+    ) {
+        if (startDate) {
+            queryBuilder.andWhere({
+                [column]: MoreThanOrEqual(new Date(startDate)),
+            });
+        }
+
+        if (endDate) {
+            queryBuilder.andWhere({
+                [column]: LessThanOrEqual(new Date(endDate)),
+            });
+        }
+    }
 }

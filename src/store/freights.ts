@@ -8,6 +8,7 @@ import { FilterData, IOrderData } from '@/models/appBaseEntity';
 type IFreightsStoreState = PiniaCustomStateProperties;
 
 const emptyFreightFormData = (): IFormData => ({
+    id: 0,
     description: '',
     cargo: '',
     status: 'Não iniciado',
@@ -24,11 +25,12 @@ const emptyFreightFormData = (): IFormData => ({
     destinationCountry: 'Brasil',
     destinationCity: '',
     destinationState: '',
+    createdAt: '',
+    updatedAt: '',
 });
 
 export const initialState = (): IFreightsStoreState => ({
     _items: [],
-    _syncing: false,
     _filterData: {} as FilterData,
     _newItem: emptyFreightFormData(),
     _editItem: emptyFreightFormData(),
@@ -39,7 +41,6 @@ export const useFreightsStore = defineStore('freights', {
     state: (): IFreightsStoreState => initialState(),
     getters: {
         freights: (state) => state._items,
-        syncing: (state) => state._syncing,
         orderData: (state) => state._orderData,
         filterData: (state) => state._filterData,
         newFreight: (state: IFreightsStoreState) => state._newItem as IFormData,

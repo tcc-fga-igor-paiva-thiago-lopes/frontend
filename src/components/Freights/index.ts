@@ -3,6 +3,7 @@ import { Ref } from 'vue';
 export * from './';
 
 export interface IFormData extends Record<string, unknown> {
+    id: number;
     description: string;
     cargo: string;
     status: string;
@@ -19,6 +20,8 @@ export interface IFormData extends Record<string, unknown> {
     destinationCountry: string;
     destinationCity: string;
     destinationState: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface IGeneralDataFields extends Record<string, any> {

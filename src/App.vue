@@ -101,6 +101,7 @@ import {
     logOut,
     navigate,
     pricetags,
+    statsChart,
     personCircleSharp,
 } from 'ionicons/icons';
 
@@ -146,7 +147,7 @@ const allMenuOptions: IMenuOption[] = [
         offlinePermitted: true,
     },
     {
-        route: 'FreightsIndex',
+        route: 'FreightsHome',
         icon: navigate,
         name: 'Fretes',
         offlinePermitted: true,
@@ -155,6 +156,12 @@ const allMenuOptions: IMenuOption[] = [
         route: 'CategoriesIndex',
         icon: pricetags,
         name: 'Categorias',
+        offlinePermitted: true,
+    },
+    {
+        route: 'AnalysisIndex',
+        icon: statsChart,
+        name: 'Indicadores',
         offlinePermitted: true,
     },
     {
@@ -181,7 +188,9 @@ const menuOptions = computed(() =>
 const handleLogout = async () => {
     const message = new IonicSafeString(`
         Tem certeza que deseja encerrar sua sessão?<br /><br />
-        Você precisará se conectar novamente e todos os dados salvos poderão ser apagados
+        Você precisará se conectar novamente e todos os dados salvos poderão ser apagados.<br /><br />
+        Recomendamos que faça uma sincronização total de todos os dados antes de encerrar a sessão.
+        Procure por "Sincronização" na página inicial ou no menu lateral
     `);
 
     await presentConfirmationAlert({

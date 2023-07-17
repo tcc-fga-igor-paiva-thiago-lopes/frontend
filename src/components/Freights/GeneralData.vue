@@ -7,7 +7,7 @@
                 ok-text="OK"
                 cancel-text="Fechar"
                 name="status"
-                interface="alert"
+                interface="popover"
                 placeholder="Selecione o status deste frete"
                 :disabled="readonly"
                 :value="fields.status.value"

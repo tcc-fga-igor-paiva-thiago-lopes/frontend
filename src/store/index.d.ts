@@ -63,7 +63,6 @@ declare module 'pinia' {
     }
 
     export interface PiniaCustomStateProperties {
-        _syncing: boolean;
         _items: Ref<any[]>;
         _newItem: Record<string, any>;
         _editItem: Record<string, any>;

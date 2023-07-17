@@ -17,7 +17,7 @@ import { SyncStatus } from '@/services/sync';
 import { FilterData, IOrderData } from '@/models/appBaseEntity';
 
 export const DatabaseCrudPlugin = () => ({
-    _syncing: false,
+    _syncing_entities: {} as Record<string, boolean>,
     _items: [] as any[],
     _filterData: {} as FilterData,
     _newItem: {} as Record<string, any>,
@@ -198,10 +198,10 @@ export const DatabaseCrudPlugin = () => ({
         });
     },
     async syncRecords<T extends SyncableEntity>(model: ModelClass<T>) {
-        if (this._syncing) return [];
+        if (this._syncing_entities[model.name]) return [];
 
         try {
-            this._syncing = true;
+            this._syncing_entities[model.name] = true;
 
             const apiAdapter = new APIAdapter(`/${model.API_ENDPOINT_NAME}`);
 
@@ -213,10 +213,7 @@ export const DatabaseCrudPlugin = () => ({
                     apiAdapter
                         .patch({
                             url: '/',
-                            data: multipleDatabaseToApi(
-                                toSync,
-                                model.getRepository<T>()
-                            ),
+                            data: await multipleDatabaseToApi(model, toSync),
                         })
                         .then((response) =>
                             runDatabaseOperation(() =>
@@ -266,7 +263,7 @@ export const DatabaseCrudPlugin = () => ({
 
             return ['error', 'error'] as SyncStatus[];
         } finally {
-            this._syncing = false;
+            this._syncing_entities[model.name] = false;
         }
     },
 });

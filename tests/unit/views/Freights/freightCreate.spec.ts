@@ -12,6 +12,7 @@ import {
     useFreightsStore,
 } from '@/store/freights';
 import { FreightStatus } from '@/models/freight';
+import { formatISO } from 'date-fns';
 
 const mockDataSource = DatabaseHelper.dataSource();
 
@@ -75,7 +76,7 @@ describe('FreightCreate.vue', () => {
             originCountry: 'Brasil',
             destinationCountry: 'Brasil',
             status: FreightStatus.NOT_STARTED,
-            startDate: new Date().toISOString(),
+            startDate: formatISO(new Date()),
         });
     });
 });

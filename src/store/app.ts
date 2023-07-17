@@ -11,6 +11,7 @@ import {
     SYNCABLE_ENTITIES,
 } from '@/services/sync';
 import AuthService from '@/services/auth';
+import { Account } from '@/models/account';
 
 type Platform = 'android' | 'ios' | 'web';
 
@@ -101,11 +102,19 @@ export const useAppStore = defineStore('application', {
 
             if (!isLogged) return;
 
-            const promises = SYNCABLE_ENTITIES.map((entity) =>
-                this.syncEntity(entity)
-            );
+            const promises = SYNCABLE_ENTITIES.filter(
+                (entity) => entity !== Account
+            ).map((entity) => this.syncEntity(entity));
 
             const settledResults = await Promise.allSettled(promises);
+
+            if (
+                settledResults.every((result) => result.status === 'fulfilled')
+            ) {
+                settledResults.push(
+                    (await Promise.allSettled([this.syncEntity(Account)]))[0]
+                );
+            }
 
             return Object.fromEntries(
                 settledResults.map(

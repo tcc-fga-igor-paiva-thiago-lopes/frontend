@@ -4,17 +4,21 @@ import { SyncStatus } from '@/services/sync';
 import { IFormData } from '@/components/Categories';
 import { Category, ICategory } from '@/models/category';
 import { FilterData, IOrderData } from '@/models/appBaseEntity';
+import { Account } from '@/models/account';
+import { presentToast } from '@/utils/toast';
 
 type CategoriesStoreState = PiniaCustomStateProperties;
 
 const emptyCategoryFormData = (): IFormData => ({
+    id: 0,
     name: '',
     color: '#FFFFFF',
+    createdAt: '',
+    updatedAt: '',
 });
 
 export const initialState = (): CategoriesStoreState => ({
     _items: [],
-    _syncing: false,
     _filterData: {} as FilterData,
     _newItem: emptyCategoryFormData(),
     _editItem: emptyCategoryFormData(),
@@ -25,7 +29,6 @@ export const useCategoriesStore = defineStore('categories', {
     state: (): CategoriesStoreState => initialState(),
     getters: {
         categories: (state) => state._items,
-        syncing: (state) => state._syncing,
         orderData: (state) => state._orderData,
         filterData: (state) => state._filterData,
         newCategory: (state: CategoriesStoreState) =>
@@ -65,6 +68,22 @@ export const useCategoriesStore = defineStore('categories', {
             this._newItem = emptyCategoryFormData();
         },
         async removeCategory(id: ICategory['id']) {
+            const hasAssociatedRecords = await Account.createQueryBuilder(
+                'account'
+            )
+                .innerJoin('account.category', 'category')
+                .where({ categoryId: id })
+                .getExists();
+
+            if (hasAssociatedRecords) {
+                await presentToast(
+                    'Esta categoria possui gastos associados',
+                    'danger'
+                );
+
+                return;
+            }
+
             await this.softRemoveRecord<Category>({
                 id,
                 model: Category,

@@ -1,6 +1,8 @@
 import {
+    Not,
     Like,
     Equal,
+    Between,
     MoreThan,
     LessThan,
     BaseEntity,
@@ -8,10 +10,11 @@ import {
     LessThanOrEqual,
     CreateDateColumn,
     UpdateDateColumn,
+    SelectQueryBuilder,
     PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { formatISO, parseISO } from '@/utils/date';
+import { formatISO } from '@/utils/date';
 
 export type StaticThis<T> = { new (): T } & typeof BaseEntity;
 
@@ -29,7 +32,9 @@ export type FilterDataType =
     | 'equals_to'
     | 'greater_than'
     | 'greater_than_or_equal'
-    | 'less_than_or_equal';
+    | 'less_than_or_equal'
+    | 'not_equals_to'
+    | 'not_includes';
 
 export interface IFilterData {
     value: any;
@@ -48,7 +53,7 @@ export interface IOrderData {
 }
 
 export const isDateType = (type: any) =>
-    ['date', 'datetime'].includes(type as string) || type instanceof Date;
+    ['date', 'datetime'].includes(type as string) || type === Date;
 
 export const isNumberType = (type: any) =>
     ['integer', 'number', 'numeric', 'decimal'].includes(type as string) ||
@@ -107,15 +112,13 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
         });
     }
 
-    static queryByFilterData<T extends AppBaseEntity>(
+    static addFilterToQuery<T extends AppBaseEntity>(
         this: StaticThis<T>,
+        queryBuilder: SelectQueryBuilder<T>,
         filterData: FilterData,
-        pageSize: number,
-        pageNum = 1,
         orderData?: IOrderData
     ) {
         const repository = this.getRepository<T>();
-        const queryBuilder = this.createQueryBuilder<T>();
 
         const columnsMap = Object.fromEntries(
             repository.metadata.columns.map(
@@ -130,16 +133,42 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
             if (!data.active) return;
 
             const { type } = columnsMap[field];
+
             const isDate = isDateType(type);
 
-            let value = isDate ? parseISO(data.value) : data.value;
+            let value = isDate ? new Date(data.value) : data.value;
 
             if (isDate && data.dateOnly)
                 value = formatISO(value, { representation: 'date' });
 
             switch (data.type) {
                 case 'equals_to':
-                    queryBuilder.andWhere({ [field]: Equal(value) });
+                    if (isDate && data.dateOnly) {
+                        queryBuilder.andWhere({
+                            [field]: Between(
+                                new Date(`${value} 00:00`),
+                                new Date(`${value} 23:59`)
+                            ),
+                        });
+                    } else {
+                        queryBuilder.andWhere({ [field]: Equal(value) });
+                    }
+
+                    break;
+                case 'not_equals_to':
+                    if (isDate && data.dateOnly) {
+                        queryBuilder.andWhere({
+                            [field]: Not(
+                                Between(
+                                    new Date(`${value} 00:00`),
+                                    new Date(`${value} 23:59`)
+                                )
+                            ),
+                        });
+                    } else {
+                        queryBuilder.andWhere({ [field]: Not(value) });
+                    }
+
                     break;
                 case 'greater_than':
                     queryBuilder.andWhere({ [field]: MoreThan(value) });
@@ -160,6 +189,11 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
                 case 'includes':
                     queryBuilder.andWhere({ [field]: Like(`%${data.value}%`) });
                     break;
+                case 'not_includes':
+                    queryBuilder.andWhere({
+                        [field]: Not(Like(`%${data.value}%`)),
+                    });
+                    break;
                 case 'starts_with':
                     queryBuilder.andWhere({ [field]: Like(`${value}%`) });
                     break;
@@ -173,10 +207,30 @@ export class AppBaseEntity extends BaseEntity implements IAppBaseEntity {
 
         if (orderData) {
             queryBuilder.orderBy(
-                columnsMap[orderData.field].databaseName,
+                columnsMap[orderData.field]?.databaseName,
                 orderData.order
             );
         }
+
+        return queryBuilder;
+    }
+
+    static queryByFilterData<T extends AppBaseEntity>(
+        this: StaticThis<T> & {
+            addFilterToQuery(
+                queryBuilder: SelectQueryBuilder<T>,
+                filterData: FilterData,
+                orderData?: IOrderData
+            ): SelectQueryBuilder<T>;
+        },
+        filterData: FilterData,
+        pageSize: number,
+        pageNum = 1,
+        orderData?: IOrderData
+    ) {
+        const queryBuilder = this.createQueryBuilder<T>();
+
+        this.addFilterToQuery(queryBuilder, filterData, orderData);
 
         queryBuilder.skip((pageNum - 1) * pageSize).take(pageSize);
 

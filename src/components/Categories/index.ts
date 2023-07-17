@@ -1,19 +1,9 @@
-import { Ref } from 'vue';
-
 export * from '.';
 
 export interface IFormData extends Record<string, any> {
+    id: number;
     name: string;
     color: string;
-}
-
-export interface IDataFields extends Record<string, any> {
-    name: {
-        value: string;
-        ref: Ref<any>;
-    };
-    color: {
-        value: string;
-        ref: Ref<any>;
-    };
+    createdAt: string;
+    updatedAt: string;
 }
