@@ -2,7 +2,7 @@ import { useAppStore } from '@/store/app';
 import { Capacitor } from '@capacitor/core';
 import { offlinePermittedRoutes } from '@/router';
 
-export const isRouteOfflinePermitted = async (
+export const isRouteNotPermittedOffline = async (
     routeName: string,
     readStatus = true,
     connected?: boolean

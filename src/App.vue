@@ -109,7 +109,7 @@ import { useAppStore } from './store/app';
 import AuthService from './services/auth';
 import { presentToast } from './utils/toast';
 import { presentConfirmationAlert } from './utils/alert';
-import { isRouteOfflinePermitted } from './utils/offline';
+import { isRouteNotPermittedOffline } from './utils/offline';
 
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
@@ -225,7 +225,7 @@ onBeforeUnmount(async () => {
 
 appStore.$subscribe(async (_, state) => {
     if (
-        await isRouteOfflinePermitted(
+        await isRouteNotPermittedOffline(
             route.name as string,
             false,
             state._connectionStatus.connected
