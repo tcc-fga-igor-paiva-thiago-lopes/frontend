@@ -112,8 +112,8 @@ import ConnectionStatus from '@/components/ConnectionStatus.vue';
 const indicators = [
     {
         route: 'ProfitPerColumn',
-        label: 'Tipo de carga e contratante',
-        sublabel: 'Lucro por tipo de carga/contratante',
+        label: 'Tipo de carga, contratante e trajeto',
+        sublabel: 'Lucro por tipo de carga, contratante e trajeto',
     },
     {
         route: 'ProfitPerPeriod',
