@@ -18,92 +18,86 @@
             <ion-loading :is-open="loading"></ion-loading>
 
             <form class="form ion-padding" @submit="submit">
-                <ion-list class="ion-no-padding">
-                    <ion-item class="form-item" ref="nameRef">
-                        <ion-label position="stacked">Nome *</ion-label>
-                        <ion-input
-                            required
-                            name="name"
-                            v-model="name"
-                            autocomplete="name"
-                            placeholder="Digite seu nome"
-                        >
-                        </ion-input>
+                <ion-item class="form-item" ref="nameRef">
+                    <ion-label position="stacked">Nome *</ion-label>
+                    <ion-input
+                        required
+                        name="name"
+                        v-model="name"
+                        autocomplete="name"
+                        placeholder="Digite seu nome"
+                    >
+                    </ion-input>
 
-                        <InputErrorNote
-                            field="name"
-                            defaultMsg="Nome inválido"
-                            :validationErrors="validationErrors"
-                        />
-                    </ion-item>
+                    <InputErrorNote
+                        field="name"
+                        defaultMsg="Nome inválido"
+                        :validationErrors="validationErrors"
+                    />
+                </ion-item>
 
-                    <ion-item class="form-item" ref="emailRef">
-                        <ion-label position="stacked">E-mail *</ion-label>
-                        <ion-input
-                            required
-                            type="email"
-                            name="email"
-                            v-model="email"
-                            inputmode="email"
-                            autocomplete="email"
-                            @ionInput="handleEmailChange"
-                            placeholder="Digite seu e-mail"
-                        >
-                        </ion-input>
-                        <ion-note slot="helper"
-                            >Insira um e-mail válido</ion-note
-                        >
+                <ion-item class="form-item" ref="emailRef">
+                    <ion-label position="stacked">E-mail *</ion-label>
+                    <ion-input
+                        required
+                        type="email"
+                        name="email"
+                        v-model="email"
+                        inputmode="email"
+                        autocomplete="email"
+                        @ionInput="handleEmailChange"
+                        placeholder="Digite seu e-mail"
+                    >
+                    </ion-input>
+                    <ion-note slot="helper">Insira um e-mail válido</ion-note>
 
-                        <InputErrorNote
-                            field="email"
-                            defaultMsg="E-mail inválido"
-                            :validationErrors="validationErrors"
-                        />
-                    </ion-item>
+                    <InputErrorNote
+                        field="email"
+                        defaultMsg="E-mail inválido"
+                        :validationErrors="validationErrors"
+                    />
+                </ion-item>
 
-                    <ion-item class="form-item" ref="passwordRef">
-                        <ion-label position="stacked">Senha *</ion-label>
-                        <ion-input
-                            required
-                            type="password"
-                            name="password"
-                            v-model="password"
-                            autocomplete="new-password"
-                            placeholder="Digite sua senha"
-                        >
-                        </ion-input>
+                <ion-item class="form-item" ref="passwordRef">
+                    <ion-label position="stacked">Senha *</ion-label>
+                    <ion-input
+                        required
+                        type="password"
+                        name="password"
+                        v-model="password"
+                        autocomplete="new-password"
+                        placeholder="Digite sua senha"
+                    >
+                    </ion-input>
 
-                        <InputErrorNote
-                            field="password"
-                            defaultMsg="Senha inválida"
-                            :validationErrors="validationErrors"
-                        />
-                    </ion-item>
+                    <InputErrorNote
+                        field="password"
+                        defaultMsg="Senha inválida"
+                        :validationErrors="validationErrors"
+                    />
+                </ion-item>
 
-                    <ion-item class="form-item" ref="passwordConfirmationRef">
-                        <ion-label position="stacked"
-                            >Confirmação de senha *</ion-label
-                        >
-                        <ion-input
-                            required
-                            type="password"
-                            name="passwordConfirmation"
-                            autocomplete="new-password"
-                            v-model="passwordConfirmation"
-                            placeholder="Confirme sua senha"
-                        >
-                        </ion-input>
-                        <ion-note slot="helper"
-                            >Deve ser igual a senha</ion-note
-                        >
+                <ion-item class="form-item" ref="passwordConfirmationRef">
+                    <ion-label position="stacked"
+                        >Confirmação de senha *</ion-label
+                    >
+                    <ion-input
+                        required
+                        type="password"
+                        name="passwordConfirmation"
+                        autocomplete="new-password"
+                        v-model="passwordConfirmation"
+                        placeholder="Confirme sua senha"
+                    >
+                    </ion-input>
+                    <ion-note slot="helper">Deve ser igual a senha</ion-note>
 
-                        <InputErrorNote
-                            field="passwordConfirmation"
-                            defaultMsg="Confirmação de senha inválida"
-                            :validationErrors="validationErrors"
-                        />
-                    </ion-item>
-                </ion-list>
+                    <InputErrorNote
+                        field="passwordConfirmation"
+                        defaultMsg="Confirmação de senha inválida"
+                        :validationErrors="validationErrors"
+                    />
+                </ion-item>
 
                 <ion-text color="danger" v-if="!loading && !!errorMessage">
                     <h6>{{ errorMessage }}</h6>

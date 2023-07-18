@@ -18,33 +18,31 @@
             <ion-loading :is-open="loading" />
 
             <form class="form ion-padding" @submit="submit">
-                <ion-list class="ion-no-padding">
-                    <ion-item class="form-item">
-                        <ion-label position="stacked">E-mail *</ion-label>
-                        <ion-input
-                            required
-                            type="email"
-                            :name="email"
-                            v-model="email"
-                            inputmode="email"
-                            placeholder="Digite seu e-mail"
-                        >
-                        </ion-input>
-                        <ion-note slot="error">E-mail inválido</ion-note>
-                    </ion-item>
+                <ion-item class="form-item">
+                    <ion-label position="stacked">E-mail *</ion-label>
+                    <ion-input
+                        required
+                        type="email"
+                        :name="email"
+                        v-model="email"
+                        inputmode="email"
+                        placeholder="Digite seu e-mail"
+                    >
+                    </ion-input>
+                    <ion-note slot="error">E-mail inválido</ion-note>
+                </ion-item>
 
-                    <ion-item class="form-item">
-                        <ion-label position="stacked">Senha *</ion-label>
-                        <ion-input
-                            required
-                            type="password"
-                            :name="password"
-                            v-model="password"
-                            placeholder="Digite sua senha"
-                        >
-                        </ion-input>
-                    </ion-item>
-                </ion-list>
+                <ion-item class="form-item">
+                    <ion-label position="stacked">Senha *</ion-label>
+                    <ion-input
+                        required
+                        type="password"
+                        :name="password"
+                        v-model="password"
+                        placeholder="Digite sua senha"
+                    >
+                    </ion-input>
+                </ion-item>
 
                 <ion-text color="danger" v-if="!loading && !!errorMessage">
                     <h6>{{ errorMessage }}</h6>
