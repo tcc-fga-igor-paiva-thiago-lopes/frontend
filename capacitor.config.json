@@ -1,6 +1,6 @@
 {
     "appId": "io.ionic.starter",
-    "appName": "accounts-management-app",
+    "appName": "truck-driver-app",
     "webDir": "dist",
     "bundledWebRuntime": false,
     "plugins": {

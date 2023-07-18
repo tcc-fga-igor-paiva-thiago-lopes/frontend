@@ -74,7 +74,6 @@ import {
     IonLoading,
     IonInput,
     IonButton,
-    IonList,
     IonNote,
     IonItem,
     IonLabel,
