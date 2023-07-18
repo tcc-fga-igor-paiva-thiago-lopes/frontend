@@ -133,9 +133,12 @@ const handleOrderData = async (orderData: Partial<IOrderData>) => {
     await paginationService.reset();
 };
 
-const unwatch = watch([route], async (value) => {
-    if (value[0].query.reset === 'true') await paginationService.reset();
-});
+const unwatch = watch(
+    () => route.query,
+    async (value) => {
+        if (value.reset === 'true') await paginationService.reset();
+    }
+);
 
 onMounted(async () => {
     try {

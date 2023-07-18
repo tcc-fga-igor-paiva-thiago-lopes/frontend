@@ -228,15 +228,8 @@
 </style>
 
 <script setup lang="ts">
-import {
-    computed,
-    onBeforeMount,
-    onBeforeUnmount,
-    ref,
-    toRefs,
-    watch,
-} from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { computed, onBeforeMount, ref, toRefs } from 'vue';
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 import {
     IonText,
     IonInput,
@@ -423,15 +416,11 @@ const fetchCategories = async () => {
     categories.value = await Category.find();
 };
 
-const unwatch = watch([route], async () => {
+onBeforeRouteUpdate(async () => {
     await fetchCategories();
 });
 
 onBeforeMount(async () => {
     await fetchCategories();
-});
-
-onBeforeUnmount(() => {
-    unwatch();
 });
 </script>

@@ -161,10 +161,13 @@ const applyQueryParams = () => {
     }
 };
 
-const unwatch = watch([route], async (value) => {
-    if (value[0].query.reset === 'true') await paginationService.reset();
-    else if (value[0].query.status) applyQueryParams();
-});
+const unwatch = watch(
+    () => route.query,
+    async (value) => {
+        if (value.reset === 'true') await paginationService.reset();
+        else if (value.status) applyQueryParams();
+    }
+);
 
 onBeforeMount(async () => {
     try {

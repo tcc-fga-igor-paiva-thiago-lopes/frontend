@@ -135,7 +135,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { useRoute } from 'vue-router';
+import { onBeforeRouteLeave } from 'vue-router';
 import { Chart, registerables } from 'chart.js';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
@@ -181,8 +181,6 @@ const FILTER_PERIOD_OPTIONS = {
 const appStore = useAppStore();
 
 const { platform } = storeToRefs(appStore);
-
-const route = useRoute();
 
 const loading = ref(false);
 
@@ -264,8 +262,8 @@ const unwatchColumn = watch([groupOption], async () => {
     await queryResults();
 });
 
-const unwatchRoute = watch([route], async () => {
-    if (route.name !== 'ProfitPerPeriod') {
+onBeforeRouteLeave(async (to, from) => {
+    if (to.name !== from.name) {
         ScreenOrientation.unlock();
 
         displayMode.value = 'list';
@@ -280,7 +278,6 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     unwatchColumn();
-    unwatchRoute();
 
     ScreenOrientation.unlock();
 });

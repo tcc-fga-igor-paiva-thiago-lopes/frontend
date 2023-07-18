@@ -29,7 +29,7 @@
 <style></style>
 
 <script setup lang="ts">
-import { onBeforeMount, ref, computed } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 
 import {
