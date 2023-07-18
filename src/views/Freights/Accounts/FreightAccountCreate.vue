@@ -13,11 +13,16 @@
         </ion-header>
 
         <ion-content :fullscreen="true" class="ion-padding-horizontal">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <AccountsForm
                 :freight="freight"
                 :formData="newAccount"
+                :categories="categories"
                 :setAttribute="changeField"
                 @on-submit="handleFormSubmit"
             />
@@ -40,11 +45,15 @@ import {
     IonToolbar,
     IonLoading,
     IonButtons,
+    IonRefresher,
     IonMenuButton,
+    IonRefresherContent,
+    RefresherCustomEvent,
 } from '@ionic/vue';
 
 import { formatISO } from '@/utils/date';
 import { Freight } from '@/models/freight';
+import { Category } from '@/models/category';
 import { presentToast } from '@/utils/toast';
 import { useAccountsStore } from '@/store/accounts';
 import { useFreightsStore } from '@/store/freights';
@@ -55,6 +64,8 @@ import AccountsForm from '@/components/Accounts/AccountsForm.vue';
 const loading = ref(false);
 
 const freight = ref<Freight | null>(null);
+
+const categories = ref<Category[]>([]);
 
 const route = useRoute();
 const router = useRouter();
@@ -90,6 +101,10 @@ const changeField = (field: string, value: unknown) => {
     setNewAccountAttrs({ [field]: value });
 };
 
+const fetchCategories = async () => {
+    categories.value = await Category.find();
+};
+
 const searchFreight = async () => {
     const { params } = route;
 
@@ -104,20 +119,38 @@ const searchFreight = async () => {
     }
 
     freight.value = foundFreight;
+
+    setNewAccountAttrs({
+        freightId: foundFreight.id,
+        accountDate: formatISO(new Date()),
+    });
+};
+
+const searchFreightAndCategories = async () => {
+    loading.value = true;
+
+    try {
+        await searchFreight();
+
+        await fetchCategories();
+    } finally {
+        loading.value = false;
+    }
+};
+
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await searchFreightAndCategories();
+
+    await event.target.complete();
 };
 
 onBeforeRouteUpdate(async (to, from) => {
     if (to.params.freightId !== from.params.freightId) {
-        await searchFreight();
+        await searchFreightAndCategories();
     }
 });
 
 onBeforeMount(async () => {
-    await searchFreight();
-
-    setNewAccountAttrs({
-        freightId: freight?.value?.id,
-        accountDate: formatISO(new Date()),
-    });
+    await searchFreightAndCategories();
 });
 </script>

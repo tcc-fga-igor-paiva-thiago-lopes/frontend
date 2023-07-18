@@ -13,6 +13,10 @@
         </ion-header>
 
         <ion-content :fullscreen="true" class="ion-padding">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <div
@@ -156,6 +160,9 @@ import {
     IonLoading,
     IonSegment,
     IonSegmentButton,
+    IonRefresher,
+    IonRefresherContent,
+    RefresherCustomEvent,
     SegmentChangeEventDetail,
 } from '@ionic/vue';
 import { sync, list, barChart } from 'ionicons/icons';
@@ -276,6 +283,14 @@ const queryResults = async () => {
     } finally {
         loading.value = false;
     }
+};
+
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await queryResults();
+
+    await ScreenOrientation.unlock();
+
+    await event.target.complete();
 };
 
 const unwatchColumn = watch([column], async () => {

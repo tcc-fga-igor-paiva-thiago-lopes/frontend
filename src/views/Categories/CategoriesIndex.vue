@@ -13,6 +13,10 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <ManageCategories
@@ -53,8 +57,11 @@ import {
     IonToolbar,
     IonLoading,
     IonButtons,
+    IonRefresher,
     IonMenuButton,
     IonicSafeString,
+    IonRefresherContent,
+    RefresherCustomEvent,
 } from '@ionic/vue';
 
 import { Category } from '@/models/category';
@@ -133,6 +140,12 @@ const handleOrderData = async (orderData: Partial<IOrderData>) => {
     await paginationService.reset();
 };
 
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await loadCategories();
+
+    await event.target.complete();
+};
+
 const unwatch = watch(
     () => route.query,
     async (value) => {
@@ -140,7 +153,9 @@ const unwatch = watch(
     }
 );
 
-onMounted(async () => {
+const loadCategories = async () => {
+    loading.value = true;
+
     try {
         await paginationService.getFirstPage();
     } catch (e) {
@@ -150,6 +165,10 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
+};
+
+onMounted(async () => {
+    await loadCategories();
 });
 
 onBeforeUnmount(() => {

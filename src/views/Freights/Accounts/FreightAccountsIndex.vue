@@ -13,6 +13,10 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <ManageAccounts
@@ -60,8 +64,11 @@ import {
     IonToolbar,
     IonLoading,
     IonButtons,
+    IonRefresher,
     IonMenuButton,
     IonicSafeString,
+    IonRefresherContent,
+    RefresherCustomEvent,
 } from '@ionic/vue';
 
 import { Account } from '@/models/account';
@@ -201,15 +208,13 @@ const searchFreight = async () => {
     freight.value = foundFreight;
 };
 
-onBeforeRouteUpdate(async (to, from) => {
-    if (to.params.freightId !== from.params.freightId) {
-        await searchFreight();
-    }
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await loadAccounts();
 
-    if (to.query.reset === 'true') await paginationService.reset();
-});
+    await event.target.complete();
+};
 
-onMounted(async () => {
+const loadAccounts = async () => {
     loading.value = true;
 
     try {
@@ -223,6 +228,18 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
+};
+
+onBeforeRouteUpdate(async (to, from) => {
+    if (to.params.freightId !== from.params.freightId) {
+        await searchFreight();
+    }
+
+    if (to.query.reset === 'true') await paginationService.reset();
+});
+
+onMounted(async () => {
+    await loadAccounts();
 });
 
 onBeforeUnmount(() => {

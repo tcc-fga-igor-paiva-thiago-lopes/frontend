@@ -13,6 +13,10 @@
         </ion-header>
 
         <ion-content :fullscreen="true" class="ion-padding-horizontal">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <AccountsForm
@@ -20,6 +24,7 @@
                 edit
                 :freight="freight"
                 :formData="editAccount"
+                :categories="categories"
                 :setAttribute="changeField"
                 @on-submit="handleFormSubmit"
             />
@@ -43,10 +48,14 @@ import {
     IonLoading,
     IonButtons,
     IonMenuButton,
+    IonRefresher,
+    IonRefresherContent,
+    RefresherCustomEvent,
 } from '@ionic/vue';
 
 import { Freight } from '@/models/freight';
 import { presentToast } from '@/utils/toast';
+import { Category } from '@/models/category';
 import { useAccountsStore } from '@/store/accounts';
 import { useFreightsStore } from '@/store/freights';
 
@@ -56,6 +65,8 @@ import AccountsForm from '@/components/Accounts/AccountsForm.vue';
 const loading = ref(false);
 
 const freight = ref<Freight | null>(null);
+
+const categories = ref<Category[]>([]);
 
 const accountFound = ref(false);
 
@@ -95,6 +106,17 @@ const handleFormSubmit = async () => {
 
 const changeField = (field: string, value: unknown) => {
     setEditAccountAttrs({ [field]: value });
+};
+
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await searchFreightAndAccount();
+    await fetchCategories();
+
+    await event.target.complete();
+};
+
+const fetchCategories = async () => {
+    categories.value = await Category.find();
 };
 
 const searchFreightAndAccount = async () => {
@@ -138,9 +160,12 @@ onBeforeRouteUpdate(async (to, from) => {
     ) {
         await searchFreightAndAccount();
     }
+
+    await fetchCategories();
 });
 
 onBeforeMount(async () => {
     await searchFreightAndAccount();
+    await fetchCategories();
 });
 </script>

@@ -11,7 +11,7 @@
                     class="flex-direction-column ion-margin-bottom ion-padding-top"
                 >
                     <div class="flex-direction-column" style="padding: 0 8px">
-                        <div class="display-flex ion-justify-content-between">
+                        <div class="flex-direction-column">
                             <ion-text color="medium">
                                 <h6 style="margin: 0">
                                     <strong>Início: </strong
@@ -27,20 +27,12 @@
                             </ion-text>
                         </div>
 
-                        <div
-                            class="display-flex ion-justify-content-between ion-align-items-center ion-margin-top"
-                        >
+                        <div class="flex-direction-column ion-margin-top">
                             <ion-text color="medium">
                                 <h6 style="margin: 0">
                                     <strong>De: </strong>{{ freightOriginText }}
                                 </h6>
                             </ion-text>
-
-                            <ion-icon
-                                :icon="arrowForward"
-                                size="small"
-                                color="medium"
-                            ></ion-icon>
 
                             <ion-text color="medium">
                                 <h6 style="margin: 0">
@@ -228,8 +220,8 @@
 </style>
 
 <script setup lang="ts">
-import { computed, onBeforeMount, ref, toRefs } from 'vue';
-import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
+import { computed, ref, toRefs } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import {
     IonText,
     IonInput,
@@ -237,14 +229,12 @@ import {
     IonItem,
     IonLabel,
     IonNote,
-    IonIcon,
     IonSelect,
     IonTextarea,
     IonAccordion,
     IonAccordionGroup,
     IonSelectOption,
 } from '@ionic/vue';
-import { arrowForward } from 'ionicons/icons';
 
 import {
     ValidationErrors,
@@ -267,6 +257,7 @@ interface IProps {
     edit?: boolean;
     readonly?: boolean;
     formData: IFormData;
+    categories: Category[];
     freight: Freight | null;
     setAttribute: (field: string, value: unknown) => void;
 }
@@ -276,7 +267,8 @@ const props = withDefaults(defineProps<IProps>(), {
     readonly: false,
 });
 
-const { edit, readonly, formData, setAttribute, freight } = toRefs(props);
+const { edit, readonly, formData, setAttribute, freight, categories } =
+    toRefs(props);
 
 const emit = defineEmits(['onSubmit']);
 
@@ -294,8 +286,6 @@ const accountDateRef = ref('');
 const categoryIdRef = ref('');
 
 const validationErrors = ref<ValidationErrors>({});
-
-const categories = ref<Category[]>([]);
 
 const freightOriginText = computed(
     () => `${freight.value?.originCity} (${freight.value?.originState})`
@@ -411,16 +401,4 @@ const handleSubmit = () => {
         emit('onSubmit');
     }
 };
-
-const fetchCategories = async () => {
-    categories.value = await Category.find();
-};
-
-onBeforeRouteUpdate(async () => {
-    await fetchCategories();
-});
-
-onBeforeMount(async () => {
-    await fetchCategories();
-});
 </script>
