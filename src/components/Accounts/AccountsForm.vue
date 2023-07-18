@@ -153,7 +153,7 @@
             >
                 <IonSelectOption
                     v-for="category in categories"
-                    :value="category.id"
+                    :value="category.id.toString()"
                     :key="category.id"
                 >
                     {{ category.name }}
