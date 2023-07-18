@@ -1,9 +1,11 @@
 import { setActivePinia } from 'pinia';
 import { mount } from '@vue/test-utils';
 import { TestingPinia, createTestingPinia } from '@pinia/testing';
+import { Router, createRouter, createWebHistory } from 'vue-router';
 
 const mockApiAdapter = jest.fn();
 
+import { routes } from '@/router';
 import { DatabaseHelper } from '../../../databaseHelper';
 import { initialState as appInitialState } from '@/store/app';
 import CategoriesIndex from '@/views/Categories/CategoriesIndex.vue';
@@ -35,6 +37,7 @@ jest.mock('@/services/api', () => {
     });
 });
 
+let router: Router;
 let testingPinia: TestingPinia;
 
 beforeAll(async () => {
@@ -47,7 +50,7 @@ beforeAll(async () => {
 afterAll(() => DatabaseHelper.instance.teardownTestDB());
 
 describe('CategoriesIndex.vue', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         testingPinia = createTestingPinia({
             initialState: {
                 application: appInitialState(),
@@ -56,6 +59,14 @@ describe('CategoriesIndex.vue', () => {
         });
 
         setActivePinia(testingPinia);
+
+        router = createRouter({
+            history: createWebHistory(),
+            routes: routes,
+        });
+
+        router.push('/categories');
+        await router.isReady();
     });
 
     it('renders categories index vue', async () => {
@@ -65,7 +76,7 @@ describe('CategoriesIndex.vue', () => {
 
         const wrapper = mount(CategoriesIndex, {
             global: {
-                plugins: [testingPinia],
+                plugins: [router, testingPinia],
             },
         });
 
