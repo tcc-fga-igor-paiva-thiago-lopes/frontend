@@ -13,6 +13,10 @@
         </ion-header>
 
         <ion-content :fullscreen="true" class="ion-padding-horizontal">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <AccountsForm
@@ -20,6 +24,7 @@
                 readonly
                 :freight="freight"
                 :formData="account"
+                :categories="categories"
                 :setAttribute="(field: string, value: unknown) => true"
             />
         </ion-content>
@@ -41,6 +46,9 @@ import {
     IonLoading,
     IonButtons,
     IonMenuButton,
+    IonRefresher,
+    IonRefresherContent,
+    RefresherCustomEvent,
 } from '@ionic/vue';
 
 import { Freight } from '@/models/freight';
@@ -51,12 +59,15 @@ import { useFreightsStore } from '@/store/freights';
 import { IFormData } from '@/components/Accounts';
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 import AccountsForm from '@/components/Accounts/AccountsForm.vue';
+import { Category } from '@/models/category';
 
 const loading = ref(false);
 
 const freight = ref<Freight | null>(null);
 
 const account = ref<IFormData | null>(null);
+
+const categories = ref<Category[]>([]);
 
 const route = useRoute();
 const router = useRouter();
@@ -68,6 +79,17 @@ const freightsStore = useFreightsStore();
 const { findFreight } = freightsStore;
 
 const { findAccount } = accountsStore;
+
+const fetchCategories = async () => {
+    categories.value = await Category.find();
+};
+
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await searchFreightAndAccount();
+    await fetchCategories();
+
+    await event.target.complete();
+};
 
 const searchFreightAndAccount = async () => {
     const { params } = route;
@@ -111,9 +133,12 @@ onBeforeRouteUpdate(async (to, from) => {
     ) {
         await searchFreightAndAccount();
     }
+
+    await fetchCategories();
 });
 
 onBeforeMount(async () => {
     await searchFreightAndAccount();
+    await fetchCategories();
 });
 </script>
