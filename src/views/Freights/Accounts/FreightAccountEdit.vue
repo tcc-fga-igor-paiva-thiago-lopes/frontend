@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 
 import {
     IonPage,
@@ -97,21 +97,50 @@ const changeField = (field: string, value: unknown) => {
     setEditAccountAttrs({ [field]: value });
 };
 
-onBeforeMount(async () => {
+const searchFreightAndAccount = async () => {
     const { params } = route;
 
-    freight.value = (await findFreight(
-        parseInt(params.freightId as string, 10)
-    )) as Freight | null;
+    loading.value = true;
 
-    if (!freight.value) return router.push({ name: 'FreightsIndex' });
+    try {
+        const freightId = parseInt(params.freightId as string, 10);
 
-    accountFound.value = await findEditAccount(accountId.value);
+        const foundFreight = (await findFreight(freightId)) as Freight | null;
 
-    if (!accountFound.value) {
-        presentToast('Gasto não encontrado', 'danger');
+        if (!foundFreight) {
+            await presentToast('Frete não encontrado', 'danger');
 
-        return router.push({ name: 'FreightAccountsIndex' });
+            return router.push({ name: 'FreightsIndex' });
+        }
+
+        const foundAccount = await findEditAccount(
+            freightId,
+            parseInt(route.params.accountId as string, 10)
+        );
+
+        if (!foundAccount) {
+            await presentToast('Gasto não encontrado', 'danger');
+
+            return router.push({ name: 'FreightAccountsIndex' });
+        }
+
+        freight.value = foundFreight;
+        accountFound.value = foundAccount;
+    } finally {
+        loading.value = false;
     }
+};
+
+onBeforeRouteUpdate(async (to, from) => {
+    if (
+        to.params.freightId !== from.params.freightId &&
+        to.params.accountId !== from.params.accountId
+    ) {
+        await searchFreightAndAccount();
+    }
+});
+
+onBeforeMount(async () => {
+    await searchFreightAndAccount();
 });
 </script>

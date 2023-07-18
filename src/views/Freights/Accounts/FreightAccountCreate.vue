@@ -30,7 +30,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 
 import {
     IonPage,
@@ -90,17 +90,33 @@ const changeField = (field: string, value: unknown) => {
     setNewAccountAttrs({ [field]: value });
 };
 
-onBeforeMount(async () => {
+const searchFreight = async () => {
     const { params } = route;
 
-    freight.value = (await findFreight(
+    const foundFreight = (await findFreight(
         parseInt(params.freightId as string, 10)
     )) as Freight | null;
 
-    if (!freight.value) return router.push({ name: 'FreightsIndex' });
+    if (!foundFreight) {
+        await presentToast('Frete não encontrado', 'danger');
+
+        return router.push({ name: 'FreightsIndex' });
+    }
+
+    freight.value = foundFreight;
+};
+
+onBeforeRouteUpdate(async (to, from) => {
+    if (to.params.freightId !== from.params.freightId) {
+        await searchFreight();
+    }
+});
+
+onBeforeMount(async () => {
+    await searchFreight();
 
     setNewAccountAttrs({
-        freightId: freight.value.id,
+        freightId: freight?.value?.id,
         accountDate: formatISO(new Date()),
     });
 });

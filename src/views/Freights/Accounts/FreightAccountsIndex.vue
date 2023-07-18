@@ -42,7 +42,7 @@
 <style></style>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 import {
     onBeforeUnmount,
     onMounted,
@@ -182,15 +182,38 @@ const handleOrderData = async (data: Partial<IOrderData>) => {
     await paginationService.reset();
 };
 
-const unwatch = watch([route], async (value) => {
-    if (value[0].query.reset === 'true') await paginationService.reset();
+const unwatch = watch(
+    () => route.query,
+    async (value) => {
+        if (value.reset === 'true') await paginationService.reset();
+    }
+);
+
+const searchFreight = async () => {
+    const foundFreight = (await findFreight(freightId.value)) as Freight | null;
+
+    if (!foundFreight) {
+        await presentToast('Frete não encontrado', 'danger');
+
+        return router.back();
+    }
+
+    freight.value = foundFreight;
+};
+
+onBeforeRouteUpdate(async (to, from) => {
+    if (to.params.freightId !== from.params.freightId) {
+        await searchFreight();
+    }
+
+    if (to.query.reset === 'true') await paginationService.reset();
 });
 
 onMounted(async () => {
-    try {
-        freight.value = (await findFreight(freightId.value)) as Freight | null;
+    loading.value = true;
 
-        if (!freight.value) return router.back();
+    try {
+        await searchFreight();
 
         await paginationService.getFirstPage();
     } catch (e) {

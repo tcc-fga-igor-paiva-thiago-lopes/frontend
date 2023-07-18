@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import { onBeforeMount, ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 
 import {
     IonPage,
@@ -69,31 +69,51 @@ const { findFreight } = freightsStore;
 
 const { findAccount } = accountsStore;
 
-const accountId = computed(() =>
-    parseInt(route.params.accountId as string, 10)
-);
-
-onBeforeMount(async () => {
+const searchFreightAndAccount = async () => {
     const { params } = route;
 
-    freight.value = (await findFreight(
-        parseInt(params.freightId as string, 10)
-    )) as Freight | null;
+    loading.value = true;
 
-    if (!freight.value) {
-        await presentToast('Frete não encontrado', 'danger');
+    try {
+        const freightId = parseInt(params.freightId as string, 10);
 
-        return router.push({ name: 'FreightsIndex' });
+        const foundFreight = (await findFreight(freightId)) as Freight | null;
+
+        if (!foundFreight) {
+            await presentToast('Frete não encontrado', 'danger');
+
+            return router.push({ name: 'FreightsIndex' });
+        }
+
+        const foundAccount = await findAccount(
+            freightId,
+            parseInt(route.params.accountId as string, 10),
+            true
+        );
+
+        if (!foundAccount?.value) {
+            await presentToast('Gasto não encontrado', 'danger');
+
+            return router.push({ name: 'FreightAccountsIndex' });
+        }
+
+        freight.value = foundFreight;
+        account.value = foundAccount as IFormData | null;
+    } finally {
+        loading.value = false;
     }
+};
 
-    const foundAccount = await findAccount(accountId.value, true);
-
-    if (!foundAccount?.value) {
-        await presentToast('Gasto não encontrado', 'danger');
-
-        return router.push({ name: 'FreightAccountsIndex' });
+onBeforeRouteUpdate(async (to, from) => {
+    if (
+        to.params.freightId !== from.params.freightId &&
+        to.params.accountId !== from.params.accountId
+    ) {
+        await searchFreightAndAccount();
     }
+});
 
-    account.value = foundAccount as IFormData | null;
+onBeforeMount(async () => {
+    await searchFreightAndAccount();
 });
 </script>
