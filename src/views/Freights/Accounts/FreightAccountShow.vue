@@ -128,7 +128,7 @@ const searchFreightAndAccount = async () => {
 
 onBeforeRouteUpdate(async (to, from) => {
     if (
-        to.params.freightId !== from.params.freightId &&
+        to.params.freightId !== from.params.freightId ||
         to.params.accountId !== from.params.accountId
     ) {
         await searchFreightAndAccount();
