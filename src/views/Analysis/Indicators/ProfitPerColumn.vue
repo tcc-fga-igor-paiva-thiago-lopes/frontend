@@ -97,37 +97,32 @@
                     <h6>Nenhum frete finalizado cadastrado...</h6>
                 </ion-text>
 
-                <template>
-                    <ion-list v-if="displayMode === 'list'">
-                        <ion-item
-                            v-for="data in profitPerColumn"
-                            :key="data.cargo"
-                        >
-                            <ion-label text-wrap>
-                                <h2>{{ data[column] }}</h2>
+                <ion-list v-if="displayMode === 'list'">
+                    <ion-item v-for="data in profitPerColumn" :key="data.cargo">
+                        <ion-label text-wrap>
+                            <h2>{{ data[column] }}</h2>
 
-                                <p>
-                                    Total de fretes:
-                                    {{ data.freights_num }}
-                                    <br />
-                                    Total de gastos:
-                                    {{ data.accounts_num }}
-                                </p>
-                            </ion-label>
+                            <p>
+                                Total de fretes:
+                                {{ data.freights_num }}
+                                <br />
+                                Total de gastos:
+                                {{ data.accounts_num }}
+                            </p>
+                        </ion-label>
 
-                            <span slot="end">{{
-                                brazilFormatter.format(data.profit)
-                            }}</span>
-                        </ion-item>
-                    </ion-list>
+                        <span slot="end">{{
+                            brazilFormatter.format(data.profit)
+                        }}</span>
+                    </ion-item>
+                </ion-list>
 
-                    <canvas
-                        ref="chartRef"
-                        :style="{
-                            display: displayMode === 'chart' ? '' : 'none',
-                        }"
-                    ></canvas>
-                </template>
+                <canvas
+                    ref="chartRef"
+                    :style="{
+                        display: displayMode === 'chart' ? '' : 'none',
+                    }"
+                ></canvas>
             </div>
         </ion-content>
     </ion-page>
