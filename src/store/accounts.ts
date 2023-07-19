@@ -1,6 +1,7 @@
 import { defineStore, PiniaCustomStateProperties } from 'pinia';
 
 import { SyncStatus } from '@/services/sync';
+import { IFreight } from '@/models/freight';
 import { IFormData } from '@/components/Accounts';
 import { Account, IAccount } from '@/models/account';
 import { FilterData, IOrderData } from '@/models/appBaseEntity';
@@ -53,11 +54,29 @@ export const useAccountsStore = defineStore('accounts', {
         async loadPaginated(pageSize: number, pageNum: number) {
             return this.loadAllPaginated<Account>(Account, pageSize, pageNum);
         },
-        async findEditAccount(id: IAccount['id']) {
-            return this.findEditRecord<Account>({ model: Account, id });
+        async findEditAccount(freightId: IFreight['id'], id: IAccount['id']) {
+            const foundAccount = await this.findRecordByAtrrs<Account>(
+                Account,
+                { id, freightId },
+                true
+            );
+
+            if (!foundAccount) return false;
+
+            this._editItem = foundAccount;
+
+            return true;
         },
-        async findAccount(id: IAccount['id'], asFormData = false) {
-            return this.findRecord<Account>(Account, id, asFormData);
+        async findAccount(
+            freightId: IFreight['id'],
+            id: IAccount['id'],
+            asFormData = false
+        ) {
+            return this.findRecordByAtrrs<Account>(
+                Account,
+                { id, freightId },
+                asFormData
+            );
         },
         async createAccount() {
             await this.createRecordWithNewItem<Account>({

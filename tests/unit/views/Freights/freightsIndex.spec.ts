@@ -1,9 +1,11 @@
 import { setActivePinia } from 'pinia';
 import { mount } from '@vue/test-utils';
 import { TestingPinia, createTestingPinia } from '@pinia/testing';
+import { Router, createRouter, createWebHistory } from 'vue-router';
 
 const mockApiAdapter = jest.fn();
 
+import { routes } from '@/router';
 import { DatabaseHelper } from '../../../databaseHelper';
 import { initialState as appInitialState } from '@/store/app';
 import FreightsIndex from '@/views/Freights/FreightsIndex.vue';
@@ -31,6 +33,7 @@ jest.mock('@/services/api', () => {
     });
 });
 
+let router: Router;
 let testingPinia: TestingPinia;
 
 beforeAll(async () => {
@@ -43,7 +46,7 @@ beforeAll(async () => {
 afterAll(() => DatabaseHelper.instance.teardownTestDB());
 
 describe('FreightsIndex.vue', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         testingPinia = createTestingPinia({
             initialState: {
                 application: appInitialState(),
@@ -52,6 +55,14 @@ describe('FreightsIndex.vue', () => {
         });
 
         setActivePinia(testingPinia);
+
+        router = createRouter({
+            history: createWebHistory(),
+            routes: routes,
+        });
+
+        router.push('/freights');
+        await router.isReady();
     });
 
     it('renders freights index vue', async () => {
@@ -61,7 +72,7 @@ describe('FreightsIndex.vue', () => {
 
         const wrapper = mount(FreightsIndex, {
             global: {
-                plugins: [testingPinia],
+                plugins: [router, testingPinia],
             },
         });
 

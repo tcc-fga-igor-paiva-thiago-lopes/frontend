@@ -80,7 +80,7 @@ onMounted(async () => {
     categoryFound.value = await findEditCategory(categoryId.value);
 
     if (!categoryFound.value) {
-        presentToast('Categoria não encontrado', 'danger');
+        presentToast('Categoria não encontrada', 'danger');
 
         await router.push({ name: 'CategoriesIndex' });
     }
@@ -94,7 +94,7 @@ const handleFormSubmit = async () => {
     try {
         await updateCategory(categoryId.value);
 
-        await presentToast('Categoria editado com sucesso!', 'success');
+        await presentToast('Categoria editada com sucesso!', 'success');
 
         await router.push({
             name: 'CategoriesIndex',

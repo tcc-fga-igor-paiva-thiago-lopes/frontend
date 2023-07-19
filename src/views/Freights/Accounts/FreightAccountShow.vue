@@ -13,6 +13,10 @@
         </ion-header>
 
         <ion-content :fullscreen="true" class="ion-padding-horizontal">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <AccountsForm
@@ -20,6 +24,7 @@
                 readonly
                 :freight="freight"
                 :formData="account"
+                :categories="categories"
                 :setAttribute="(field: string, value: unknown) => true"
             />
         </ion-content>
@@ -29,8 +34,8 @@
 <style></style>
 
 <script setup lang="ts">
-import { onBeforeMount, ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { onBeforeMount, ref } from 'vue';
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 
 import {
     IonPage,
@@ -41,6 +46,9 @@ import {
     IonLoading,
     IonButtons,
     IonMenuButton,
+    IonRefresher,
+    IonRefresherContent,
+    RefresherCustomEvent,
 } from '@ionic/vue';
 
 import { Freight } from '@/models/freight';
@@ -51,12 +59,15 @@ import { useFreightsStore } from '@/store/freights';
 import { IFormData } from '@/components/Accounts';
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 import AccountsForm from '@/components/Accounts/AccountsForm.vue';
+import { Category } from '@/models/category';
 
 const loading = ref(false);
 
 const freight = ref<Freight | null>(null);
 
 const account = ref<IFormData | null>(null);
+
+const categories = ref<Category[]>([]);
 
 const route = useRoute();
 const router = useRouter();
@@ -69,31 +80,65 @@ const { findFreight } = freightsStore;
 
 const { findAccount } = accountsStore;
 
-const accountId = computed(() =>
-    parseInt(route.params.accountId as string, 10)
-);
+const fetchCategories = async () => {
+    categories.value = await Category.find();
+};
 
-onBeforeMount(async () => {
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await searchFreightAndAccount();
+    await fetchCategories();
+
+    await event.target.complete();
+};
+
+const searchFreightAndAccount = async () => {
     const { params } = route;
 
-    freight.value = (await findFreight(
-        parseInt(params.freightId as string, 10)
-    )) as Freight | null;
+    loading.value = true;
 
-    if (!freight.value) {
-        await presentToast('Frete não encontrado', 'danger');
+    try {
+        const freightId = parseInt(params.freightId as string, 10);
 
-        return router.push({ name: 'FreightsIndex' });
+        const foundFreight = (await findFreight(freightId)) as Freight | null;
+
+        if (!foundFreight) {
+            await presentToast('Frete não encontrado', 'danger');
+
+            return router.push({ name: 'FreightsIndex' });
+        }
+
+        const foundAccount = await findAccount(
+            freightId,
+            parseInt(route.params.accountId as string, 10),
+            true
+        );
+
+        if (!foundAccount?.value) {
+            await presentToast('Gasto não encontrado', 'danger');
+
+            return router.push({ name: 'FreightAccountsIndex' });
+        }
+
+        freight.value = foundFreight;
+        account.value = foundAccount as IFormData | null;
+    } finally {
+        loading.value = false;
+    }
+};
+
+onBeforeRouteUpdate(async (to, from) => {
+    if (
+        to.params.freightId !== from.params.freightId ||
+        to.params.accountId !== from.params.accountId
+    ) {
+        await searchFreightAndAccount();
     }
 
-    const foundAccount = await findAccount(accountId.value, true);
+    await fetchCategories();
+});
 
-    if (!foundAccount?.value) {
-        await presentToast('Gasto não encontrado', 'danger');
-
-        return router.push({ name: 'FreightAccountsIndex' });
-    }
-
-    account.value = foundAccount as IFormData | null;
+onBeforeMount(async () => {
+    await searchFreightAndAccount();
+    await fetchCategories();
 });
 </script>

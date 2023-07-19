@@ -283,6 +283,7 @@ import DatetimeButton from '@/components/DatetimeButton.vue';
 import InputErrorNote from '../InputErrorNote.vue';
 import { brazilFormatter } from '@/utils/currency';
 import { ValidationErrors } from '@/utils/errors';
+import { formatISO } from '@/utils/date';
 import { IGeneralDataFields } from '.';
 
 interface IProps {
@@ -320,22 +321,37 @@ const paymentHelperText = computed(() => {
     }: ${brazilFormatter.format(displayValue)}`;
 });
 
-const unwatch = watch([isPaymentPerTon, agreedPayment, fields], (values) => {
-    const [isPaymentPerTon, inputPayment, fields] = values;
+const unwatchPaymentData = watch(
+    [isPaymentPerTon, agreedPayment, fields],
+    (values) => {
+        const [isPaymentPerTon, inputPayment, fields] = values;
 
-    if (inputPayment && fields.cargoWeight.value) {
-        const payment = parseFloat(inputPayment);
-        const weight = parseFloat(fields.cargoWeight.value);
+        if (inputPayment && fields.cargoWeight.value) {
+            const payment = parseFloat(inputPayment);
+            const weight = parseFloat(fields.cargoWeight.value);
 
-        const totalPayment = isPaymentPerTon
-            ? Math.round(payment * weight * 100) / 100
-            : inputPayment;
+            const totalPayment = isPaymentPerTon
+                ? Math.round(payment * weight * 100) / 100
+                : inputPayment;
 
-        setAttribute.value('agreedPayment', `${totalPayment}`);
+            setAttribute.value('agreedPayment', `${totalPayment}`);
+        }
     }
-});
+);
+
+const unwatchStatus = watch(
+    () => fields.value.status.value,
+    (newStatus) => {
+        if (newStatus === FreightStatus.FINISHED) {
+            setAttribute.value('finishedDate', formatISO(new Date()));
+        } else {
+            setAttribute.value('finishedDate', '');
+        }
+    }
+);
 
 onBeforeUnmount(() => {
-    unwatch();
+    unwatchStatus();
+    unwatchPaymentData();
 });
 </script>

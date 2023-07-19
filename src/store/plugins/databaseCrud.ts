@@ -66,6 +66,21 @@ export const DatabaseCrudPlugin = () => ({
 
         return record;
     },
+    async findRecordByAtrrs<T extends SyncableEntity>(
+        model: ModelClass<T>,
+        attrs: Record<string, any>,
+        asFormData = false
+    ) {
+        const record = await model.findOneBy<T>(attrs);
+
+        if (!record) return null;
+
+        if (asFormData) {
+            return instanceToObject<T>(record, model.getRepository<T>());
+        }
+
+        return record;
+    },
     async findEditRecord<T extends SyncableEntity>({
         id,
         model,
@@ -186,14 +201,10 @@ export const DatabaseCrudPlugin = () => ({
         attributes,
     }: IMemberActionWithAttrsParams<T>) {
         return runDatabaseOperation(async () => {
-            await inMemberOperation<SyncableEntity, Record<string, any>>({
+            return generalOperation({
                 errorMsg,
                 successMsg,
-                findAttrs: { id },
-                actionFunc: (instance) =>
-                    instance.saveWithAttributes(attributes),
-                findFunc: (attrs: Record<string, any>) =>
-                    this.findRecordByAttrs(model, attrs),
+                actionFunc: () => model.update<T>(id, attributes),
             });
         });
     },

@@ -13,6 +13,10 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <ion-card class="ion-margin-bottom">
@@ -160,6 +164,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
+import { onBeforeRouteUpdate } from 'vue-router';
 
 import {
     IonIcon,
@@ -181,6 +186,9 @@ import {
     IonLoading,
     IonCardContent,
     IonicSafeString,
+    IonRefresher,
+    IonRefresherContent,
+    RefresherCustomEvent,
 } from '@ionic/vue';
 
 import {
@@ -221,6 +229,12 @@ const { connectionStatus } = storeToRefs(appStore);
 const ignoredIconStr = `<ion-icon icon="${alertCircle}" color="warning" style="margin: 0 0 0 4px"></ion-icon>`;
 const successIconStr = `<ion-icon icon="${checkmarkCircle}" color="success" style="margin: 0 0 0 4px"></ion-icon>`;
 const errorIconStr = `<ion-icon icon="${closeCircle}" color="danger" style="margin: 0 0 0 4px"></ion-icon>`;
+
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await updateEntitiesData();
+
+    await event.target.complete();
+};
 
 const lastSyncInfoMessage = async (model: SyncableModel) => {
     const data = await readLastSyncData(model.name);
@@ -340,6 +354,10 @@ const handleFullSync = async () => {
         confirmAction,
     });
 };
+
+onBeforeRouteUpdate(async () => {
+    await updateEntitiesData();
+});
 
 onMounted(async () => {
     await updateEntitiesData();

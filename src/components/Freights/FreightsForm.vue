@@ -3,7 +3,7 @@
         :steps="steps"
         :activeStep="step"
         :hideSubmit="readonly"
-        lastStepActionLabel="Criar frete"
+        :lastStepActionLabel="edit ? 'Editar frete' : 'Criar frete'"
         contentPadding="0 0 16px 0"
         @lastStepAction="handleSubmit"
         @changeStep="handleStepChange"

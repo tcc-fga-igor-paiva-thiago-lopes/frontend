@@ -43,10 +43,14 @@ declare module 'pinia' {
         createRecordWithNewItem: <T extends SyncableEntity>(
             params: Omit<IMemberActionWithMsgParams<T>, 'id'>
         ) => Promise<[T, Record<string, any>]>;
-
         findRecord: <T extends SyncableEntity>(
             model: ModelClass<T>,
             id: any,
+            asFormData = false
+        ) => Promise<Record<string, any> | T | null>;
+        findRecordByAtrrs: <T extends SyncableEntity>(
+            model: ModelClass<T>,
+            attrs: Record<string, any>,
             asFormData = false
         ) => Promise<Record<string, any> | T | null>;
         findEditRecord: <T extends SyncableEntity>(

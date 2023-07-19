@@ -13,6 +13,10 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <ManageFreights
@@ -54,7 +58,10 @@ import {
     IonToolbar,
     IonLoading,
     IonButtons,
+    IonRefresher,
     IonMenuButton,
+    IonRefresherContent,
+    RefresherCustomEvent,
 } from '@ionic/vue';
 
 import { Freight } from '@/models/freight';
@@ -161,12 +168,23 @@ const applyQueryParams = () => {
     }
 };
 
-const unwatch = watch([route], async (value) => {
-    if (value[0].query.reset === 'true') await paginationService.reset();
-    else if (value[0].query.status) applyQueryParams();
-});
+const unwatch = watch(
+    () => route.query,
+    async (value) => {
+        if (value.reset === 'true') await paginationService.reset();
+        else if (value.status) applyQueryParams();
+    }
+);
 
-onBeforeMount(async () => {
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await loadFreights();
+
+    await event.target.complete();
+};
+
+const loadFreights = async () => {
+    loading.value = true;
+
     try {
         if (route.query.status) applyQueryParams();
 
@@ -178,6 +196,10 @@ onBeforeMount(async () => {
     } finally {
         loading.value = false;
     }
+};
+
+onBeforeMount(async () => {
+    await loadFreights();
 });
 
 onBeforeUnmount(() => {

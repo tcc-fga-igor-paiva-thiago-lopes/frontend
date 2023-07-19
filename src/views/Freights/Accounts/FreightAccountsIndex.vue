@@ -13,6 +13,10 @@
         </ion-header>
 
         <ion-content :fullscreen="true">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <ManageAccounts
@@ -42,7 +46,7 @@
 <style></style>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 import {
     onBeforeUnmount,
     onMounted,
@@ -60,8 +64,11 @@ import {
     IonToolbar,
     IonLoading,
     IonButtons,
+    IonRefresher,
     IonMenuButton,
     IonicSafeString,
+    IonRefresherContent,
+    RefresherCustomEvent,
 } from '@ionic/vue';
 
 import { Account } from '@/models/account';
@@ -182,15 +189,36 @@ const handleOrderData = async (data: Partial<IOrderData>) => {
     await paginationService.reset();
 };
 
-const unwatch = watch([route], async (value) => {
-    if (value[0].query.reset === 'true') await paginationService.reset();
-});
+const unwatch = watch(
+    () => route.query,
+    async (value) => {
+        if (value.reset === 'true') await paginationService.reset();
+    }
+);
 
-onMounted(async () => {
+const searchFreight = async () => {
+    const foundFreight = (await findFreight(freightId.value)) as Freight | null;
+
+    if (!foundFreight) {
+        await presentToast('Frete não encontrado', 'danger');
+
+        return router.back();
+    }
+
+    freight.value = foundFreight;
+};
+
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await loadAccounts();
+
+    await event.target.complete();
+};
+
+const loadAccounts = async () => {
+    loading.value = true;
+
     try {
-        freight.value = (await findFreight(freightId.value)) as Freight | null;
-
-        if (!freight.value) return router.back();
+        await searchFreight();
 
         await paginationService.getFirstPage();
     } catch (e) {
@@ -200,6 +228,18 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
+};
+
+onBeforeRouteUpdate(async (to, from) => {
+    if (to.params.freightId !== from.params.freightId) {
+        await searchFreight();
+    }
+
+    if (to.query.reset === 'true') await paginationService.reset();
+});
+
+onMounted(async () => {
+    await loadAccounts();
 });
 
 onBeforeUnmount(() => {

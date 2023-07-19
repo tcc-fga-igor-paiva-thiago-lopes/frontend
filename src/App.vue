@@ -109,7 +109,7 @@ import { useAppStore } from './store/app';
 import AuthService from './services/auth';
 import { presentToast } from './utils/toast';
 import { presentConfirmationAlert } from './utils/alert';
-import { isRouteOfflinePermitted } from './utils/offline';
+import { isRouteNotPermittedOffline } from './utils/offline';
 
 import ConnectionStatus from '@/components/ConnectionStatus.vue';
 
@@ -188,7 +188,7 @@ const menuOptions = computed(() =>
 const handleLogout = async () => {
     const message = new IonicSafeString(`
         Tem certeza que deseja encerrar sua sessão?<br /><br />
-        Você precisará se conectar novamente e todos os dados salvos poderão ser apagados.<br /><br />
+        Você precisará se conectar novamente e todos os dados salvos localmente serão ser apagados.<br /><br />
         Recomendamos que faça uma sincronização total de todos os dados antes de encerrar a sessão.
         Procure por "Sincronização" na página inicial ou no menu lateral
     `);
@@ -225,7 +225,7 @@ onBeforeUnmount(async () => {
 
 appStore.$subscribe(async (_, state) => {
     if (
-        await isRouteOfflinePermitted(
+        await isRouteNotPermittedOffline(
             route.name as string,
             false,
             state._connectionStatus.connected

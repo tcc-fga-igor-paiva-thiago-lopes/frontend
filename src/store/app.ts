@@ -11,7 +11,12 @@ import {
     SYNCABLE_ENTITIES,
 } from '@/services/sync';
 import AuthService from '@/services/auth';
+import { Freight } from '@/models/freight';
 import { Account } from '@/models/account';
+import { Category } from '@/models/category';
+import dataSource from '@/database/dataSource';
+import { SyncableEntity } from '@/models/syncableEntity';
+import { runDatabaseOperation } from './helpers/databaseConnector';
 
 type Platform = 'android' | 'ios' | 'web';
 
@@ -124,6 +129,22 @@ export const useAppStore = defineStore('application', {
                             : result.reason) as SyncStatus[]
                 )
             ) as Record<string, SyncStatus[]>;
+        },
+        async clearDatabase() {
+            return runDatabaseOperation(() => {
+                return dataSource.transaction(async () => {
+                    await Account.createQueryBuilder().delete().execute();
+
+                    await Promise.all(
+                        [Freight, Category].map((entity) =>
+                            (entity as typeof SyncableEntity)
+                                .createQueryBuilder()
+                                .delete()
+                                .execute()
+                        )
+                    );
+                });
+            });
         },
     },
 });

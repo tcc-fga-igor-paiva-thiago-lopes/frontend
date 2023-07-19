@@ -13,6 +13,10 @@
         </ion-header>
 
         <ion-content :fullscreen="true" class="ion-padding">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <div
@@ -89,8 +93,12 @@
                     </h5>
                 </ion-text>
 
-                <template v-if="displayMode === 'list'">
-                    <ion-list>
+                <ion-text v-if="!profitPerColumn.length" color="medium">
+                    <h6>Nenhum frete finalizado cadastrado...</h6>
+                </ion-text>
+
+                <template>
+                    <ion-list v-if="displayMode === 'list'">
                         <ion-item
                             v-for="data in profitPerColumn"
                             :key="data.cargo"
@@ -112,12 +120,14 @@
                             }}</span>
                         </ion-item>
                     </ion-list>
-                </template>
 
-                <canvas
-                    ref="chartRef"
-                    :style="{ display: displayMode === 'chart' ? '' : 'none' }"
-                ></canvas>
+                    <canvas
+                        ref="chartRef"
+                        :style="{
+                            display: displayMode === 'chart' ? '' : 'none',
+                        }"
+                    ></canvas>
+                </template>
             </div>
         </ion-content>
     </ion-page>
@@ -132,7 +142,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { useRoute } from 'vue-router';
+import { onBeforeRouteLeave } from 'vue-router';
 import { Chart, registerables } from 'chart.js';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
@@ -156,6 +166,9 @@ import {
     IonLoading,
     IonSegment,
     IonSegmentButton,
+    IonRefresher,
+    IonRefresherContent,
+    RefresherCustomEvent,
     SegmentChangeEventDetail,
 } from '@ionic/vue';
 import { sync, list, barChart } from 'ionicons/icons';
@@ -174,8 +187,6 @@ const FILTER_COLUMNS = ['cargo', 'contractor', 'route'];
 const appStore = useAppStore();
 
 const { platform } = storeToRefs(appStore);
-
-const route = useRoute();
 
 const loading = ref(false);
 
@@ -274,18 +285,26 @@ const queryResults = async () => {
             endDate.value
         );
 
-        generateChart();
+        if (profitPerColumn.value.length) generateChart();
     } finally {
         loading.value = false;
     }
 };
 
-const unwatchColumn = watch([column], async () => {
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await queryResults();
+
+    await ScreenOrientation.unlock();
+
+    await event.target.complete();
+};
+
+const unwatchColumn = watch(column, async () => {
     await queryResults();
 });
 
-const unwatchRoute = watch([route], async () => {
-    if (route.name !== 'ProfitPerColumn') {
+onBeforeRouteLeave(async (to, from) => {
+    if (to.name !== from.name) {
         ScreenOrientation.unlock();
 
         displayMode.value = 'list';
@@ -300,7 +319,6 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     unwatchColumn();
-    unwatchRoute();
 
     ScreenOrientation.unlock();
 });

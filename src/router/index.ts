@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 
 import AuthService from '@/services/auth';
 import { presentToast } from '@/utils/toast';
-import { isRouteOfflinePermitted } from '@/utils/offline';
+import { isRouteNotPermittedOffline } from '@/utils/offline';
 
 import SignUp from '../views/SignUp.vue';
 import SignIn from '../views/SignIn.vue';
@@ -182,10 +182,22 @@ export const offlinePermittedRoutes = [
     'Welcome',
     'NotFound',
     'SyncManagement',
+    'FreightsHome',
     'FreightsIndex',
     'FreightCreate',
     'FreightShow',
     'FreightEdit',
+    'FreightAccountsIndex',
+    'FreightAccountCreate',
+    'FreightAccountShow',
+    'FreightAccountEdit',
+    'CategoriesIndex',
+    'CategoryCreate',
+    'CategoryShow',
+    'CategoryEdit',
+    'AnalysisIndex',
+    'ProfitPerColumn',
+    'ProfitPerPeriod',
 ];
 
 router.beforeEach(async (to, from) => {
@@ -196,8 +208,8 @@ router.beforeEach(async (to, from) => {
         };
     }
 
-    if (await isRouteOfflinePermitted(to.name as string)) {
-        presentToast(
+    if (await isRouteNotPermittedOffline(to.name as string)) {
+        await presentToast(
             'Esta página não é permitida sem conexão com a Internet',
             'danger'
         );

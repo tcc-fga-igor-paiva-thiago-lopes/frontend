@@ -91,8 +91,12 @@
                     </h5>
                 </ion-text>
 
-                <template v-if="displayMode === 'list'">
-                    <ion-list>
+                <ion-text v-if="!queryData.length" color="medium">
+                    <h6>Nenhum frete finalizado cadastrado...</h6>
+                </ion-text>
+
+                <template v-else>
+                    <ion-list v-if="displayMode === 'list'">
                         <ion-item
                             v-for="data in queryData"
                             :key="data[groupOption]"
@@ -114,13 +118,15 @@
                             }}</span>
                         </ion-item>
                     </ion-list>
-                </template>
 
-                <canvas
-                    id="chartCanvas"
-                    ref="chartRef"
-                    :style="{ display: displayMode === 'chart' ? '' : 'none' }"
-                ></canvas>
+                    <canvas
+                        id="chartCanvas"
+                        ref="chartRef"
+                        :style="{
+                            display: displayMode === 'chart' ? '' : 'none',
+                        }"
+                    ></canvas>
+                </template>
             </div>
         </ion-content>
     </ion-page>
@@ -135,7 +141,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { useRoute } from 'vue-router';
+import { onBeforeRouteLeave } from 'vue-router';
 import { Chart, registerables } from 'chart.js';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
@@ -181,8 +187,6 @@ const FILTER_PERIOD_OPTIONS = {
 const appStore = useAppStore();
 
 const { platform } = storeToRefs(appStore);
-
-const route = useRoute();
 
 const loading = ref(false);
 
@@ -254,18 +258,18 @@ const queryResults = async () => {
             endDate.value
         );
 
-        generateChart();
+        if (queryData.value.length) generateChart();
     } finally {
         loading.value = false;
     }
 };
 
-const unwatchColumn = watch([groupOption], async () => {
+const unwatchColumn = watch(groupOption, async () => {
     await queryResults();
 });
 
-const unwatchRoute = watch([route], async () => {
-    if (route.name !== 'ProfitPerPeriod') {
+onBeforeRouteLeave(async (to, from) => {
+    if (to.name !== from.name) {
         ScreenOrientation.unlock();
 
         displayMode.value = 'list';
@@ -280,7 +284,6 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     unwatchColumn();
-    unwatchRoute();
 
     ScreenOrientation.unlock();
 });

@@ -13,11 +13,16 @@
         </ion-header>
 
         <ion-content :fullscreen="true" class="ion-padding-horizontal">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh">
+                <ion-refresher-content></ion-refresher-content>
+            </ion-refresher>
+
             <ion-loading :is-open="loading"></ion-loading>
 
             <AccountsForm
                 :freight="freight"
                 :formData="newAccount"
+                :categories="categories"
                 :setAttribute="changeField"
                 @on-submit="handleFormSubmit"
             />
@@ -30,7 +35,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 
 import {
     IonPage,
@@ -40,11 +45,15 @@ import {
     IonToolbar,
     IonLoading,
     IonButtons,
+    IonRefresher,
     IonMenuButton,
+    IonRefresherContent,
+    RefresherCustomEvent,
 } from '@ionic/vue';
 
 import { formatISO } from '@/utils/date';
 import { Freight } from '@/models/freight';
+import { Category } from '@/models/category';
 import { presentToast } from '@/utils/toast';
 import { useAccountsStore } from '@/store/accounts';
 import { useFreightsStore } from '@/store/freights';
@@ -55,6 +64,8 @@ import AccountsForm from '@/components/Accounts/AccountsForm.vue';
 const loading = ref(false);
 
 const freight = ref<Freight | null>(null);
+
+const categories = ref<Category[]>([]);
 
 const route = useRoute();
 const router = useRouter();
@@ -73,7 +84,7 @@ const handleFormSubmit = async () => {
     try {
         await createAccount();
 
-        await presentToast('Gasto criada com sucesso!', 'success');
+        await presentToast('Gasto criado com sucesso!', 'success');
 
         await router.push({
             name: 'FreightAccountsIndex',
@@ -90,18 +101,56 @@ const changeField = (field: string, value: unknown) => {
     setNewAccountAttrs({ [field]: value });
 };
 
-onBeforeMount(async () => {
+const fetchCategories = async () => {
+    categories.value = await Category.find();
+};
+
+const searchFreight = async () => {
     const { params } = route;
 
-    freight.value = (await findFreight(
+    const foundFreight = (await findFreight(
         parseInt(params.freightId as string, 10)
     )) as Freight | null;
 
-    if (!freight.value) return router.push({ name: 'FreightsIndex' });
+    if (!foundFreight) {
+        await presentToast('Frete não encontrado', 'danger');
+
+        return router.push({ name: 'FreightsIndex' });
+    }
+
+    freight.value = foundFreight;
 
     setNewAccountAttrs({
-        freightId: freight.value.id,
+        freightId: foundFreight.id,
         accountDate: formatISO(new Date()),
     });
+};
+
+const searchFreightAndCategories = async () => {
+    loading.value = true;
+
+    try {
+        await searchFreight();
+
+        await fetchCategories();
+    } finally {
+        loading.value = false;
+    }
+};
+
+const handleRefresh = async (event: RefresherCustomEvent) => {
+    await searchFreightAndCategories();
+
+    await event.target.complete();
+};
+
+onBeforeRouteUpdate(async (to, from) => {
+    if (to.params.freightId !== from.params.freightId) {
+        await searchFreightAndCategories();
+    }
+});
+
+onBeforeMount(async () => {
+    await searchFreightAndCategories();
 });
 </script>

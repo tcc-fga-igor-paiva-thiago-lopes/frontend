@@ -3,6 +3,7 @@ import { setActivePinia } from 'pinia';
 import { Preferences } from '@capacitor/preferences';
 
 import router from '@/router';
+import { presentToast } from '@/utils/toast';
 import { createTestingPinia } from '@pinia/testing';
 import { initialState, useAppStore } from '@/store/app';
 
@@ -21,10 +22,18 @@ jest.mock('@/database', () => {
     return jest.fn().mockImplementation(() => ({ default: {} }));
 });
 
+jest.mock('@/utils/toast');
+
 jest.mock('@/router', () => ({
     __esModule: true,
-    default: { push: jest.fn(), currentRoute: { value: { name: 'Home' } } },
+    default: {
+        push: jest.fn(),
+        replace: jest.fn(),
+        currentRoute: { value: { name: 'Home' } },
+    },
 }));
+
+const presentToastMock = presentToast as jest.Mock<any, any>;
 
 describe('AuthService', () => {
     beforeEach(() => {
@@ -70,8 +79,24 @@ describe('AuthService', () => {
         expect(Preferences.remove).toHaveBeenCalledWith({ key: 'token' });
     });
 
-    it('should remove username and token from preferences in logout', async () => {
+    it('should remove all keys from preferences in logout', async () => {
         const appStore = useAppStore();
+
+        jest.spyOn(Preferences, 'clear').mockImplementation(() =>
+            Promise.resolve()
+        );
+
+        jest.spyOn(appStore, 'openLoading').mockImplementationOnce(() =>
+            Promise.resolve()
+        );
+
+        jest.spyOn(appStore, 'closeLoading').mockImplementationOnce(() =>
+            Promise.resolve()
+        );
+
+        jest.spyOn(appStore, 'clearDatabase').mockImplementationOnce(() =>
+            Promise.resolve()
+        );
 
         appStore._username = 'John';
 
@@ -79,11 +104,14 @@ describe('AuthService', () => {
 
         await AuthService.logout();
 
-        expect(Preferences.remove).toHaveBeenCalledWith({ key: 'token' });
+        expect(Preferences.clear).toHaveBeenCalled();
         // With stubActions = True (default) we can check if action was called
         // expect(appStore.setUsername).toHaveBeenCalledWith('');
 
         expect(appStore.username).toEqual('');
-        expect(router.push).toHaveBeenCalledWith({ name: 'Welcome' });
+        expect(router.replace).toHaveBeenCalledWith({ name: 'Welcome' });
+        expect(presentToastMock).toBeCalledTimes(0);
+        expect(appStore.openLoading).toHaveBeenCalled();
+        expect(appStore.closeLoading).toHaveBeenCalled();
     });
 });
