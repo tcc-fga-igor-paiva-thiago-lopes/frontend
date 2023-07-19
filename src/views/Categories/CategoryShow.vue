@@ -76,7 +76,7 @@ onMounted(async () => {
     );
 
     if (!foundCategory) {
-        presentToast('Categoria não encontrado', 'danger');
+        presentToast('Categoria não encontrada', 'danger');
 
         await router.push({ name: 'CategoriesIndex' });
     }

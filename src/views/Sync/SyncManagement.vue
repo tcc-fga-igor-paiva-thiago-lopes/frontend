@@ -255,8 +255,6 @@ const lastSyncInfoMessage = async (model: SyncableModel) => {
 };
 
 const updateEntitiesData = async () => {
-    console.log('updateEntitiesData');
-
     try {
         loading.value = true;
 

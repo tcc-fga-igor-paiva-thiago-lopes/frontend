@@ -342,8 +342,6 @@ const unwatchPaymentData = watch(
 const unwatchStatus = watch(
     () => fields.value.status.value,
     (newStatus) => {
-        console.log('watchEffect status');
-
         if (newStatus === FreightStatus.FINISHED) {
             setAttribute.value('finishedDate', formatISO(new Date()));
         } else {

@@ -84,7 +84,7 @@ const handleFormSubmit = async () => {
     try {
         await createAccount();
 
-        await presentToast('Gasto criada com sucesso!', 'success');
+        await presentToast('Gasto criado com sucesso!', 'success');
 
         await router.push({
             name: 'FreightAccountsIndex',

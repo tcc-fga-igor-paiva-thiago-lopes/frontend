@@ -64,7 +64,7 @@ const handleFormSubmit = async () => {
     try {
         await createFreight();
 
-        await presentToast('Frete criada com sucesso!', 'success');
+        await presentToast('Frete criado com sucesso!', 'success');
 
         await router.push({ name: 'FreightsIndex', query: { reset: 'true' } });
     } catch (error) {
