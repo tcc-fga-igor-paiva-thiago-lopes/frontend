@@ -293,7 +293,7 @@ const handleRefresh = async (event: RefresherCustomEvent) => {
     await event.target.complete();
 };
 
-const unwatchColumn = watch([column], async () => {
+const unwatchColumn = watch(column, async () => {
     await queryResults();
 });
 

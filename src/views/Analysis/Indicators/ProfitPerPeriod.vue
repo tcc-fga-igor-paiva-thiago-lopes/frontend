@@ -258,7 +258,7 @@ const queryResults = async () => {
     }
 };
 
-const unwatchColumn = watch([groupOption], async () => {
+const unwatchColumn = watch(groupOption, async () => {
     await queryResults();
 });
 
