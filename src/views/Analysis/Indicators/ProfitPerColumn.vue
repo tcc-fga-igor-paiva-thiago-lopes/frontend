@@ -93,8 +93,12 @@
                     </h5>
                 </ion-text>
 
-                <template v-if="displayMode === 'list'">
-                    <ion-list>
+                <ion-text v-if="!profitPerColumn.length" color="medium">
+                    <h6>Nenhum frete finalizado cadastrado...</h6>
+                </ion-text>
+
+                <template>
+                    <ion-list v-if="displayMode === 'list'">
                         <ion-item
                             v-for="data in profitPerColumn"
                             :key="data.cargo"
@@ -116,12 +120,14 @@
                             }}</span>
                         </ion-item>
                     </ion-list>
-                </template>
 
-                <canvas
-                    ref="chartRef"
-                    :style="{ display: displayMode === 'chart' ? '' : 'none' }"
-                ></canvas>
+                    <canvas
+                        ref="chartRef"
+                        :style="{
+                            display: displayMode === 'chart' ? '' : 'none',
+                        }"
+                    ></canvas>
+                </template>
             </div>
         </ion-content>
     </ion-page>
@@ -279,7 +285,7 @@ const queryResults = async () => {
             endDate.value
         );
 
-        generateChart();
+        if (profitPerColumn.value.length) generateChart();
     } finally {
         loading.value = false;
     }

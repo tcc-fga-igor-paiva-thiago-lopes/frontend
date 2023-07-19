@@ -91,8 +91,12 @@
                     </h5>
                 </ion-text>
 
-                <template v-if="displayMode === 'list'">
-                    <ion-list>
+                <ion-text v-if="!queryData.length" color="medium">
+                    <h6>Nenhum frete finalizado cadastrado...</h6>
+                </ion-text>
+
+                <template v-else>
+                    <ion-list v-if="displayMode === 'list'">
                         <ion-item
                             v-for="data in queryData"
                             :key="data[groupOption]"
@@ -114,13 +118,15 @@
                             }}</span>
                         </ion-item>
                     </ion-list>
-                </template>
 
-                <canvas
-                    id="chartCanvas"
-                    ref="chartRef"
-                    :style="{ display: displayMode === 'chart' ? '' : 'none' }"
-                ></canvas>
+                    <canvas
+                        id="chartCanvas"
+                        ref="chartRef"
+                        :style="{
+                            display: displayMode === 'chart' ? '' : 'none',
+                        }"
+                    ></canvas>
+                </template>
             </div>
         </ion-content>
     </ion-page>
@@ -252,7 +258,7 @@ const queryResults = async () => {
             endDate.value
         );
 
-        generateChart();
+        if (queryData.value.length) generateChart();
     } finally {
         loading.value = false;
     }
